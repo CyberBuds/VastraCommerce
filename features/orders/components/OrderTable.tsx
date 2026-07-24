@@ -76,7 +76,10 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
   const { data: customers = [] } = useCustomers();
 
   // Active view states
-  const [viewedOrder, setViewedOrder] = React.useState<Order | null>(null);
+  const [viewedOrderId, setViewedOrderId] = React.useState<string | null>(null);
+  const viewedOrder = React.useMemo(() => {
+    return viewedOrderId ? orders.find(o => o.id === viewedOrderId) || null : null;
+  }, [viewedOrderId, orders]);
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
   const [isHoldOpen, setIsHoldOpen] = React.useState(false);
   const [holdReason, setHoldReason] = React.useState('');
@@ -112,14 +115,6 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
     if (activeTab === 'ALL') return orders;
     return orders.filter(o => o.status === activeTab);
   }, [orders, activeTab]);
-
-  // Sync viewed order details when orders list changes (keeps details pane updated)
-  React.useEffect(() => {
-    if (viewedOrder) {
-      const fresh = orders.find(o => o.id === viewedOrder.id);
-      if (fresh) setViewedOrder(fresh);
-    }
-  }, [orders, viewedOrder]);
 
   // Helper calculation for custom order builder
   const calculatedTotals = React.useMemo(() => {
@@ -261,7 +256,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       header: 'Order Reference',
       cell: ({ row }) => (
         <button
-          onClick={() => setViewedOrder(row.original)}
+          onClick={() => setViewedOrderId(row.original.id)}
           className="font-mono text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline text-left"
         >
           {row.getValue('OrderNumber')}
@@ -363,7 +358,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0"
-            onClick={() => setViewedOrder(row.original)}
+            onClick={() => setViewedOrderId(row.original.id)}
             title="Open 360° Console"
           >
             <Eye className="w-4 h-4 text-slate-600 dark:text-zinc-400" />
@@ -389,7 +384,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                 size="sm"
                 className="h-8 w-8 p-0"
                 onClick={() => {
-                  setViewedOrder(row.original);
+                  setViewedOrderId(row.original.id);
                   setIsHoldOpen(true);
                 }}
                 title="Place Hold"
@@ -450,7 +445,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       {viewedOrder && (
         <div className="fixed inset-0 z-40 bg-slate-900/45 backdrop-blur-xs flex justify-end" id="drawer-container">
           {/* Close Backdrop Click */}
-          <div className="absolute inset-0 -z-10" onClick={() => setViewedOrder(null)} />
+          <div className="absolute inset-0 -z-10" onClick={() => setViewedOrderId(null)} />
 
           <div className="w-full max-w-3xl bg-white dark:bg-zinc-900 border-l border-slate-200 dark:border-zinc-800 h-full flex flex-col shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-250">
             {/* Drawer Header */}
@@ -463,7 +458,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                 </h3>
               </div>
               <button
-                onClick={() => setViewedOrder(null)}
+                onClick={() => setViewedOrderId(null)}
                 className="h-8 w-8 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-250 font-bold text-lg rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 flex items-center justify-center transition-colors"
               >
                 ✕

@@ -159,6 +159,8 @@ export const Dialog = ({ isOpen, onClose, title, children, size = 'md' }: Dialog
   );
 };
 
+export const Modal = Dialog;
+
 // ==========================================
 // DRAWER / SHEET COMPONENT (Sliding from Right)
 // ==========================================

@@ -361,3 +361,80 @@ export const Avatar = ({ src, name, size = 'md', className }: AvatarProps) => {
     </div>
   );
 };
+
+// ==========================================
+// LABEL COMPONENT
+// ==========================================
+export interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
+  children?: React.ReactNode;
+}
+
+export const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
+  ({ className, children, ...props }, ref) => {
+    return (
+      <label
+        ref={ref}
+        className={cn('text-xs font-semibold text-slate-700 dark:text-zinc-300 tracking-wide select-none', className)}
+        {...props}
+      >
+        {children}
+      </label>
+    );
+  }
+);
+Label.displayName = 'Label';
+
+// ==========================================
+// SELECT COMPONENT
+// ==========================================
+export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label?: string;
+  error?: string;
+  helperText?: string;
+  icon?: LucideIcon;
+}
+
+export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
+  ({ className, label, error, helperText, icon: Icon, children, id, ...props }, ref) => {
+    const generatedId = React.useId();
+    const selectId = id || generatedId;
+
+    return (
+      <div className="w-full flex flex-col gap-1.5">
+        {label && (
+          <label htmlFor={selectId} className="text-xs font-semibold text-slate-700 dark:text-zinc-300 tracking-wide">
+            {label}
+          </label>
+        )}
+        <div className="relative">
+          {Icon && (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+              <Icon className="w-4 h-4" />
+            </div>
+          )}
+          <select
+            id={selectId}
+            ref={ref}
+            className={cn(
+              'w-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg py-2 px-3 text-sm transition-all outline-none focus:border-slate-500 dark:focus:border-zinc-500 focus:ring-1 focus:ring-slate-500 dark:focus:ring-zinc-500 text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-zinc-950',
+              {
+                'pl-10': Icon,
+                'border-red-500 focus:border-red-500 focus:ring-red-500': !!error,
+              },
+              className
+            )}
+            {...props}
+          >
+            {children}
+          </select>
+        </div>
+        {error ? (
+          <span className="text-[11px] font-medium text-red-500">{error}</span>
+        ) : helperText ? (
+          <span className="text-[11px] text-slate-400 dark:text-zinc-500">{helperText}</span>
+        ) : null}
+      </div>
+    );
+  }
+);
+Select.displayName = 'Select';
