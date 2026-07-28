@@ -5,7 +5,7 @@ import { useLayoutStore } from '@/store/layoutStore';
 import { useInventoryStore, CycleCount, CycleCountItem } from '@/store/inventoryStore';
 import { AppProviders } from '@/providers/AppProviders';
 import { AdminLayout } from '@/features/layout/AdminLayout';
-import { Button, Badge } from '@/components/enterprise/BaseInputs';
+import { Button } from '@/components/enterprise/BaseInputs';
 import { 
   Plus, 
   RotateCcw, 
@@ -218,13 +218,13 @@ function CycleCountsContent() {
                         </td>
                         <td className="py-3 px-3">
                           {cc.accuracyScore !== undefined ? (
-                            <div className="flex items-center gap-1.5">
-                              <Badge variant={cc.accuracyScore > 95 ? 'success' : 'warning'}>
-                                {cc.accuracyScore}% Accuracy
-                              </Badge>
-                            </div>
+                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${cc.accuracyScore > 95 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                              {cc.accuracyScore}% Accuracy
+                            </span>
                           ) : (
-                            <Badge variant="warning">In Progress</Badge>
+                            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800">
+                              In Progress
+                            </span>
                           )}
                         </td>
                         <td className="py-3 px-3 text-slate-500 italic max-w-[120px] truncate" title={cc.notes}>

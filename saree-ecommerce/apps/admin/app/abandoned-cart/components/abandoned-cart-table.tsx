@@ -34,7 +34,7 @@ export function AbandonedCartsTable() {
   });
 
   const tableData = data?.data || [];
-  const pageCount = data?.meta?.lastPage || 0;
+  const pageCount = data?.meta?.lastPage || data?.totalPages || 0;
 
   const table = useReactTable({
     data: tableData,

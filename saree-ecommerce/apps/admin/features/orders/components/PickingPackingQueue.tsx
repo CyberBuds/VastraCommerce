@@ -47,14 +47,8 @@ export function PickingPackingQueue() {
   }, [orders]);
 
   const activeOrder = React.useMemo(() => {
-    return queueOrders.find(o => o.id === selectedOrderId) || null;
-  }, [queueOrders, selectedOrderId]);
-
-  // Set default selection when data loads
-  React.useEffect(() => {
-    if (queueOrders.length > 0 && !selectedOrderId) {
-      setSelectedOrderId(queueOrders[0].id);
-    }
+    const effectiveId = selectedOrderId || (queueOrders.length > 0 ? queueOrders[0].id : null);
+    return queueOrders.find(o => o.id === effectiveId) || null;
   }, [queueOrders, selectedOrderId]);
 
   const handleStartPicking = (orderId: string) => {

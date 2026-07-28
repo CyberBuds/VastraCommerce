@@ -1,13 +1,19 @@
 
 'use client';
 
+import * as React from 'react';
 import { AdminLayout } from "@/features/layout/AdminLayout";
 
-const TransactionDetailsPage = ({ params }: { params: { id: string } }) => {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+const TransactionDetailsPage = ({ params }: PageProps) => {
+    const { id } = React.use(params);
     return (
         <AdminLayout>
             <h1 className="text-2xl font-bold">Payment Transaction Details</h1>
-            <p>Transaction ID: {params.id}</p>
+            <p>Transaction ID: {id}</p>
         </AdminLayout>
     );
 };

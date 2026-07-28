@@ -25,15 +25,10 @@ export function ReturnTable() {
   const processReturnMutation = useProcessReturn();
 
   // Selected return request for processing details modal
-  const [selectedReturn, setSelectedReturn] = React.useState<ReturnRequest | null>(null);
-
-  // Sync state if returns array changes
-  React.useEffect(() => {
-    if (selectedReturn) {
-      const fresh = returns.find(r => r.id === selectedReturn.id);
-      if (fresh) setSelectedReturn(fresh);
-    }
-  }, [returns, selectedReturn]);
+  const [selectedReturnId, setSelectedReturnId] = React.useState<string | null>(null);
+  const selectedReturn = React.useMemo(() => {
+    return selectedReturnId ? returns.find(r => r.id === selectedReturnId) || null : null;
+  }, [returns, selectedReturnId]);
 
   const handleProcess = (status: 'APPROVED' | 'REJECTED' | 'COMPLETED', customAmt?: number) => {
     if (!selectedReturn) return;
@@ -54,7 +49,7 @@ export function ReturnTable() {
         }
       }, {
         onSuccess: () => {
-          setSelectedReturn(null);
+          setSelectedReturnId(null);
         }
       });
     }
@@ -67,7 +62,7 @@ export function ReturnTable() {
       header: 'Return Reference',
       cell: ({ row }) => (
         <button
-          onClick={() => setSelectedReturn(row.original)}
+          onClick={() => setSelectedReturnId(row.original.id)}
           className="font-mono text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline text-left"
         >
           {row.getValue('ReturnNumber')}
@@ -158,7 +153,7 @@ export function ReturnTable() {
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0"
-            onClick={() => setSelectedReturn(row.original)}
+            onClick={() => setSelectedReturnId(row.original.id)}
             title="Inspect Return Request"
           >
             <Eye className="w-4 h-4 text-slate-600 dark:text-zinc-400" />
@@ -191,7 +186,7 @@ export function ReturnTable() {
                 <RefreshCw className="w-4.5 h-4.5 text-indigo-500" />
                 RETURN RMA AUDITING: {selectedReturn.returnNumber}
               </h4>
-              <button type="button" onClick={() => setSelectedReturn(null)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+              <button type="button" onClick={() => setSelectedReturnId(null)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
             </div>
 
             {/* General metadata */}
@@ -292,7 +287,7 @@ export function ReturnTable() {
             )}
 
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-zinc-850">
-              <Button type="button" variant="outline" size="sm" onClick={() => setSelectedReturn(null)}>Close Inspection</Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => setSelectedReturnId(null)}>Close Inspection</Button>
             </div>
 
           </div>

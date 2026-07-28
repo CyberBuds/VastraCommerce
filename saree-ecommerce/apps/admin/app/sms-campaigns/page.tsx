@@ -1,3 +1,5 @@
+'use client';
+
 // app/sms-campaigns/page.tsx
 import { Button } from '@/components/enterprise/BaseInputs';
 import Link from 'next/link';

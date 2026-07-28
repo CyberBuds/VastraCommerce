@@ -1,3 +1,5 @@
+'use client';
+
 // app/abandoned-cart/page.tsx
 import { AbandonedCartsTable } from './components/abandoned-cart-table';
 

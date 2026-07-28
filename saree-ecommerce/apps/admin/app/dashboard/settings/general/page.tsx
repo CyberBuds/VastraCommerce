@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useLayoutStore } from '@/store/layoutStore';
 import { useSettingsStore } from '@/store/settingsStore';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/enterprise/FeedbackComponents';
 import { Button, Input, Switch } from '@/components/enterprise/BaseInputs';
 import { Autocomplete, DatePicker, TagInput, RichTextEditor } from '@/components/enterprise/ComplexInputs';
 import { Sliders, Settings, HelpCircle, Save } from 'lucide-react';
@@ -93,143 +93,140 @@ export default function GeneralSettingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* Main settings column */}
           <div className="md:col-span-8 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <Card
+              header={
+                <div className="flex items-center gap-2">
                   <Settings className="w-4.5 h-4.5" />
-                  Brand & Registry Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+                  <span className="font-bold text-sm text-slate-800 dark:text-zinc-150">Brand & Registry Settings</span>
+                </div>
+              }
+            >
+              <div className="space-y-4">
+                <Input
+                  label="Application Name"
+                  placeholder="Aero Enterprise"
+                  error={errors.appName?.message}
+                  {...register('appName')}
+                />
+
+                <Input
+                  label="Corporate SecOps Email"
+                  placeholder="secops@enterprise.aero"
+                  error={errors.supportEmail?.message}
+                  {...register('supportEmail')}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
                   <Input
-                    label="Application Name"
-                    placeholder="Aero Enterprise"
-                    error={errors.appName?.message}
-                    {...register('appName')}
+                    label="User License Seat Limit"
+                    type="number"
+                    error={errors.maxUsers?.message}
+                    {...register('maxUsers', { valueAsNumber: true })}
                   />
 
-                  <Input
-                    label="Corporate SecOps Email"
-                    placeholder="secops@enterprise.aero"
-                    error={errors.supportEmail?.message}
-                    {...register('supportEmail')}
-                  />
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label="User License Seat Limit"
-                      type="number"
-                      error={errors.maxUsers?.message}
-                      {...register('maxUsers', { valueAsNumber: true })}
-                    />
-
-                    {/* Autocomplete for Default Currency selection */}
-                    <Controller
-                      name="defaultCurrency"
-                      control={control}
-                      render={({ field }) => (
-                        <Autocomplete
-                          label="System Default Currency"
-                          options={[
-                            { value: 'USD', label: 'USD - US Dollar' },
-                            { value: 'EUR', label: 'EUR - Euro' },
-                            { value: 'GBP', label: 'GBP - British Pound' },
-                            { value: 'INR', label: 'INR - Indian Rupee' },
-                            { value: 'JPY', label: 'JPY - Japanese Yen' },
-                          ]}
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="Search currency..."
-                        />
-                      )}
-                    />
-                  </div>
-
-                  {/* Date Picker for Fiscal Year Calendar */}
+                  {/* Autocomplete for Default Currency selection */}
                   <Controller
-                    name="fiscalYearStart"
+                    name="defaultCurrency"
                     control={control}
                     render={({ field }) => (
-                      <DatePicker
-                        label="Fiscal Year Calendar Start"
+                      <Autocomplete
+                        label="System Default Currency"
+                        options={[
+                          { value: 'USD', label: 'USD - US Dollar' },
+                          { value: 'EUR', label: 'EUR - Euro' },
+                          { value: 'GBP', label: 'GBP - British Pound' },
+                          { value: 'INR', label: 'INR - Indian Rupee' },
+                          { value: 'JPY', label: 'JPY - Japanese Yen' },
+                        ]}
                         value={field.value}
                         onChange={field.onChange}
-                        error={errors.fiscalYearStart?.message}
-                      />
-                    )}
-                  />
-
-                  {/* Tag Input for Allowed Email domains */}
-                  <Controller
-                    name="allowedDomains"
-                    control={control}
-                    render={({ field }) => (
-                      <TagInput
-                        label="Allowed Corporate Email Domains"
-                        tags={field.value}
-                        onChange={field.onChange}
-                        placeholder="Add corporate domain (press Enter)..."
+                        placeholder="Search currency..."
                       />
                     )}
                   />
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Rich Text Editor card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sliders className="w-4.5 h-4.5" />
-                  Global Banner Notice
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                {/* Date Picker for Fiscal Year Calendar */}
                 <Controller
-                  name="systemMessage"
+                  name="fiscalYearStart"
                   control={control}
                   render={({ field }) => (
-                    <RichTextEditor
-                      label="Notice Content (HTML Supported)"
+                    <DatePicker
+                      label="Fiscal Year Calendar Start"
                       value={field.value}
                       onChange={field.onChange}
-                      placeholder="Enter security notice banner text..."
+                      error={errors.fiscalYearStart?.message}
                     />
                   )}
                 />
-              </CardContent>
+
+                {/* Tag Input for Allowed Email domains */}
+                <Controller
+                  name="allowedDomains"
+                  control={control}
+                  render={({ field }) => (
+                    <TagInput
+                      label="Allowed Corporate Email Domains"
+                      tags={field.value}
+                      onChange={field.onChange}
+                      placeholder="Add corporate domain (press Enter)..."
+                    />
+                  )}
+                />
+              </div>
+            </Card>
+
+            {/* Rich Text Editor card */}
+            <Card
+              header={
+                <div className="flex items-center gap-2">
+                  <Sliders className="w-4.5 h-4.5" />
+                  <span className="font-bold text-sm text-slate-800 dark:text-zinc-150">Global Banner Notice</span>
+                </div>
+              }
+            >
+              <Controller
+                name="systemMessage"
+                control={control}
+                render={({ field }) => (
+                  <RichTextEditor
+                    label="Notice Content (HTML Supported)"
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Enter security notice banner text..."
+                  />
+                )}
+              />
             </Card>
           </div>
 
           {/* Right/Secondary parameters column */}
           <div className="md:col-span-4 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <Card
+              header={
+                <div className="flex items-center gap-2">
                   <HelpCircle className="w-4.5 h-4.5" />
-                  Access Polices
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Switch for mandatory 2FA security checks */}
-                  <Controller
-                    name="twoFactorMandatory"
-                    control={control}
-                    render={({ field }) => (
-                      <Switch
-                        label="Two-Factor Security Enforcement"
-                        checked={field.value}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    )}
-                  />
-                  <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 leading-normal">
-                    If activated, session check intercepts verify multifactor credential tokens.
-                  </p>
+                  <span className="font-bold text-sm text-slate-800 dark:text-zinc-150">Access Polices</span>
                 </div>
-              </CardContent>
+              }
+            >
+              <div className="space-y-4">
+                {/* Switch for mandatory 2FA security checks */}
+                <Controller
+                  name="twoFactorMandatory"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      label="Two-Factor Security Enforcement"
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                  )}
+                />
+                <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 leading-normal">
+                  If activated, session check intercepts verify multifactor credential tokens.
+                </p>
+              </div>
             </Card>
 
             {/* Save trigger card */}

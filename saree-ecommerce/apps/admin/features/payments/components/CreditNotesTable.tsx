@@ -1,19 +1,23 @@
 
 'use client';
 
+import * as React from 'react';
 import { EnterpriseTable } from "@/components/enterprise/EnterpriseTable";
 import { useCreditNotes } from "../hooks/usePayments";
 import { columns } from "./CreditNotesColumns";
+import { CreditNote } from "../types";
 
 export const CreditNotesTable = () => {
     const { data: creditNotes, isLoading } = useCreditNotes();
+    const [globalFilter, setGlobalFilter] = React.useState('');
 
     return (
-        <EnterpriseTable
+        <EnterpriseTable<CreditNote>
             data={creditNotes || []}
             columns={columns}
             isLoading={isLoading}
-            filterColumn="customer"
+            globalFilter={globalFilter}
+            setGlobalFilter={setGlobalFilter}
         />
     );
 };

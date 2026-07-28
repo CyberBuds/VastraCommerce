@@ -50,7 +50,7 @@ export const columns: ColumnDef<AbandonedCart>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
       const { recoveryStatus } = row.original;
-      return <Badge variant={recoveryStatus === 'RECOVERED' ? 'default' : 'secondary'}>{recoveryStatus}</Badge>;
+      return <Badge variant={recoveryStatus === 'RECOVERED' ? 'success' : 'warning'}>{recoveryStatus}</Badge>;
     },
     filterFn: (row, id, value) => {
         return value.includes(row.getValue(id));

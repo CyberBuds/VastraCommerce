@@ -6,7 +6,7 @@ import { CreditNote } from "../types";
 import { Badge } from "@/components/enterprise/BaseInputs";
 import { cn } from "@/lib/utils";
 
-export const columns: ColumnDef<CreditNote>[] = [
+export const columns: ColumnDef<CreditNote, any>[] = [
     {
         accessorKey: "creditNoteDate",
         header: "Date",
@@ -23,7 +23,7 @@ export const columns: ColumnDef<CreditNote>[] = [
         accessorKey: "amount",
         header: "Amount",
         cell: ({ row }) => {
-            const amount = parseFloat(row.getValue("amount"));
+            const amount = row.getValue("amount") as number;
             const formatted = new Intl.NumberFormat("en-US", {
                 style: "currency",
                 currency: "USD",

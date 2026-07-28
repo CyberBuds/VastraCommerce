@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/enterprise/InteractiveComponents';
+} from '@/components/ui/select';
 import {
     useCreatePushNotification,
 } from '@/features/marketing/hooks/usePushNotifications';

@@ -289,6 +289,7 @@ export function CouponForm({ initialData }: CouponFormProps) {
                         <SelectContent>
                         <SelectItem value="ACTIVE">Active</SelectItem>
                         <SelectItem value="INACTIVE">Inactive</SelectItem>
+                        <SelectItem value="EXPIRED">Expired</SelectItem>
                         </SelectContent>
                     </Select>
                     <FormMessage />

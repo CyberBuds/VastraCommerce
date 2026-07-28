@@ -17,7 +17,7 @@ export const couponSchema = z.object({
   applicableCustomerGroupIds: z.array(z.string()).optional(),
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
-  status: z.enum(['ACTIVE', 'INACTIVE']),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'EXPIRED']),
 });
 
 export const discountRuleSchema = z.object({

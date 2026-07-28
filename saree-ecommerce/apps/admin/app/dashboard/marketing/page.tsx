@@ -4,7 +4,7 @@
 import { MarketingDashboardStats } from '@/types/marketing';
 import { useGetMarketingDashboardStats } from '@/features/marketing/hooks/useMarketingDashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AreaChart, BarChart } from '@tremor/react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 
@@ -48,14 +48,18 @@ const MarketingDashboardPage = () => {
                 <CardTitle>Campaigns vs Coupons</CardTitle>
                 </CardHeader>
                 <CardContent>
-                <AreaChart
-                    className="h-72 mt-4"
-                    data={chartdata}
-                    index="date"
-                    categories={['Running Coupons', 'Active Campaigns']}
-                    colors={['indigo', 'cyan']}
-                    valueFormatter={dataFormatter}
-                />
+                <div className="h-72 mt-4 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartdata} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                      <XAxis dataKey="date" fontSize={12} />
+                      <YAxis fontSize={12} tickFormatter={dataFormatter} />
+                      <Tooltip formatter={(value: any) => [dataFormatter(Number(value) || 0), '']} />
+                      <Area type="monotone" dataKey="Running Coupons" stroke="#6366f1" fill="#6366f1" fillOpacity={0.2} />
+                      <Area type="monotone" dataKey="Active Campaigns" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.2} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
                 </CardContent>
             </Card>
             <Card>

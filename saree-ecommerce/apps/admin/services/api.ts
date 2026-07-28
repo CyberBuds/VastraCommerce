@@ -90,8 +90,8 @@ api.interceptors.request.use(
   async (config) => {
     const { url, method, data, params } = config;
 
-    // Check if the endpoint is a simulated API
-    if (url && url.startsWith('/api/')) {
+    // Check if the endpoint is a simulated API (excluding real API proxy routes)
+    if (url && url.startsWith('/api/') && !url.includes('/api/v1/auth/login')) {
       const settings = useSettingsStore.getState().settings;
       const latency = settings.simulatedLatencyMs || 300;
 
@@ -734,6 +734,138 @@ function handleMockRoute(url: string, method: string, body: any, params: any): a
     const track = store.tracking.find((t: any) => t.trackingNumber === trackingNum);
     if (track) return { success: true, data: track };
     return { success: false, error: 'Tracking detail not found' };
+  }
+
+  // 7. CMS Module Mock Routes
+  if (path.startsWith('/api/cms')) {
+    const { useCmsStore } = require('@/store/cmsStore');
+    const cmsStore = useCmsStore.getState();
+
+    if (path === '/api/cms/stats') {
+      return { success: true, data: cmsStore.getStats() };
+    }
+
+    if (path === '/api/cms/pages') {
+      if (method === 'get') return { success: true, data: cmsStore.pages };
+      if (method === 'post') {
+        const page = cmsStore.addPage(body);
+        return { success: true, data: page };
+      }
+    }
+
+    if (path.startsWith('/api/cms/pages/')) {
+      const id = path.split('/').pop();
+      if (method === 'get') {
+        const page = cmsStore.pages.find((p: any) => p.id === id);
+        return page ? { success: true, data: page } : { success: false, error: 'Page not found' };
+      }
+      if (method === 'put') {
+        cmsStore.updatePage(id, body);
+        return { success: true, data: cmsStore.pages.find((p: any) => p.id === id) };
+      }
+      if (method === 'delete') {
+        cmsStore.deletePage(id);
+        return { success: true, data: { id } };
+      }
+    }
+
+    if (path === '/api/cms/blogs') {
+      if (method === 'get') return { success: true, data: cmsStore.blogs };
+      if (method === 'post') {
+        const blog = cmsStore.addBlog(body);
+        return { success: true, data: blog };
+      }
+    }
+
+    if (path.startsWith('/api/cms/blogs/')) {
+      const id = path.split('/').pop();
+      if (method === 'get') {
+        const blog = cmsStore.blogs.find((b: any) => b.id === id);
+        return blog ? { success: true, data: blog } : { success: false, error: 'Blog not found' };
+      }
+      if (method === 'put') {
+        cmsStore.updateBlog(id, body);
+        return { success: true, data: cmsStore.blogs.find((b: any) => b.id === id) };
+      }
+      if (method === 'delete') {
+        cmsStore.deleteBlog(id);
+        return { success: true, data: { id } };
+      }
+    }
+
+    if (path === '/api/cms/categories') return { success: true, data: cmsStore.categories };
+    if (path === '/api/cms/tags') return { success: true, data: cmsStore.tags };
+    if (path === '/api/cms/media') return { success: true, data: cmsStore.mediaItems };
+    if (path === '/api/cms/menus') return { success: true, data: cmsStore.menus };
+    if (path === '/api/cms/faqs') return { success: true, data: cmsStore.faqs };
+    if (path === '/api/cms/testimonials') return { success: true, data: cmsStore.testimonials };
+    if (path === '/api/cms/landing-pages') return { success: true, data: cmsStore.landingPages };
+    if (path === '/api/cms/seo') return { success: true, data: cmsStore.seoConfig };
+    if (path === '/api/cms/redirects') return { success: true, data: cmsStore.redirects };
+    if (path === '/api/cms/sitemaps') return { success: true, data: cmsStore.sitemaps };
+    if (path === '/api/cms/robots') return { success: true, data: cmsStore.robotsConfig };
+    if (path === '/api/cms/schemas') return { success: true, data: cmsStore.schemas };
+    if (path === '/api/cms/meta-rules') return { success: true, data: cmsStore.metaRules };
+    if (path === '/api/cms/scheduler') return { success: true, data: cmsStore.scheduledQueue };
+    if (path === '/api/cms/revisions') return { success: true, data: cmsStore.revisions };
+  }
+
+  // 8. System Administration & Settings Module Mock Routes
+  if (path.startsWith('/api/system')) {
+    const { useSystemStore } = require('@/store/systemStore');
+    const systemStore = useSystemStore.getState();
+
+    if (path === '/api/system/company') {
+      if (method === 'get') return { success: true, data: systemStore.companyProfile };
+      if (method === 'put') {
+        systemStore.updateCompanyProfile(body);
+        return { success: true, data: systemStore.companyProfile };
+      }
+    }
+
+    if (path === '/api/system/stores') {
+      if (method === 'get') return { success: true, data: systemStore.stores };
+      if (method === 'post') {
+        systemStore.addStoreSetting(body);
+        return { success: true, data: body };
+      }
+    }
+
+    if (path === '/api/system/theme') {
+      if (method === 'get') return { success: true, data: systemStore.themeConfig };
+      if (method === 'put') {
+        systemStore.updateThemeConfig(body);
+        return { success: true, data: systemStore.themeConfig };
+      }
+    }
+
+    if (path === '/api/system/localization') {
+      if (method === 'get') return { success: true, data: systemStore.localization };
+      if (method === 'put') {
+        systemStore.updateLocalization(body);
+        return { success: true, data: systemStore.localization };
+      }
+    }
+
+    if (path === '/api/system/tax') return { success: true, data: systemStore.taxRules };
+    if (path === '/api/system/gateways') return { success: true, data: systemStore.gateways };
+    if (path === '/api/system/integrations') return { success: true, data: systemStore.integrations };
+    if (path === '/api/system/webhooks') return { success: true, data: systemStore.webhooks };
+    if (path === '/api/system/feature-flags') return { success: true, data: systemStore.featureFlags };
+    if (path === '/api/system/security') {
+      if (method === 'get') return { success: true, data: systemStore.securityPolicy };
+      if (method === 'put') {
+        systemStore.updateSecurityPolicy(body);
+        return { success: true, data: systemStore.securityPolicy };
+      }
+    }
+    if (path === '/api/system/roles') return { success: true, data: systemStore.roles };
+    if (path === '/api/system/users') return { success: true, data: systemStore.users };
+    if (path === '/api/system/logs') return { success: true, data: systemStore.auditLogs };
+    if (path === '/api/system/health') return { success: true, data: systemStore.healthMetrics };
+    if (path === '/api/system/cache') return { success: true, data: systemStore.cacheStatus };
+    if (path === '/api/system/backups') return { success: true, data: systemStore.backups };
+    if (path === '/api/system/license') return { success: true, data: systemStore.licenseInfo };
   }
 
   // Default fallback for unhandled mocked endpoints
