@@ -438,7 +438,7 @@ export const SIDEBAR_MENU: MenuItem[] = [
       {
         id: 'marketing-dashboard',
         title: 'Dashboard',
-        href: '/marketing/dashboard',
+        href: '/dashboard/marketing',
         icon: 'LayoutDashboard',
         permission: 'view:marketing',
       },
