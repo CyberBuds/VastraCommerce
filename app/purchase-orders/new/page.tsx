@@ -5,7 +5,7 @@ import { useLayoutStore } from '@/store/layoutStore';
 import { useInventoryStore } from '@/store/inventoryStore';
 import { AppProviders } from '@/providers/AppProviders';
 import { AdminLayout } from '@/features/layout/AdminLayout';
-import { Button, Input } from '@/components/enterprise/BaseInputs';
+import { Button } from '@/components/enterprise/BaseInputs';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Plus, Trash2, FileText, ShoppingBag, Save } from 'lucide-react';
 import { toast } from 'sonner';

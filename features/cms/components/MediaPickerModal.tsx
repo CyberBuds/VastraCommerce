@@ -134,7 +134,6 @@ export function MediaPickerModal({
           </Button>
           <Button
             type="button"
-            variant="default"
             size="sm"
             disabled={!selectedUrl}
             onClick={handleConfirm}

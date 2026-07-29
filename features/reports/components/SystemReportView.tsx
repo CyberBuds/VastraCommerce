@@ -18,6 +18,7 @@ export function SystemReportView() {
   const currentCpu = metrics[metrics.length - 1]?.cpuUsagePct || 35;
   const currentRam = metrics[metrics.length - 1]?.memoryUsagePct || 59;
   const currentReq = metrics[metrics.length - 1]?.apiRequestsPerMin || 1600;
+  const tableData = metrics.map((metric) => ({ ...metric, id: metric.timestamp }));
 
   return (
     <div className="space-y-6">
@@ -54,7 +55,7 @@ export function SystemReportView() {
 
       <ReportDataTable
         title="System Telemetry History"
-        data={metrics}
+        data={tableData}
         columns={[
           { header: 'Time Slot', accessorKey: 'timestamp' },
           { header: 'CPU Load', accessorKey: (r) => `${r.cpuUsagePct}%` },

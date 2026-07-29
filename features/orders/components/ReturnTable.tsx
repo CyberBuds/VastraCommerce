@@ -62,7 +62,7 @@ export function ReturnTable() {
       header: 'Return Reference',
       cell: ({ row }) => (
         <button
-          onClick={() => setSelectedReturn(row.original)}
+          onClick={() => setSelectedReturnId(row.original.id)}
           className="font-mono text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline text-left"
         >
           {row.getValue('ReturnNumber')}
@@ -287,7 +287,7 @@ export function ReturnTable() {
             )}
 
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-zinc-850">
-              <Button type="button" variant="outline" size="sm" onClick={() => setSelectedReturn(null)}>Close Inspection</Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => setSelectedReturnId(null)}>Close Inspection</Button>
             </div>
 
           </div>

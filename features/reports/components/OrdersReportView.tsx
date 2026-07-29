@@ -18,6 +18,7 @@ export function OrdersReportView() {
   const { data: orderStatuses = [] } = useOrderStatusBreakdown();
 
   const totalOrders = orderStatuses.reduce((acc, curr) => acc + curr.count, 0);
+  const tableData = orderStatuses.map((status) => ({ ...status, id: status.status }));
 
   return (
     <div className="space-y-6">
@@ -59,7 +60,7 @@ export function OrdersReportView() {
         <div className="lg:col-span-2">
           <ReportDataTable
             title="Order Status Metrics Ledger"
-            data={orderStatuses}
+            data={tableData}
             columns={[
               { header: 'Status Name', accessorKey: 'status' },
               { header: 'Order Volume', accessorKey: 'count' },

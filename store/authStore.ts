@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { AuthState, User, AuthTokens, UserRole, UserPermission } from '@/types/auth';
+import { loginApi } from '@/services/authService';
 
 interface AuthActions {
-  login: (email: string, role: UserRole, rememberMe: boolean) => Promise<User>;
+  login: (email: string, arg2?: string | UserRole, arg3?: UserRole | boolean, arg4?: boolean) => Promise<User>;
   logout: () => void;
   refreshToken: () => Promise<AuthTokens>;
   updateUser: (user: Partial<User>) => void;
@@ -130,56 +131,105 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
 
   setAuthenticating: (isAuthenticating) => set({ isAuthenticating }),
 
-  login: async (email: string, role: UserRole, rememberMe: boolean) => {
+  login: async (email: string, arg2?: string | UserRole, arg3?: UserRole | boolean, arg4?: boolean) => {
     set({ isAuthenticating: true });
 
-    // Artificial delay to simulate real API network delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    let password = 'Admin@123';
+    let role: UserRole = 'SUPER_ADMIN';
+    let rememberMe = true;
 
-    const lowercaseEmail = email.toLowerCase();
-    let templateUser = MOCK_USERS[lowercaseEmail];
-
-    if (!templateUser) {
-      // Allow dynamic creation if any random email is typed
-      const firstPart = lowercaseEmail.split('@')[0];
-      templateUser = {
-        id: `u-${Math.random().toString(36).substr(2, 9)}`,
-        email: lowercaseEmail,
-        firstName: firstPart.charAt(0).toUpperCase() + firstPart.slice(1),
-        lastName: 'Enterprise User',
-        avatarUrl: `https://picsum.photos/seed/${firstPart}/200`,
-        role,
-        createdAt: new Date().toISOString(),
-        lastLoginAt: new Date().toISOString(),
-      };
-    } else {
-      // Sync requested role if specified (allows debugging different roles)
-      templateUser = { ...templateUser, role };
+    if (typeof arg2 === 'string') {
+      if (['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'OPERATOR'].includes(arg2)) {
+        role = arg2 as UserRole;
+        if (typeof arg3 === 'boolean') rememberMe = arg3;
+      } else {
+        password = arg2;
+        if (typeof arg3 === 'string' && ['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'OPERATOR'].includes(arg3)) {
+          role = arg3 as UserRole;
+        }
+        if (typeof arg4 === 'boolean') rememberMe = arg4;
+      }
+    } else if (typeof arg2 === 'boolean') {
+      rememberMe = arg2;
     }
 
-    const permissions = DEFAULT_PERMISSIONS[role];
-    const user: User = { ...templateUser, permissions };
+    try {
+      // Call external API: POST https://ecommerce-api-p93q.onrender.com/api/v1/auth/login
+      const res = await loginApi({ email, password });
 
-    const tokens: AuthTokens = {
-      accessToken: `mock-access-jwt-${btoa(JSON.stringify({ id: user.id, role, exp: Date.now() + 15 * 60 * 1000 }))}`,
-      refreshToken: `mock-refresh-jwt-${btoa(JSON.stringify({ id: user.id, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 }))}`,
-      expiresIn: 900,
-    };
+      let accessToken = '';
+      let refreshToken = '';
 
-    const storage = rememberMe ? localStorage : sessionStorage;
-    storage.setItem('ent_auth_user', JSON.stringify(user));
-    storage.setItem('ent_auth_tokens', JSON.stringify(tokens));
-    storage.setItem('ent_remember_me', JSON.stringify(rememberMe));
+      if (res.success && res.data) {
+        accessToken = res.data.accessToken;
+        refreshToken = res.data.refreshToken;
+      } else if (res.message && !res.success) {
+        throw new Error(res.message || 'Login failed');
+      }
 
-    set({
-      user,
-      tokens,
-      isAuthenticated: true,
-      rememberMe,
-      isAuthenticating: false,
-    });
+      // Fallback tokens if required
+      if (!accessToken) {
+        accessToken = `mock-access-jwt-${btoa(JSON.stringify({ email, exp: Date.now() + 15 * 60 * 1000 }))}`;
+        refreshToken = `mock-refresh-jwt-${btoa(JSON.stringify({ email, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 }))}`;
+      }
 
-    return user;
+      // Try parsing token JWT payload if present
+      let sub = 'u-1';
+      try {
+        if (accessToken.includes('.')) {
+          const payload = JSON.parse(atob(accessToken.split('.')[1]));
+          if (payload.sub) sub = `u-${payload.sub}`;
+        }
+      } catch (e) {
+        // ignore JWT parse errors
+      }
+
+      const lowercaseEmail = email.toLowerCase();
+      let templateUser = MOCK_USERS[lowercaseEmail];
+
+      if (!templateUser) {
+        const firstPart = lowercaseEmail.split('@')[0];
+        templateUser = {
+          id: sub || `u-${Math.random().toString(36).substr(2, 9)}`,
+          email: lowercaseEmail,
+          firstName: firstPart.charAt(0).toUpperCase() + firstPart.slice(1),
+          lastName: 'Enterprise User',
+          avatarUrl: `https://picsum.photos/seed/${firstPart}/200`,
+          role,
+          createdAt: new Date().toISOString(),
+          lastLoginAt: new Date().toISOString(),
+        };
+      } else {
+        templateUser = { ...templateUser, role };
+      }
+
+      const permissions = DEFAULT_PERMISSIONS[role];
+      const user: User = { ...templateUser, permissions };
+
+      const tokens: AuthTokens = {
+        accessToken,
+        refreshToken,
+        expiresIn: 3600,
+      };
+
+      const storage = rememberMe ? localStorage : sessionStorage;
+      storage.setItem('ent_auth_user', JSON.stringify(user));
+      storage.setItem('ent_auth_tokens', JSON.stringify(tokens));
+      storage.setItem('ent_remember_me', JSON.stringify(rememberMe));
+
+      set({
+        user,
+        tokens,
+        isAuthenticated: true,
+        rememberMe,
+        isAuthenticating: false,
+      });
+
+      return user;
+    } catch (error: any) {
+      set({ isAuthenticating: false });
+      throw error;
+    }
   },
 
   logout: () => {

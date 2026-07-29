@@ -141,7 +141,7 @@ export function CmsPagesListView() {
         accessorKey: 'author',
         header: 'Author',
         cell: ({ row }) => (
-          <span className="text-xs text-slate-600 dark:text-zinc-400">{row.original.author}</span>
+          <span className="text-xs text-slate-600 dark:text-zinc-400">{row.original.author.name}</span>
         ),
       },
       {

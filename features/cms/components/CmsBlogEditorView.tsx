@@ -23,8 +23,8 @@ const blogSchema = z.object({
   tags: z.string(),
   coverImage: z.string().optional(),
   status: z.enum(['DRAFT', 'PUBLISHED', 'SCHEDULED', 'ARCHIVED']),
-  authorName: z.string().default('Current User'),
-  authorRole: z.string().default('Senior Technical Architect'),
+  authorName: z.string().optional(),
+  authorRole: z.string().optional(),
 });
 
 type BlogFormData = z.infer<typeof blogSchema>;
@@ -52,11 +52,11 @@ export function CmsBlogEditorView({ blogId }: CmsBlogEditorViewProps) {
     defaultValues: {
       title: existingBlog?.title || '',
       slug: existingBlog?.slug || '',
-      excerpt: existingBlog?.excerpt || '',
+      excerpt: existingBlog?.summary || '',
       content: existingBlog?.content || '<h2>Write technical article content...</h2>',
-      category: existingBlog?.category || 'Engineering',
-      tags: existingBlog?.tags.join(', ') || 'Next.js, Architecture',
-      coverImage: existingBlog?.coverImage || 'https://picsum.photos/seed/techblog/1200/600',
+      category: existingBlog?.categoryName || 'Engineering',
+      tags: existingBlog?.tagNames.join(', ') || 'Next.js, Architecture',
+      coverImage: existingBlog?.featuredImage || 'https://picsum.photos/seed/techblog/1200/600',
       status: existingBlog?.status || 'DRAFT',
       authorName: existingBlog?.author.name || 'Current User',
       authorRole: existingBlog?.author.role || 'Principal Architect',
@@ -77,23 +77,22 @@ export function CmsBlogEditorView({ blogId }: CmsBlogEditorViewProps) {
 
   const onSubmit = (data: BlogFormData) => {
     const tagsArr = data.tags.split(',').map((t) => t.trim()).filter(Boolean);
-    const wordCount = data.content.split(/\s+/).length;
-    const readingTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
+    const authorName = data.authorName || 'Current User';
+    const authorRole = data.authorRole || 'Principal Architect';
 
     if (existingBlog) {
       updateBlog(existingBlog.id, {
         title: data.title,
         slug: data.slug,
-        excerpt: data.excerpt,
+        summary: data.excerpt,
         content: data.content,
-        category: data.category,
-        tags: tagsArr,
-        coverImage: data.coverImage,
+        categoryName: data.category,
+        tagNames: tagsArr,
+        featuredImage: data.coverImage,
         status: data.status as CmsContentStatus,
-        readingTimeMinutes,
         author: {
-          name: data.authorName,
-          role: data.authorRole,
+          name: authorName,
+          role: authorRole,
           avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
         },
       });
@@ -102,18 +101,26 @@ export function CmsBlogEditorView({ blogId }: CmsBlogEditorViewProps) {
       addBlog({
         title: data.title,
         slug: data.slug,
-        excerpt: data.excerpt,
+        summary: data.excerpt,
         content: data.content,
-        category: data.category,
-        tags: tagsArr,
-        coverImage: data.coverImage || 'https://picsum.photos/seed/techblog/1200/600',
+        categoryName: data.category,
+        tagNames: tagsArr,
+        featuredImage: data.coverImage || 'https://picsum.photos/seed/techblog/1200/600',
         status: data.status as CmsContentStatus,
-        readingTimeMinutes,
         author: {
-          name: data.authorName,
-          role: data.authorRole,
+          name: authorName,
+          role: authorRole,
           avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
         },
+        categoryId: '',
+        tagIds: [],
+        gallery: [],
+        seo: {
+          metaTitle: data.title,
+          metaDescription: data.excerpt,
+          keywords: data.tags,
+        },
+        publishDate: new Date().toISOString(),
       });
       toast.success('Blog post published!');
     }
@@ -158,8 +165,8 @@ export function CmsBlogEditorView({ blogId }: CmsBlogEditorViewProps) {
                 </Label>
                 <Select id="category" {...register('category')} className="mt-1 text-xs">
                   {categories.map((c) => (
-                    <option key={c.id} value={c.name}>
-                      {c.name}
+                    <option key={c.id} value={c.title}>
+                      {c.title}
                     </option>
                   ))}
                 </Select>

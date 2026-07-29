@@ -29,7 +29,7 @@ export function CmsBlogsListView() {
 
   const filteredBlogs = React.useMemo(() => {
     if (categoryFilter === 'ALL') return blogs;
-    return blogs.filter((b) => b.category === categoryFilter);
+    return blogs.filter((b) => b.categoryName === categoryFilter);
   }, [blogs, categoryFilter]);
 
   const handleDelete = (id: string, title: string) => {
@@ -48,7 +48,7 @@ export function CmsBlogsListView() {
           const blog = row.original;
           return (
             <div className="flex items-center gap-3">
-              <img src={blog.coverImage} alt={blog.title} className="w-12 h-12 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-zinc-800" />
+              <img src={blog.featuredImage} alt={blog.title} className="w-12 h-12 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-zinc-800" />
               <div className="flex flex-col gap-0.5">
                 <Link
                   href={`/cms/blogs/edit/${blog.id}`}
@@ -58,7 +58,6 @@ export function CmsBlogsListView() {
                 </Link>
                 <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
                   <span>By <strong className="text-slate-700 dark:text-zinc-300">{blog.author.name}</strong></span>
-                  <span>• {blog.readingTimeMinutes} min read</span>
                 </div>
               </div>
             </div>
@@ -66,11 +65,11 @@ export function CmsBlogsListView() {
         },
       },
       {
-        accessorKey: 'category',
+        accessorKey: 'categoryName',
         header: 'Category',
         cell: ({ row }) => (
           <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900">
-            {row.original.category}
+            {row.original.categoryName}
           </span>
         ),
       },
@@ -99,16 +98,15 @@ export function CmsBlogsListView() {
         cell: ({ row }) => (
           <div className="flex items-center gap-3 text-xs font-medium text-slate-600 dark:text-zinc-400">
             <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5 text-slate-400" /> {row.original.views.toLocaleString()}</span>
-            <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5 text-rose-500" /> {row.original.likes}</span>
           </div>
         ),
       },
       {
-        accessorKey: 'publishedAt',
+        accessorKey: 'publishDate',
         header: 'Published Date',
         cell: ({ row }) => (
           <span className="text-xs text-slate-500 dark:text-zinc-400">
-            {row.original.publishedAt ? new Date(row.original.publishedAt).toLocaleDateString() : 'Unpublished'}
+            {row.original.publishDate ? new Date(row.original.publishDate).toLocaleDateString() : 'Unpublished'}
           </span>
         ),
       },

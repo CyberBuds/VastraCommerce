@@ -1,3 +1,5 @@
+'use client';
+
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Loader2, LucideIcon } from 'lucide-react';
@@ -11,41 +13,52 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   isLoading?: boolean;
   icon?: LucideIcon;
   iconPosition?: 'left' | 'right';
+  asChild?: boolean;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', isLoading, icon: Icon, iconPosition = 'left', children, ...props }, ref) => {
+  ({ className, variant = 'primary', size = 'md', isLoading, icon: Icon, iconPosition = 'left', children, asChild = false, ...props }, ref) => {
+    const buttonClasses = cn(
+      'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]',
+      {
+        // Primary - Slate Blue Gradient & Brand Accent in dark mode
+        'bg-linear-to-r from-slate-800 to-slate-900 text-white hover:from-slate-700 hover:to-slate-800 dark:from-brand dark:to-brand-dark dark:hover:from-brand-hover dark:hover:to-brand shadow-md shadow-slate-900/10 dark:shadow-brand/20 focus:ring-slate-600 dark:focus:ring-brand focus:ring-offset-white dark:focus:ring-offset-zinc-950':
+          variant === 'primary',
+        // Secondary
+        'bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 focus:ring-slate-400 focus:ring-offset-white dark:focus:ring-offset-zinc-950':
+          variant === 'secondary',
+        // Outline
+        'border border-slate-300 hover:bg-slate-50 text-slate-700 dark:border-zinc-700 dark:hover:bg-zinc-800 dark:text-zinc-300 focus:ring-slate-400 focus:ring-offset-white dark:focus:ring-offset-zinc-950':
+          variant === 'outline',
+        // Ghost
+        'hover:bg-slate-100 dark:hover:bg-zinc-850 text-slate-700 dark:text-zinc-300 focus:ring-slate-300':
+          variant === 'ghost',
+        // Danger
+        'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500 shadow-md shadow-red-950/10': variant === 'danger',
+        // Success
+        'bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500 shadow-md shadow-emerald-950/10': variant === 'success',
+      },
+      {
+        'px-3 py-1.5 text-xs': size === 'sm',
+        'px-4 py-2 text-sm': size === 'md',
+        'px-5 py-3 text-base': size === 'lg',
+        'p-2 w-9 h-9': size === 'icon',
+      },
+      className
+    );
+
+    if (asChild && React.isValidElement(children)) {
+      return React.cloneElement(children as React.ReactElement<any>, {
+        ref,
+        className: cn(buttonClasses, (children.props as any)?.className),
+        ...props,
+      });
+    }
+
     return (
       <button
         ref={ref}
-        className={cn(
-          'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]',
-          {
-            // Primary - Slate Blue Gradient & Brand Accent in dark mode
-            'bg-linear-to-r from-slate-800 to-slate-900 text-white hover:from-slate-700 hover:to-slate-800 dark:from-brand dark:to-brand-dark dark:hover:from-brand-hover dark:hover:to-brand shadow-md shadow-slate-900/10 dark:shadow-brand/20 focus:ring-slate-600 dark:focus:ring-brand focus:ring-offset-white dark:focus:ring-offset-zinc-950':
-              variant === 'primary',
-            // Secondary
-            'bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 focus:ring-slate-400 focus:ring-offset-white dark:focus:ring-offset-zinc-950':
-              variant === 'secondary',
-            // Outline
-            'border border-slate-300 hover:bg-slate-50 text-slate-700 dark:border-zinc-700 dark:hover:bg-zinc-800 dark:text-zinc-300 focus:ring-slate-400 focus:ring-offset-white dark:focus:ring-offset-zinc-950':
-              variant === 'outline',
-            // Ghost
-            'hover:bg-slate-100 dark:hover:bg-zinc-850 text-slate-700 dark:text-zinc-300 focus:ring-slate-300':
-              variant === 'ghost',
-            // Danger
-            'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500 shadow-md shadow-red-950/10': variant === 'danger',
-            // Success
-            'bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500 shadow-md shadow-emerald-950/10': variant === 'success',
-          },
-          {
-            'px-3 py-1.5 text-xs': size === 'sm',
-            'px-4 py-2 text-sm': size === 'md',
-            'px-5 py-3 text-base': size === 'lg',
-            'p-2 w-9 h-9': size === 'icon',
-          },
-          className
-        )}
+        className={buttonClasses}
         disabled={isLoading || props.disabled}
         {...props}
       >
@@ -167,13 +180,15 @@ Textarea.displayName = 'Textarea';
 // ==========================================
 // CHECKBOX COMPONENT
 // ==========================================
-export interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'checked'> {
   label?: string;
   error?: string;
+  checked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
 }
 
 export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ className, label, error, id, ...props }, ref) => {
+  ({ className, label, error, id, checked, onCheckedChange, onChange, ...props }, ref) => {
     const generatedId = React.useId();
     const checkboxId = id || generatedId;
 
@@ -184,6 +199,11 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             id={checkboxId}
             ref={ref}
             type="checkbox"
+            checked={checked}
+            onChange={(e) => {
+              onChange?.(e);
+              onCheckedChange?.(e.target.checked);
+            }}
             className={cn(
               'mt-0.5 h-4 w-4 rounded-sm border-slate-300 dark:border-zinc-700 text-brand focus:ring-brand transition-all cursor-pointer accent-brand',
               className
@@ -278,7 +298,7 @@ Switch.displayName = 'Switch';
 // BADGE COMPONENT
 // ==========================================
 export interface BadgeProps {
-  variant?: 'neutral' | 'success' | 'warning' | 'error' | 'info' | 'purple' | 'brand';
+  variant?: 'neutral' | 'success' | 'warning' | 'error' | 'info' | 'purple' | 'brand' | 'default' | 'secondary' | 'outline' | 'danger';
   children: React.ReactNode;
   className?: string;
 }
@@ -289,19 +309,22 @@ export const Badge = ({ variant = 'neutral', children, className }: BadgeProps) 
       className={cn(
         'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold leading-4 tracking-wide',
         {
-          'bg-slate-100 text-slate-800 dark:bg-zinc-800 dark:text-zinc-300': variant === 'neutral',
+          'bg-slate-100 text-slate-800 dark:bg-zinc-800 dark:text-zinc-300':
+            variant === 'neutral' || variant === 'default' || variant === 'secondary',
           'bg-emerald-50 text-emerald-700 border border-emerald-200/50 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50':
             variant === 'success',
           'bg-amber-50 text-amber-700 border border-amber-200/50 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/50':
             variant === 'warning',
           'bg-red-50 text-red-700 border border-red-200/50 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50':
-            variant === 'error',
+            variant === 'error' || variant === 'danger',
           'bg-sky-50 text-sky-700 border border-sky-200/50 dark:bg-sky-950/20 dark:text-sky-400 dark:border-sky-900/50':
             variant === 'info',
           'bg-purple-50 text-purple-700 border border-purple-200/50 dark:bg-purple-950/20 dark:text-purple-400 dark:border-purple-900/50':
             variant === 'purple',
           'bg-brand/10 text-brand border border-brand/20 dark:bg-brand/20 dark:text-brand-light dark:border-brand/40':
             variant === 'brand',
+          'border border-slate-200 text-slate-700 dark:border-zinc-700 dark:text-zinc-300':
+            variant === 'outline',
         },
         className
       )}
@@ -438,3 +461,13 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   }
 );
 Select.displayName = 'Select';
+
+export {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from '@/components/ui/form';

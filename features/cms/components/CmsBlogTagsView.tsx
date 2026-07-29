@@ -18,6 +18,7 @@ export function CmsBlogTagsView() {
     addTag({
       name,
       slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      status: 'ACTIVE',
     });
 
     setName('');
@@ -64,7 +65,7 @@ export function CmsBlogTagsView() {
                 <Tag className="w-3.5 h-3.5 text-blue-500" />
                 <span>#{t.name}</span>
                 <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
-                  {t.count}
+                  {t.postsCount}
                 </span>
                 <button
                   onClick={() => {

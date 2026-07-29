@@ -15,6 +15,7 @@ export function UserManagementView() {
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingUser, setEditingUser] = React.useState<SystemUser | null>(null);
+  const [globalFilter, setGlobalFilter] = React.useState<string>(''); // Add globalFilter state
 
   const [email, setEmail] = React.useState('');
   const [firstName, setFirstName] = React.useState('');
@@ -169,7 +170,13 @@ export function UserManagementView() {
       </div>
 
       <Card>
-        <EnterpriseTable data={users} columns={columns} searchPlaceholder="Search users by name, email, department..." />
+        <EnterpriseTable
+          data={users}
+          columns={columns}
+          searchPlaceholder="Search users by name, email, department..."
+          globalFilter={globalFilter} // Pass globalFilter
+          setGlobalFilter={setGlobalFilter} // Pass setGlobalFilter
+        />
       </Card>
 
       {/* User Modal */}

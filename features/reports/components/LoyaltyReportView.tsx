@@ -9,9 +9,9 @@ import { ReportExportModal } from './ReportExportModal';
 import { Award, Users, Star, Gift } from 'lucide-react';
 
 const mockLoyaltyTiers = [
-  { tier: 'Titanium Defense (Tier 1)', members: 140, totalPointsIssued: 4500000, pointsRedeemed: 3200000, retentionRate: '98.5%' },
-  { tier: 'Gold Aviation (Tier 2)', members: 480, totalPointsIssued: 2100000, pointsRedeemed: 1400000, retentionRate: '92.1%' },
-  { tier: 'Silver Carrier (Tier 3)', members: 1250, totalPointsIssued: 980000, pointsRedeemed: 520000, retentionRate: '84.0%' },
+  { id: 1, tier: 'Titanium Defense (Tier 1)', members: 140, totalPointsIssued: 4500000, pointsRedeemed: 3200000, retentionRate: '98.5%' },
+  { id: 2, tier: 'Gold Aviation (Tier 2)', members: 480, totalPointsIssued: 2100000, pointsRedeemed: 1400000, retentionRate: '92.1%' },
+  { id: 3, tier: 'Silver Carrier (Tier 3)', members: 1250, totalPointsIssued: 980000, pointsRedeemed: 520000, retentionRate: '84.0%' },
 ];
 
 export function LoyaltyReportView() {

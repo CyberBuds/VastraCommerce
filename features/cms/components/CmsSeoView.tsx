@@ -20,6 +20,7 @@ export function CmsSeoView() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     updateSeoConfig({
+      ...seoConfig,
       siteName,
       titleTemplate,
       defaultMetaDescription,

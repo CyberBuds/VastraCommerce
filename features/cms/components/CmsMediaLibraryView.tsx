@@ -21,7 +21,7 @@ import {
 import { toast } from 'sonner';
 
 export function CmsMediaLibraryView() {
-  const { mediaItems, uploadMedia, deleteMediaItem } = useCmsStore();
+  const { mediaItems, uploadMedia, deleteMedia } = useCmsStore();
   const [search, setSearch] = React.useState('');
   const [folderFilter, setFolderFilter] = React.useState('ALL');
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid');
@@ -210,10 +210,10 @@ export function CmsMediaLibraryView() {
                   <Copy className="w-3.5 h-3.5" /> Copy CDN Link
                 </Button>
                 <Button
-                  variant="destructive"
+                  variant="danger"
                   size="sm"
                   onClick={() => {
-                    deleteMediaItem(selectedAsset.id);
+                    deleteMedia(selectedAsset.id);
                     setSelectedAsset(null);
                     toast.success('Asset deleted');
                   }}

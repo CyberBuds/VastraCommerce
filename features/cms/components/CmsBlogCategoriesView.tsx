@@ -9,24 +9,30 @@ import { toast } from 'sonner';
 
 export function CmsBlogCategoriesView() {
   const { categories, addCategory, deleteCategory } = useCmsStore();
-  const [name, setName] = React.useState('');
+  const [title, setTitle] = React.useState('');
   const [slug, setSlug] = React.useState('');
   const [description, setDescription] = React.useState('');
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return;
+    if (!title) return;
 
     addCategory({
-      name,
-      slug: slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      title,
+      slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       description,
+      status: 'ACTIVE',
+      seo: {
+        metaTitle: title,
+        metaDescription: description,
+        keywords: title.split(' ').join(', '),
+      },
     });
 
-    setName('');
+    setTitle('');
     setSlug('');
     setDescription('');
-    toast.success(`Category "${name}" created successfully.`);
+    toast.success(`Category "${title}" created successfully.`);
   };
 
   return (
@@ -48,7 +54,7 @@ export function CmsBlogCategoriesView() {
             <Label htmlFor="catName" className="text-xs font-bold text-slate-700 dark:text-zinc-300">
               Category Name *
             </Label>
-            <Input id="catName" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Artificial Intelligence" className="mt-1 text-xs" required />
+            <Input id="catName" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Artificial Intelligence" className="mt-1 text-xs" required />
           </div>
 
           <div>
@@ -84,7 +90,7 @@ export function CmsBlogCategoriesView() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center gap-1.5">
-                    <Folder className="w-4 h-4" /> {cat.name}
+                    <Folder className="w-4 h-4" /> {cat.title}
                   </span>
                   <span className="text-xs font-mono text-slate-400">/{cat.slug}</span>
                 </div>
@@ -93,7 +99,7 @@ export function CmsBlogCategoriesView() {
 
               <div className="mt-4 pt-3 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-between">
                 <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 flex items-center gap-1">
-                  <BookOpen className="w-3.5 h-3.5 text-slate-400" /> {cat.postCount} articles
+                  <BookOpen className="w-3.5 h-3.5 text-slate-400" /> {cat.postsCount} articles
                 </span>
                 <button
                   onClick={() => {

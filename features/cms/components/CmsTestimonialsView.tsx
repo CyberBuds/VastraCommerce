@@ -9,30 +9,31 @@ import { toast } from 'sonner';
 
 export function CmsTestimonialsView() {
   const { testimonials, addTestimonial, deleteTestimonial } = useCmsStore();
-  const [authorName, setAuthorName] = React.useState('');
-  const [role, setRole] = React.useState('');
+  const [customerName, setCustomerName] = React.useState('');
+  const [designation, setDesignation] = React.useState('');
   const [company, setCompany] = React.useState('');
-  const [quote, setQuote] = React.useState('');
+  const [review, setReview] = React.useState('');
   const [rating, setRating] = React.useState(5);
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!authorName || !quote) return;
+    if (!customerName || !review) return;
 
     addTestimonial({
-      authorName,
-      role,
+      customerName,
+      designation,
       company,
-      quote,
+      review,
       rating,
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      isFeatured: true,
+      photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+      status: 'APPROVED',
+      sortOrder: testimonials.length,
     });
 
-    setAuthorName('');
-    setRole('');
+    setCustomerName('');
+    setDesignation('');
     setCompany('');
-    setQuote('');
+    setReview('');
     toast.success('Added customer testimonial!');
   };
 
@@ -51,14 +52,14 @@ export function CmsTestimonialsView() {
           </h3>
 
           <div>
-            <Label htmlFor="authorName" className="text-xs font-bold text-slate-700 dark:text-zinc-300">Executive Name *</Label>
-            <Input id="authorName" value={authorName} onChange={(e) => setAuthorName(e.target.value)} placeholder="e.g. Sarah Connor" className="mt-1 text-xs font-bold" required />
+            <Label htmlFor="customerName" className="text-xs font-bold text-slate-700 dark:text-zinc-300">Executive Name *</Label>
+            <Input id="customerName" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="e.g. Sarah Connor" className="mt-1 text-xs font-bold" required />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <Label htmlFor="role" className="text-xs font-bold text-slate-700 dark:text-zinc-300">Title / Role</Label>
-              <Input id="role" value={role} onChange={(e) => setRole(e.target.value)} placeholder="VP of Logistics" className="mt-1 text-xs" />
+              <Label htmlFor="designation" className="text-xs font-bold text-slate-700 dark:text-zinc-300">Title / Role</Label>
+              <Input id="designation" value={designation} onChange={(e) => setDesignation(e.target.value)} placeholder="VP of Logistics" className="mt-1 text-xs" />
             </div>
             <div>
               <Label htmlFor="company" className="text-xs font-bold text-slate-700 dark:text-zinc-300">Company</Label>
@@ -67,11 +68,11 @@ export function CmsTestimonialsView() {
           </div>
 
           <div>
-            <Label htmlFor="quote" className="text-xs font-bold text-slate-700 dark:text-zinc-300">Quote / Endorsement *</Label>
+            <Label htmlFor="review" className="text-xs font-bold text-slate-700 dark:text-zinc-300">Quote / Endorsement *</Label>
             <textarea
-              id="quote"
-              value={quote}
-              onChange={(e) => setQuote(e.target.value)}
+              id="review"
+              value={review}
+              onChange={(e) => setReview(e.target.value)}
               rows={4}
               placeholder="Write customer endorsement..."
               className="w-full mt-1 p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 text-xs text-slate-900 dark:text-zinc-100 focus:outline-none"
@@ -105,14 +106,14 @@ export function CmsTestimonialsView() {
                   </button>
                 </div>
 
-                <p className="text-xs text-slate-700 dark:text-zinc-300 italic leading-relaxed">&quot;{item.quote}&quot;</p>
+                <p className="text-xs text-slate-700 dark:text-zinc-300 italic leading-relaxed">&quot;{item.review}&quot;</p>
               </div>
 
               <div className="mt-4 pt-3 border-t border-slate-200 dark:border-zinc-800 flex items-center gap-3">
-                <img src={item.avatar} alt={item.authorName} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                <img src={item.photo} alt={item.customerName} className="w-10 h-10 rounded-full object-cover shrink-0" />
                 <div>
-                  <p className="text-xs font-bold text-slate-900 dark:text-zinc-100">{item.authorName}</p>
-                  <p className="text-[11px] text-slate-500 dark:text-zinc-400">{item.role} @ {item.company}</p>
+                  <p className="text-xs font-bold text-slate-900 dark:text-zinc-100">{item.customerName}</p>
+                  <p className="text-[11px] text-slate-500 dark:text-zinc-400">{item.designation} @ {item.company}</p>
                 </div>
               </div>
             </div>

@@ -86,7 +86,7 @@ export function InvoiceTable() {
       header: 'Taxed Total',
       cell: ({ row }) => (
         <span className="font-mono text-xs font-extrabold text-slate-900 dark:text-zinc-50">
-          ₹{row.getValue('Total').toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          ₹{(row.getValue('totalAmount') as number).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
         </span>
       ),
     },

@@ -15,6 +15,7 @@ export function StoreSettingsView() {
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingStore, setEditingStore] = React.useState<StoreSetting | null>(null);
+  const [globalFilter, setGlobalFilter] = React.useState<string>(''); // Add globalFilter state
 
   const [formCode, setFormCode] = React.useState('');
   const [formName, setFormName] = React.useState('');
@@ -180,7 +181,13 @@ export function StoreSettingsView() {
       </div>
 
       <Card>
-        <EnterpriseTable data={stores} columns={columns} searchPlaceholder="Filter store channels..." />
+        <EnterpriseTable
+          data={stores}
+          columns={columns}
+          searchPlaceholder="Filter store channels..."
+          globalFilter={globalFilter} // Pass globalFilter
+          setGlobalFilter={setGlobalFilter} // Pass setGlobalFilter
+        />
       </Card>
 
       {/* Store Modal */}

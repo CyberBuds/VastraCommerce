@@ -8,7 +8,7 @@ import { Menu, Plus, Trash2, Move, Link as LinkIcon, ExternalLink } from 'lucide
 import { toast } from 'sonner';
 
 export function CmsMenusView() {
-  const { menus, addMenu, updateMenu } = useCmsStore();
+  const { menus, updateMenu } = useCmsStore();
   const [selectedMenuId, setSelectedMenuId] = React.useState(menus[0]?.id || '');
   const activeMenu = menus.find((m) => m.id === selectedMenuId) || menus[0];
 
@@ -23,10 +23,10 @@ export function CmsMenusView() {
       ...activeMenu.items,
       {
         id: `mi-${Date.now()}`,
-        title: newItemTitle,
+        label: newItemTitle,
         url: newItemUrl,
         target: '_self' as const,
-        order: activeMenu.items.length + 1,
+        sortOrder: activeMenu.items.length + 1,
       },
     ];
 
@@ -68,7 +68,7 @@ export function CmsMenusView() {
               >
                 {menus.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.name} ({m.location})
+                    {m.title} ({m.location})
                   </option>
                 ))}
               </Select>
@@ -104,7 +104,7 @@ export function CmsMenusView() {
         <div className="lg:col-span-2 p-6 rounded-2xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-900 shadow-2xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-800 pb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100">{activeMenu?.name} Link Structure</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100">{activeMenu?.title} Link Structure</h3>
               <p className="text-xs text-slate-400">Reorder or modify link targets for {activeMenu?.location}</p>
             </div>
             <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
@@ -122,7 +122,7 @@ export function CmsMenusView() {
                   <Move className="w-4 h-4 text-slate-400 cursor-grab" />
                   <span className="w-5 text-xs font-mono font-bold text-slate-400">{idx + 1}.</span>
                   <div>
-                    <p className="text-xs font-bold text-slate-900 dark:text-zinc-100">{item.title}</p>
+                    <p className="text-xs font-bold text-slate-900 dark:text-zinc-100">{item.label}</p>
                     <p className="text-[11px] font-mono text-slate-500 dark:text-zinc-400 flex items-center gap-1">
                       <LinkIcon className="w-3 h-3 text-slate-400" /> {item.url}
                     </p>

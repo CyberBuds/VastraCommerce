@@ -12,12 +12,12 @@ export function ProfitLossReportView() {
   const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
   const { data: fin } = useFinanceSummary();
 
-  const grossRev = fin?.grossRevenue || 2650000;
-  const cogs = fin?.cogs || 1320000;
+  const grossRev = fin?.grossRevenue ?? 0;
+  const cogs = fin?.cogs ?? 0;
   const grossProfit = grossRev - cogs;
-  const opEx = (fin?.operatingExpenses || 380000) + (fin?.marketingExpenses || 95000) + (fin?.logisticsExpenses || 110000);
+  const opEx = (fin?.operatingExpenses ?? 0) + (fin?.marketingExpenses ?? 0) + (fin?.logisticsExpenses ?? 0);
   const netBeforeTax = grossProfit - opEx;
-  const netIncome = netBeforeTax - (fin?.taxLiability || 223700);
+  const netIncome = netBeforeTax - (fin?.taxLiability ?? 0);
 
   return (
     <div className="space-y-6">
@@ -69,17 +69,17 @@ export function ProfitLossReportView() {
           {/* Operating Expenses */}
           <div className="py-2.5 flex items-center justify-between pl-6 text-slate-600 dark:text-zinc-300">
             <span>General & Administrative Operating Overhead</span>
-            <span className="font-mono text-rose-600">-${(fin?.operatingExpenses || 380000).toLocaleString()}</span>
+            <span className="font-mono text-rose-600">-${(fin?.operatingExpenses ?? 0).toLocaleString()}</span>
           </div>
 
           <div className="py-2.5 flex items-center justify-between pl-6 text-slate-600 dark:text-zinc-300">
             <span>Marketing & Customer Acquisition Spend</span>
-            <span className="font-mono text-rose-600">-${(fin?.marketingExpenses || 95000).toLocaleString()}</span>
+            <span className="font-mono text-rose-600">-${(fin?.marketingExpenses ?? 0).toLocaleString()}</span>
           </div>
 
           <div className="py-2.5 flex items-center justify-between pl-6 text-slate-600 dark:text-zinc-300">
             <span>Freight Freight & Logistics Overhead</span>
-            <span className="font-mono text-rose-600">-${(fin?.logisticsExpenses || 110000).toLocaleString()}</span>
+            <span className="font-mono text-rose-600">-${(fin?.logisticsExpenses ?? 0).toLocaleString()}</span>
           </div>
 
           <div className="py-2.5 flex items-center justify-between font-bold text-slate-900 dark:text-zinc-100 bg-slate-100/60 dark:bg-zinc-800/60 px-3 rounded-lg">
@@ -89,7 +89,7 @@ export function ProfitLossReportView() {
 
           <div className="py-2.5 flex items-center justify-between pl-6 text-slate-600 dark:text-zinc-300">
             <span>Estimated Income Tax Liability</span>
-            <span className="font-mono text-rose-600">-${(fin?.taxLiability || 223700).toLocaleString()}</span>
+            <span className="font-mono text-rose-600">-${(fin?.taxLiability ?? 0).toLocaleString()}</span>
           </div>
 
           <div className="py-3 flex items-center justify-between font-extrabold text-sm text-slate-900 dark:text-zinc-100 bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900 px-4 rounded-xl">

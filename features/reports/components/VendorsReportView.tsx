@@ -9,9 +9,9 @@ import { ReportExportModal } from './ReportExportModal';
 import { Building2, PackageCheck, Clock, ShieldCheck } from 'lucide-react';
 
 const mockVendors = [
-  { name: 'Honeywell Aerospace OEM', partsSupplied: 1240, spendBasis: 850000, avgLeadTimeDays: 4.2, defectRate: '0.01%', slaCompliance: '99.2%' },
-  { name: 'Collins Aerospace Systems', partsSupplied: 980, spendBasis: 620000, avgLeadTimeDays: 5.1, defectRate: '0.03%', slaCompliance: '98.5%' },
-  { name: 'Pratt & Whitney Propulsion', partsSupplied: 450, spendBasis: 1120000, avgLeadTimeDays: 7.8, defectRate: '0.00%', slaCompliance: '99.8%' },
+  { id: 'Honeywell Aerospace OEM', name: 'Honeywell Aerospace OEM', partsSupplied: 1240, spendBasis: 850000, avgLeadTimeDays: 4.2, defectRate: '0.01%', slaCompliance: '99.2%' },
+  { id: 'Collins Aerospace Systems', name: 'Collins Aerospace Systems', partsSupplied: 980, spendBasis: 620000, avgLeadTimeDays: 5.1, defectRate: '0.03%', slaCompliance: '98.5%' },
+  { id: 'Pratt & Whitney Propulsion', name: 'Pratt & Whitney Propulsion', partsSupplied: 450, spendBasis: 1120000, avgLeadTimeDays: 7.8, defectRate: '0.00%', slaCompliance: '99.8%' },
 ];
 
 export function VendorsReportView() {

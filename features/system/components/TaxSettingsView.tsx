@@ -15,6 +15,7 @@ export function TaxSettingsView() {
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingRule, setEditingRule] = React.useState<TaxRule | null>(null);
+  const [globalFilter, setGlobalFilter] = React.useState<string>(''); // Add globalFilter state
 
   const [region, setRegion] = React.useState('');
   const [country, setCountry] = React.useState('United States');
@@ -172,7 +173,13 @@ export function TaxSettingsView() {
       </div>
 
       <Card>
-        <EnterpriseTable data={taxRules} columns={columns} searchPlaceholder="Search tax rules or jurisdictions..." />
+        <EnterpriseTable
+          data={taxRules}
+          columns={columns}
+          searchPlaceholder="Search tax rules or jurisdictions..."
+          globalFilter={globalFilter} // Pass globalFilter
+          setGlobalFilter={setGlobalFilter} // Pass setGlobalFilter
+        />
       </Card>
 
       {/* Tax Rule Modal */}

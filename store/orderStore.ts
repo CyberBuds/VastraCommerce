@@ -436,8 +436,8 @@ export const useOrderStore = create<OrderState & OrderActions>((set, get) => ({
 
     // Auto-approve or deduct wallet balance if WALLET payment method is used
     if (data.paymentMethod === 'WALLET') {
+      const { useCustomerStore } = require('./customerStore');
       try {
-        const { useCustomerStore } = require('./customerStore');
         const customerState = useCustomerStore.getState();
         const customer = customerState.customers.find((c: any) => c.id === data.customerId);
         if (customer && customer.walletBalance >= data.totalAmount) {
@@ -1089,8 +1089,8 @@ export const useOrderStore = create<OrderState & OrderActions>((set, get) => ({
         if (status === 'APPROVED' || status === 'COMPLETED') {
           // 1. Process customer refund if approved or completed
           if (ret.refundToWallet) {
+            const { useCustomerStore } = require('./customerStore');
             try {
-              const { useCustomerStore } = require('./customerStore');
               const customerState = useCustomerStore.getState();
               customerState.adjustWalletBalance(
                 ret.customerId,
@@ -1198,8 +1198,8 @@ export const useOrderStore = create<OrderState & OrderActions>((set, get) => ({
 
         // If paid, issue immediate wallet refund
         if (o.paymentStatus === 'PAID') {
+          const { useCustomerStore } = require('./customerStore');
           try {
-            const { useCustomerStore } = require('./customerStore');
             const customerState = useCustomerStore.getState();
             customerState.adjustWalletBalance(
               o.customerId,
