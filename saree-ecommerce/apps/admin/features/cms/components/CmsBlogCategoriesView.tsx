@@ -61,7 +61,7 @@ export function CmsBlogCategoriesView() {
             <Label htmlFor="catSlug" className="text-xs font-bold text-slate-700 dark:text-zinc-300">
               Slug
             </Label>
-            <Input id="catSlug" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="artificial-intelligence" className="mt-1 text-xs font-mono" />
+            <Input id="catSlug" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="artificial-intelligences" className="mt-1 text-xs font-mono" />
           </div>
 
           <div>
