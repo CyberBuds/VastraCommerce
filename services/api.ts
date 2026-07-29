@@ -214,6 +214,25 @@ function handleMockRoute(url: string, method: string, body: any, params: any): a
     };
   }
 
+  // Marketing Dashboard mock
+  if (path === '/api/marketing/dashboard/stats') {
+    return {
+      success: true,
+      data: {
+        activeCampaigns: 12,
+        runningCoupons: 34,
+        flashSales: 3,
+        revenueFromPromotions: 12345.67,
+        discountAmount: 2345.67,
+        giftCardsIssued: 123,
+        referralRegistrations: 45,
+        loyaltyMembers: 1234,
+        abandonedCarts: 123,
+        recoveredCarts: 45,
+      },
+    };
+  }
+
   // 2. Catalog Products CRUD
   if (path === '/api/catalog/products') {
     const products = getLocalDb(LOCAL_DB_KEYS.products, DEFAULT_PRODUCTS);

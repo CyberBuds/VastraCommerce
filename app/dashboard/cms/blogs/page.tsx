@@ -1,5 +1,7 @@
-import { redirect } from 'next/navigation';
+'use client';
 
-export default function DashboardCmsBlogsRedirect() {
-  redirect('/cms/blogs');
+import { CmsBlogsListView } from '@/features/cms/components/CmsBlogsListView';
+
+export default function CmsBlogsListPage() {
+  return <CmsBlogsListView />;
 }

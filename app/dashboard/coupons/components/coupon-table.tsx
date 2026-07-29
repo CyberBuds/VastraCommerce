@@ -46,7 +46,7 @@ export function CouponsTable({}: CouponsTableProps) {
   }, [columnFilters, setCouponFilters]);
 
   const { data, isLoading, isError } = useGetCoupons();
-  const tableData = data?.data || [];
+  const tableData = React.useMemo(() => data?.data || [], [data]);
   const pageCount = data?.meta?.lastPage || 0;
 
   const table = useReactTable({
