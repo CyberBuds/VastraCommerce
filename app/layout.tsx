@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { AppProviders } from '@/providers/AppProviders'; // Import AppProviders
 
 const inter = Inter({
   subsets: ['latin'],
@@ -23,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body suppressHydrationWarning className="font-sans antialiased text-slate-800 dark:text-zinc-200">
-        {children}
+        <AppProviders>{children}</AppProviders> {/* Wra children with AppProviders */}
       </body>
     </html>
   );

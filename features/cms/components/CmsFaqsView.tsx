@@ -21,8 +21,8 @@ export function CmsFaqsView() {
       question,
       answer,
       category,
-      order: faqs.length + 1,
-      isPublished: true,
+      sortOrder: faqs.length + 1,
+      status: 'PUBLISHED',
     });
 
     setQuestion('');

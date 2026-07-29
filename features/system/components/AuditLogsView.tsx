@@ -14,6 +14,7 @@ export function AuditLogsView() {
   const { auditLogs, clearAuditLogs } = useSystemStore();
 
   const [selectedLog, setSelectedLog] = React.useState<AuditLogItem | null>(null);
+  const [globalFilter, setGlobalFilter] = React.useState<string>(''); // Add globalFilter state
 
   const handleExportLogs = () => {
     const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(JSON.stringify(auditLogs, null, 2))}`;
@@ -112,7 +113,13 @@ export function AuditLogsView() {
       </div>
 
       <Card>
-        <EnterpriseTable data={auditLogs} columns={columns} searchPlaceholder="Search audit events by user, action, IP..." />
+        <EnterpriseTable
+          data={auditLogs}
+          columns={columns}
+          searchPlaceholder="Search audit events by user, action, IP..."
+          globalFilter={globalFilter} // Pass globalFilter
+          setGlobalFilter={setGlobalFilter} // Pass setGlobalFilter
+        />
       </Card>
 
       {/* Diff Inspector Modal */}

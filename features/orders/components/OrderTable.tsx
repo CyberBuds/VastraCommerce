@@ -45,6 +45,7 @@ import {
   Boxes,
   HelpCircle
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Selectable catalog products
 const CATALOG_PRODUCTS = [
@@ -299,7 +300,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       header: 'Ledger Total',
       cell: ({ row }) => (
         <span className="font-mono text-xs font-extrabold text-slate-900 dark:text-zinc-100">
-          ₹{row.getValue('Total').toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          ₹{(row.getValue('totalAmount') as number).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
         </span>
       ),
     },

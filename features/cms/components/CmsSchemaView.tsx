@@ -6,12 +6,13 @@ import { CmsHeader } from './CmsHeader';
 import { Button, Input, Select, Label } from '@/components/enterprise/BaseInputs';
 import { Code2, Plus, Trash2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { SchemaMarkup } from '@/types/cms';
 
 export function CmsSchemaView() {
   const { schemas, addSchema, deleteSchema } = useCmsStore();
 
   const [name, setName] = React.useState('');
-  const [schemaType, setSchemaType] = React.useState('Organization');
+  const [schemaType, setSchemaType] = React.useState<"Organization" | "Product" | "BreadcrumbList" | "FAQPage" | "Article" | "Review" | "LocalBusiness">('Organization');
   const [jsonContent, setJsonContent] = React.useState('{\n  "@context": "https://schema.org",\n  "@type": "Organization",\n  "name": "Enterprise Aero"\n}');
 
   const handleCreate = (e: React.FormEvent) => {
@@ -27,10 +28,10 @@ export function CmsSchemaView() {
 
     addSchema({
       name,
-      schemaType,
-      jsonContent,
-      targetPages: ['GLOBAL'],
-      isActive: true,
+      type: schemaType,
+      jsonLd: jsonContent,
+      pagePattern: 'GLOBAL',
+      status: 'ACTIVE',
     });
 
     setName('');
@@ -58,11 +59,14 @@ export function CmsSchemaView() {
 
           <div>
             <Label htmlFor="schemaType" className="text-xs font-bold text-slate-700 dark:text-zinc-300">Schema Type</Label>
-            <Select id="schemaType" value={schemaType} onChange={(e) => setSchemaType(e.target.value)} className="mt-1 text-xs">
+            <Select id="schemaType" value={schemaType} onChange={(e) => setSchemaType(e.target.value as SchemaMarkup['type'])} className="mt-1 text-xs">
               <option value="Organization">Organization</option>
-              <option value="Article">Article / TechArticle</option>
+              <option value="Article">Article</option>
               <option value="FAQPage">FAQPage</option>
-              <option value="Product">Product & Offer</option>
+              <option value="Product">Product</option>
+              <option value="BreadcrumbList">BreadcrumbList</option>
+              <option value="Review">Review</option>
+              <option value="LocalBusiness">LocalBusiness</option>
             </Select>
           </div>
 
@@ -88,7 +92,7 @@ export function CmsSchemaView() {
             <div key={s.id} className="p-5 rounded-2xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-900 shadow-2xs space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 font-bold text-xs">{s.schemaType}</span>
+                  <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 font-bold text-xs">{s.type}</span>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100">{s.name}</h4>
                 </div>
                 <button
@@ -103,7 +107,7 @@ export function CmsSchemaView() {
               </div>
 
               <pre className="p-3 rounded-xl bg-slate-950 text-emerald-400 font-mono text-[11px] overflow-x-auto leading-relaxed">
-                {s.jsonContent}
+                {s.jsonLd}
               </pre>
             </div>
           ))}

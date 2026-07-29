@@ -20,7 +20,7 @@ export type PaymentStatus = 'UNPAID' | 'PARTIALLY_PAID' | 'PAID' | 'REFUNDED';
 
 export type PaymentMethod = 'CREDIT_CARD' | 'BANK_TRANSFER' | 'WALLET' | 'CASH_ON_DELIVERY';
 
-export type ShippingMethod = 'EXPRESS' | 'STANDARD' | 'FREIGHT';
+export type ShippingMethod = 'EXPRESS' | 'STANDARD' | 'FREIGHT' | 'SAME_DAY';
 
 export interface OrderItem {
   id: string;

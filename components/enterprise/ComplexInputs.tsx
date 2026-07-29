@@ -541,3 +541,5 @@ export const RichTextEditor = ({ label, value, onChange, placeholder }: RichEdit
     </div>
   );
 };
+
+export { Checkbox } from '@/components/ui/checkbox';

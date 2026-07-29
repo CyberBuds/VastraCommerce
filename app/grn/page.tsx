@@ -5,7 +5,7 @@ import { useLayoutStore } from '@/store/layoutStore';
 import { useInventoryStore, GRNItem, GRN } from '@/store/inventoryStore';
 import { AppProviders } from '@/providers/AppProviders';
 import { AdminLayout } from '@/features/layout/AdminLayout';
-import { Button, Badge } from '@/components/enterprise/BaseInputs';
+import { Button } from '@/components/enterprise/BaseInputs';
 import { 
   Plus, 
   CheckCircle, 

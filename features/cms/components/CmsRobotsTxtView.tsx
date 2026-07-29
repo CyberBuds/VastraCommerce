@@ -8,12 +8,12 @@ import { Save, Bot, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function CmsRobotsTxtView() {
-  const { robotsConfig, updateRobotsConfig } = useCmsStore();
-  const [content, setContent] = React.useState(robotsConfig.rawContent);
+  const { robotsTxt, updateRobotsTxt } = useCmsStore();
+  const [content, setContent] = React.useState(robotsTxt.content);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    updateRobotsConfig(content);
+    updateRobotsTxt({ ...robotsTxt, content, lastSavedAt: new Date().toISOString() });
     toast.success('Robots.txt updated successfully!');
   };
 

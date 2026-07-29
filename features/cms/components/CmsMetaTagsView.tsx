@@ -8,7 +8,7 @@ import { Tag, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function CmsMetaTagsView() {
-  const { metaRules, addMetaRule, deleteMetaRule } = useCmsStore();
+  const { metaTags, addMetaTag, deleteMetaTag } = useCmsStore();
   const [name, setName] = React.useState('');
   const [content, setContent] = React.useState('');
   const [type, setType] = React.useState<'name' | 'property' | 'http-equiv'>('name');
@@ -17,10 +17,12 @@ export function CmsMetaTagsView() {
     e.preventDefault();
     if (!name || !content) return;
 
-    addMetaRule({
-      name,
-      content,
-      type,
+    addMetaTag({
+      name: name,
+      pageType: 'GLOBAL',
+      selectorPattern: '/*',
+      metaTags: [{ content: content, ...(type === 'name' && {name: name}), ...(type === 'property' && {property: name}) }],
+      status: 'ACTIVE',
     });
 
     setName('');
@@ -67,20 +69,20 @@ export function CmsMetaTagsView() {
         </form>
 
         <div className="lg:col-span-2 space-y-3">
-          {metaRules.map((m) => (
+          {metaTags.map((m) => (
             <div key={m.id} className="p-4 rounded-2xl border border-slate-200 dark:border-zinc-850 bg-white dark:bg-zinc-900 shadow-2xs flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-blue-500/10 text-blue-600">
-                  {m.type}
+                  {m.pageType}
                 </span>
                 <p className="text-xs font-mono">
-                  <strong className="text-slate-900 dark:text-zinc-100">{m.name}</strong> = &quot;{m.content}&quot;
+                  <strong className="text-slate-900 dark:text-zinc-100">{m.name}</strong>
                 </p>
               </div>
 
               <button
                 onClick={() => {
-                  deleteMetaRule(m.id);
+                  deleteMetaTag(m.id);
                   toast.success('Deleted meta rule');
                 }}
                 className="p-1 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg"

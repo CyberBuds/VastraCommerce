@@ -15,6 +15,7 @@ export function PaymentsReportView() {
 
   const totalVolume = gateways.reduce((acc, curr) => acc + curr.totalVolume, 0);
   const totalFees = gateways.reduce((acc, curr) => acc + curr.feeAmount, 0);
+  const tableData = gateways.map((gateway) => ({ ...gateway, id: gateway.gateway }));
 
   return (
     <div className="space-y-6">
@@ -38,7 +39,7 @@ export function PaymentsReportView() {
 
       <ReportDataTable
         title="Payment Gateway Performance Ledger"
-        data={gateways}
+        data={tableData}
         columns={[
           { header: 'Gateway Provider', accessorKey: 'gateway' },
           { header: 'Payment Method', accessorKey: 'method' },

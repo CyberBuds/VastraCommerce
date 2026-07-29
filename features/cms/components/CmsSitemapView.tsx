@@ -4,11 +4,12 @@ import * as React from 'react';
 import { useCmsStore } from '@/store/cmsStore';
 import { CmsHeader } from './CmsHeader';
 import { Button } from '@/components/enterprise/BaseInputs';
+import { SitemapConfig } from '@/types/cms';
 import { Zap, RefreshCw, ExternalLink, FileCode } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function CmsSitemapView() {
-  const { sitemaps } = useCmsStore();
+  const { sitemapConfig } = useCmsStore();
 
   return (
     <div className="space-y-6">
@@ -32,14 +33,14 @@ export function CmsSitemapView() {
         </div>
 
         <div className="divide-y divide-slate-100 dark:divide-zinc-800">
-          {sitemaps.map((s) => (
+          {sitemapConfig.map((s: SitemapConfig) => (
             <div key={s.id} className="py-3.5 flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-zinc-100 font-mono">{s.loc}</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Priority: {s.priority} • Changefreq: {s.changefreq}</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-zinc-100 font-mono">{s.filename}</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Total URLs: {s.totalUrls}</p>
               </div>
               <span className="text-xs font-semibold text-slate-600 dark:text-zinc-400 font-mono">
-                Updated {new Date(s.lastmod).toLocaleDateString()}
+                Updated {new Date(s.lastGeneratedAt).toLocaleDateString()}
               </span>
             </div>
           ))}

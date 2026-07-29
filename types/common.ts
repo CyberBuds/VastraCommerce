@@ -24,6 +24,12 @@ export interface PaginatedResponse<T> {
   page: number;
   limit: number;
   totalPages: number;
+  meta?: {
+    lastPage?: number;
+    total?: number;
+    page?: number;
+    perPage?: number;
+  };
 }
 
 export interface ApiResponse<T> {

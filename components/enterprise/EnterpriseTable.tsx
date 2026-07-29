@@ -24,6 +24,7 @@ interface EnterpriseTableProps<TData> {
   onBulkDelete?: (rows: TData[]) => void;
   onBulkStatusChange?: (rows: TData[], status: string) => void;
   stickyLeftColumn?: boolean;
+  searchPlaceholder?: string; // Add searchPlaceholder prop
 }
 
 export function EnterpriseTable<TData>({
@@ -35,6 +36,7 @@ export function EnterpriseTable<TData>({
   onBulkDelete,
   onBulkStatusChange,
   stickyLeftColumn = true,
+  searchPlaceholder = 'Global search table...', // Use the new prop with a default
 }: EnterpriseTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -119,7 +121,7 @@ export function EnterpriseTable<TData>({
         <div className="relative w-full md:max-w-xs">
           <input
             type="text"
-            placeholder="Global search table..."
+            placeholder={searchPlaceholder}
             value={globalFilter ?? ''}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="w-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg py-2 pl-9 pr-4 text-sm outline-none transition-all focus:border-slate-500 focus:ring-1 focus:ring-slate-500 text-slate-900 dark:text-zinc-100 placeholder-slate-400"
@@ -343,3 +345,9 @@ export function EnterpriseTable<TData>({
     </div>
   );
 }
+
+export { DataTableColumnHeader } from '@/components/ui/data-table/data-table-column-header';
+export { DataTableRowActions } from '@/components/ui/data-table/data-table-row-actions';
+export { DataTableToolbar } from '@/components/ui/data-table/data-table-toolbar';
+export { DataTable } from '@/components/ui/data-table/data-table';
+export { DataTablePagination } from '@/components/ui/data-table/data-table-pagination';

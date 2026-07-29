@@ -90,8 +90,8 @@ api.interceptors.request.use(
   async (config) => {
     const { url, method, data, params } = config;
 
-    // Check if the endpoint is a simulated API
-    if (url && url.startsWith('/api/')) {
+    // Check if the endpoint is a simulated API (excluding real API proxy routes)
+    if (url && url.startsWith('/api/') && !url.includes('/api/v1/auth/login')) {
       const settings = useSettingsStore.getState().settings;
       const latency = settings.simulatedLatencyMs || 300;
 

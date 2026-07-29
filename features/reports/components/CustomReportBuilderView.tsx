@@ -106,7 +106,7 @@ export function CustomReportBuilderView() {
                 <Select
                   value={selectedModule}
                   onChange={(e) => {
-                    const mod = e.target.value as any;
+                    const mod = e.target.value as keyof typeof AVAILABLE_FIELDS;
                     setSelectedModule(mod);
                     setSelectedFields(AVAILABLE_FIELDS[mod].slice(0, 4));
                   }}

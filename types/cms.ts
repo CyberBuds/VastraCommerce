@@ -18,6 +18,12 @@ export interface SeoSettings {
   structuredDataJson?: string;
 }
 
+export interface Author {
+  name: string;
+  role: string;
+  avatar?: string;
+}
+
 export interface CmsPage {
   id: string;
   title: string;
@@ -33,7 +39,7 @@ export interface CmsPage {
   visibility: CmsVisibility;
   password?: string;
   schedulePublishAt?: string;
-  author: string;
+  author: Author;
   views: number;
   seoSettings: SeoSettings;
   createdAt: string;
@@ -48,7 +54,7 @@ export interface BlogPost {
   categoryName: string;
   tagIds: string[];
   tagNames: string[];
-  author: string;
+  author: Author;
   summary: string;
   content: string;
   featuredImage?: string;
@@ -180,11 +186,13 @@ export interface LandingPage {
 }
 
 export interface SeoGlobalConfig {
-  metaTitle: string;
-  metaDescription: string;
+  siteName: string;
+  titleTemplate: string;
+  defaultMetaDescription: string;
   keywords: string;
   canonicalUrl: string;
-  ogImage: string;
+  defaultOgImage: string;
+  twitterHandle: string;
   twitterCard: 'summary' | 'summary_large_image';
   robotsMeta: string;
   googleSiteVerification: string;

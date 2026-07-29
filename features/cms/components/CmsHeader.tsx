@@ -94,14 +94,14 @@ export function CmsHeader({
           {actionButton && (
             actionButton.href ? (
               <Link href={actionButton.href}>
-                <Button variant="default" size="sm" className="h-9 text-xs font-semibold gap-1.5 shadow-sm">
+                <Button variant="primary" size="sm" className="h-9 text-xs font-semibold gap-1.5 shadow-sm">
                   {actionButton.icon || <Plus className="w-4 h-4" />}
                   {actionButton.label}
                 </Button>
               </Link>
             ) : (
               <Button
-                variant="default"
+                variant="primary"
                 size="sm"
                 onClick={actionButton.onClick}
                 className="h-9 text-xs font-semibold gap-1.5 shadow-sm"

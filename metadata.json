@@ -1,6 +1,6 @@
 {
-  "name": "Enterprise Admin Dashboard Foundation",
-  "description": "An enterprise-grade admin dashboard foundation built with Next.js 15, React 19, TypeScript, and TailwindCSS.",
+  "name": "VastraCommerce Admin Dashboard",
+  "description": "Enterprise eCommerce management portal with modern SaaS aesthetics, real-time analytics, order processing, and RBAC authentication.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

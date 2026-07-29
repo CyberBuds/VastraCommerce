@@ -9,9 +9,9 @@ import { ReportExportModal } from './ReportExportModal';
 import { Ticket, Percent, DollarSign, TrendingUp } from 'lucide-react';
 
 const mockCoupons = [
-  { code: 'AERO2026', type: 'PERCENTAGE', discount: '15% OFF', redemptions: 480, maxUses: 1000, totalDiscountGiven: 42000, revenueImpact: 280000 },
-  { code: 'VIPSPRING', type: 'FIXED_AMOUNT', discount: '$250 OFF', redemptions: 120, maxUses: 200, totalDiscountGiven: 30000, revenueImpact: 195000 },
-  { code: 'FREESHIP20', type: 'FREE_SHIPPING', discount: '100% Freight', redemptions: 850, maxUses: 5000, totalDiscountGiven: 12500, revenueImpact: 340000 },
+  { id: 1, code: 'AERO2026', type: 'PERCENTAGE', discount: '15% OFF', redemptions: 480, maxUses: 1000, totalDiscountGiven: 42000, revenueImpact: 280000 },
+  { id: 2, code: 'VIPSPRING', type: 'FIXED_AMOUNT', discount: '$250 OFF', redemptions: 120, maxUses: 200, totalDiscountGiven: 30000, revenueImpact: 195000 },
+  { id: 3, code: 'FREESHIP20', type: 'FREE_SHIPPING', discount: '100% Freight', redemptions: 850, maxUses: 5000, totalDiscountGiven: 12500, revenueImpact: 340000 },
 ];
 
 export function CouponsReportView() {

@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 export function StorageBackupView() {
   const { backups, createBackup, deleteBackup } = useSystemStore();
 
+  const [globalFilter, setGlobalFilter] = React.useState<string>(''); // Add globalFilter state
+
   const handleManualBackup = () => {
     const newB = createBackup('MANUAL');
     toast.success('Database Dump Created', {
@@ -103,7 +105,13 @@ export function StorageBackupView() {
       />
 
       <Card>
-        <EnterpriseTable data={backups} columns={columns} searchPlaceholder="Search backup snapshots..." />
+        <EnterpriseTable
+          data={backups}
+          columns={columns}
+          searchPlaceholder="Search backup snapshots..."
+          globalFilter={globalFilter} // Pass globalFilter
+          setGlobalFilter={setGlobalFilter} // Pass setGlobalFilter
+        />
       </Card>
     </div>
   );

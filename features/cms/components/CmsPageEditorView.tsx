@@ -26,7 +26,8 @@ const pageSchema = z.object({
   visibility: z.enum(['PUBLIC', 'PRIVATE', 'PASSWORD_PROTECTED']),
   password: z.string().optional(),
   schedulePublishAt: z.string().optional(),
-  author: z.string().default('Current User'),
+  authorName: z.string().optional(),
+  authorRole: z.string().optional(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   keywords: z.string().optional(),
@@ -67,7 +68,8 @@ export function CmsPageEditorView({ pageId }: CmsPageEditorViewProps) {
       visibility: existingPage?.visibility || 'PUBLIC',
       password: existingPage?.password || '',
       schedulePublishAt: existingPage?.schedulePublishAt || '',
-      author: existingPage?.author || 'Yash Gupta',
+      authorName: existingPage?.author.name || 'Yash Gupta',
+      authorRole: existingPage?.author.role || 'Admin',
       metaTitle: existingPage?.seoSettings?.metaTitle || '',
       metaDescription: existingPage?.seoSettings?.metaDescription || '',
       keywords: existingPage?.seoSettings?.keywords || '',
@@ -96,6 +98,8 @@ export function CmsPageEditorView({ pageId }: CmsPageEditorViewProps) {
       keywords: data.keywords || '',
       canonicalUrl: data.canonicalUrl || `https://enterprise.aero.io/${data.slug}`,
     };
+    
+    const author = { name: data.authorName || 'Current User', role: data.authorRole || 'Admin' };
 
     if (existingPage) {
       updatePage(existingPage.id, {
@@ -110,7 +114,7 @@ export function CmsPageEditorView({ pageId }: CmsPageEditorViewProps) {
         visibility: data.visibility as CmsVisibility,
         password: data.password,
         schedulePublishAt: data.schedulePublishAt,
-        author: data.author,
+        author,
         seoSettings,
       });
       toast.success('Page updated successfully!');
@@ -127,7 +131,7 @@ export function CmsPageEditorView({ pageId }: CmsPageEditorViewProps) {
         visibility: data.visibility as CmsVisibility,
         password: data.password,
         schedulePublishAt: data.schedulePublishAt,
-        author: data.author,
+        author,
         seoSettings,
       });
       toast.success('Page created successfully!');
@@ -180,10 +184,10 @@ export function CmsPageEditorView({ pageId }: CmsPageEditorViewProps) {
               </div>
 
               <div>
-                <Label htmlFor="author" className="text-xs font-bold text-slate-700 dark:text-zinc-300">
-                  Author
+                <Label htmlFor="authorName" className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                  Author Name
                 </Label>
-                <Input id="author" {...register('author')} className="mt-1 text-xs" />
+                <Input id="authorName" {...register('authorName')} className="mt-1 text-xs" />
               </div>
             </div>
 

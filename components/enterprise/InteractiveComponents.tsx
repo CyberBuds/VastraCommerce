@@ -448,3 +448,18 @@ export const Modal = ({
   );
 };
 
+export {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from '@/components/ui/popover';
+
+export { Calendar } from '@/components/ui/calendar';
+
+export {
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
+

@@ -11,22 +11,22 @@ export function CmsRedirectsView() {
   const { redirects, addRedirect, deleteRedirect } = useCmsStore();
 
   const [sourceUrl, setSourceUrl] = React.useState('');
-  const [destinationUrl, setDestinationUrl] = React.useState('');
+  const [targetUrl, setTargetUrl] = React.useState('');
   const [statusCode, setStatusCode] = React.useState<301 | 302>(301);
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!sourceUrl || !destinationUrl) return;
+    if (!sourceUrl || !targetUrl) return;
 
     addRedirect({
       sourceUrl,
-      destinationUrl,
+      targetUrl,
       statusCode,
-      matchHits: 0,
+      status: 'ACTIVE',
     });
 
     setSourceUrl('');
-    setDestinationUrl('');
+    setTargetUrl('');
     toast.success('Added URL redirect rule!');
   };
 
@@ -50,8 +50,8 @@ export function CmsRedirectsView() {
           </div>
 
           <div>
-            <Label htmlFor="destinationUrl" className="text-xs font-bold text-slate-700 dark:text-zinc-300">Destination Path *</Label>
-            <Input id="destinationUrl" value={destinationUrl} onChange={(e) => setDestinationUrl(e.target.value)} placeholder="/solutions" className="mt-1 text-xs font-mono" required />
+            <Label htmlFor="targetUrl" className="text-xs font-bold text-slate-700 dark:text-zinc-300">Destination Path *</Label>
+            <Input id="targetUrl" value={targetUrl} onChange={(e) => setTargetUrl(e.target.value)} placeholder="/solutions" className="mt-1 text-xs font-mono" required />
           </div>
 
           <div>
@@ -77,12 +77,12 @@ export function CmsRedirectsView() {
                 <div className="flex items-center gap-2 text-xs font-mono">
                   <span className="text-slate-800 dark:text-zinc-200 font-bold">{r.sourceUrl}</span>
                   <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-blue-600 dark:text-blue-400 font-bold">{r.destinationUrl}</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-bold">{r.targetUrl}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-4">
-                <span className="text-[11px] text-slate-400 font-medium">{r.matchHits} hits</span>
+                <span className="text-[11px] text-slate-400 font-medium">{r.hits} hits</span>
                 <button
                   onClick={() => {
                     deleteRedirect(r.id);

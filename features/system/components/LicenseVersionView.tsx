@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 import { useSystemStore } from '@/store/systemStore';
-import { Card, Alert } from '@/components/enterprise/FeedbackComponents';
-import { Button, Input, Badge } from '@/components/enterprise/BaseInputs';
+import { Card } from '@/components/enterprise/FeedbackComponents';
+import { Button } from '@/components/enterprise/BaseInputs';
 import { Award, ShieldCheck, RefreshCw, Cpu, CheckCircle2, Terminal } from 'lucide-react';
 import { toast } from 'sonner';
 
