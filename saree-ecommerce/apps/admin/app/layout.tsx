@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body suppressHydrationWarning className="font-sans antialiased text-slate-800 dark:text-zinc-200">
-        <AppProviders>{children}</AppProviders> {/* Wrap children with AppProviders */}
+        <AppProviders>{children}</AppProviders> {/* Wra children with AppProviders */}
       </body>
     </html>
   );
