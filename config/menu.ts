@@ -694,7 +694,7 @@ export const SIDEBAR_MENU: MenuItem[] = [
   },
   {
     id: 'reports',
-    title: 'Reports & Business Intelligence',
+    title: 'Reports & BI',
     icon: 'BarChart3',
     permission: 'view:reports',
     children: [
@@ -881,7 +881,7 @@ export const SIDEBAR_MENU: MenuItem[] = [
   },
   {
     id: 'system-admin',
-    title: 'System Administration',
+    title: 'System Admin',
     icon: 'Cpu',
     permission: 'manage:system',
     children: [
