@@ -1,6 +1,0 @@
-{
-  "name": "VastraCommerce Admin Dashboard",
-  "description": "Enterprise eCommerce management portal with modern SaaS aesthetics, real-time analytics, order processing, and RBAC authentication.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
