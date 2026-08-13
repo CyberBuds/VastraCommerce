@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Plus, Search, GitBranch, Palette, Image as ImageIcon, Type, Trash2, Edit } from 'lucide-react';
 import { useCatalogStore, Attribute, AttributeGroup } from '@/store/catalogStore';
+import { attributeGroupService, attributeService, attributeValueService } from '@/services/catalogMasterService';
 import { toast } from 'sonner';
 
 export function AttributesView() {
@@ -12,6 +14,8 @@ export function AttributesView() {
   const [activeTab, setActiveTab] = useState<'attributes' | 'groups'>('attributes');
   const [isOpen, setIsOpen] = useState(false);
   const [editingAttrId, setEditingAttrId] = useState<string | null>(null);
+  const [isSavingAttribute, setIsSavingAttribute] = useState(false);
+  const [isSavingGroup, setIsSavingGroup] = useState(false);
 
   // Attr Form state
   const [attrForm, setAttrForm] = useState<{
@@ -49,29 +53,70 @@ export function AttributesView() {
     });
   };
 
-  const handleSubmitAttr = (e: React.FormEvent) => {
+  const handleSubmitAttr = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!attrForm.name.trim()) return;
 
-    if (editingAttrId) {
-      updateAttribute(editingAttrId, attrForm);
-      toast.success('Attribute set updated');
-    } else {
-      addAttribute(attrForm);
-      toast.success('New product attribute registered');
+    setIsSavingAttribute(true);
+    try {
+      const slug = attrForm.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const payload = {
+        name: attrForm.name.trim(),
+        code: `ATTRIBUTE-${slug.toUpperCase()}`,
+        slug,
+        status: 'ACTIVE' as const,
+        isActive: true,
+        groupId: /^\d+$/.test(attrForm.groupId) ? Number(attrForm.groupId) : undefined,
+      };
+      if (editingAttrId) {
+        await attributeService.update(editingAttrId, payload);
+        updateAttribute(editingAttrId, attrForm);
+        toast.success('Attribute set updated');
+      } else {
+        const response = await attributeService.create(payload);
+        const attributeId = String(response.data.id);
+        const values = await Promise.all(attrForm.values.map(async (value) => {
+          const saved = await attributeValueService.create(attributeId, {
+            value: value.label.trim() || value.value.trim(),
+            code: value.value.trim() || undefined,
+            slug: (value.label || value.value).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || undefined,
+            extra: value.extra || undefined,
+            status: 'ACTIVE',
+            isActive: true,
+          });
+          return { ...value, id: String(saved.data.id) };
+        }));
+        addAttribute({ ...attrForm, id: attributeId, createdAt: response.data.createdAt, values });
+        toast.success('New product attribute registered');
+      }
+      setIsOpen(false);
+    } catch (error) {
+      toast.error(axios.isAxiosError(error) ? error.response?.data?.message || 'Unable to save the attribute.' : 'Unable to save the attribute.');
+    } finally {
+      setIsSavingAttribute(false);
     }
-    setIsOpen(false);
   };
 
-  const handleSubmitGroup = (e: React.FormEvent) => {
+  const handleSubmitGroup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!groupName.trim()) return;
 
-    addAttributeGroup({ name: groupName, description: groupDesc });
-    toast.success('Attribute group created');
-    setGroupName('');
-    setGroupDesc('');
-    setIsGroupModalOpen(false);
+    setIsSavingGroup(true);
+    try {
+      const slug = groupName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const response = await attributeGroupService.create({
+        name: groupName.trim(), code: `GROUP-${slug.toUpperCase()}`, slug, description: groupDesc || undefined, status: 'ACTIVE', isActive: true,
+      });
+      addAttributeGroup({ name: groupName, description: groupDesc, id: String(response.data.id) });
+      toast.success('Attribute group created');
+      setGroupName('');
+      setGroupDesc('');
+      setIsGroupModalOpen(false);
+    } catch (error) {
+      toast.error(axios.isAxiosError(error) ? error.response?.data?.message || 'Unable to save the attribute group.' : 'Unable to save the attribute group.');
+    } finally {
+      setIsSavingGroup(false);
+    }
   };
 
   return (
@@ -175,10 +220,15 @@ export function AttributesView() {
 
                 <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-zinc-800">
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       if (confirm(`Delete attribute ${a.name}?`)) {
-                        deleteAttribute(a.id);
-                        toast.success('Attribute deleted');
+                        try {
+                          await attributeService.delete(a.id);
+                          deleteAttribute(a.id);
+                          toast.success('Attribute deleted');
+                        } catch (error) {
+                          toast.error(axios.isAxiosError(error) ? error.response?.data?.message || 'Unable to delete the attribute.' : 'Unable to delete the attribute.');
+                        }
                       }
                     }}
                     className="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-100"
@@ -310,9 +360,10 @@ export function AttributesView() {
                 </button>
                 <button
                   type="submit"
+                  disabled={isSavingAttribute}
                   className="rounded-xl bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
                 >
-                  Save Attribute
+                  {isSavingAttribute ? 'Saving...' : 'Save Attribute'}
                 </button>
               </div>
             </form>
@@ -356,9 +407,10 @@ export function AttributesView() {
                 </button>
                 <button
                   type="submit"
+                  disabled={isSavingGroup}
                   className="rounded-xl bg-indigo-600 px-3 py-1.5 font-semibold text-white hover:bg-indigo-700"
                 >
-                  Save Group
+                  {isSavingGroup ? 'Saving...' : 'Save Group'}
                 </button>
               </div>
             </form>

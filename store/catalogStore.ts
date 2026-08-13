@@ -13,6 +13,8 @@ export interface CatalogBrand {
   createdAt: string;
 }
 
+type NewCatalogBrand = Omit<CatalogBrand, 'id' | 'createdAt'> & Partial<Pick<CatalogBrand, 'id' | 'createdAt'>>;
+
 export interface CatalogCollection {
   id: string;
   name: string;
@@ -21,12 +23,16 @@ export interface CatalogCollection {
   createdAt: string;
 }
 
+type NewCatalogCollection = Omit<CatalogCollection, 'id' | 'createdAt'> & Partial<Pick<CatalogCollection, 'id' | 'createdAt'>>;
+
 export interface ProductType {
   id: string;
   name: string;
   description: string;
   createdAt: string;
 }
+
+type NewProductType = Omit<ProductType, 'id' | 'createdAt'> & Partial<Pick<ProductType, 'id' | 'createdAt'>>;
 
 export interface CatalogTag {
   id: string;
@@ -35,11 +41,15 @@ export interface CatalogTag {
   createdAt: string;
 }
 
+type NewCatalogTag = Omit<CatalogTag, 'id' | 'createdAt'> & Partial<Pick<CatalogTag, 'id' | 'createdAt'>>;
+
 export interface AttributeGroup {
   id: string;
   name: string;
   description: string;
 }
+
+type NewAttributeGroup = Omit<AttributeGroup, 'id'> & Partial<Pick<AttributeGroup, 'id'>>;
 
 export interface Attribute {
   id: string;
@@ -49,6 +59,8 @@ export interface Attribute {
   values: { id: string; value: string; label: string; extra?: string }[]; // extra can be color hex or image URL
   createdAt: string;
 }
+
+type NewAttribute = Omit<Attribute, 'id' | 'createdAt'> & Partial<Pick<Attribute, 'id' | 'createdAt'>>;
 
 export interface ProductReview {
   id: string;
@@ -96,28 +108,28 @@ interface CatalogStoreState {
   auditLogs: AuditHistoryLog[];
 
   // Brands CRUD
-  addBrand: (brand: Omit<CatalogBrand, 'id' | 'createdAt'>) => void;
+  addBrand: (brand: NewCatalogBrand) => void;
   updateBrand: (id: string, brand: Partial<CatalogBrand>) => void;
   deleteBrand: (id: string) => void;
 
   // Collections CRUD
-  addCollection: (collection: Omit<CatalogCollection, 'id' | 'createdAt'>) => void;
+  addCollection: (collection: NewCatalogCollection) => void;
   updateCollection: (id: string, collection: Partial<CatalogCollection>) => void;
   deleteCollection: (id: string) => void;
 
   // Product Types CRUD
-  addProductType: (type: Omit<ProductType, 'id' | 'createdAt'>) => void;
+  addProductType: (type: NewProductType) => void;
   updateProductType: (id: string, type: Partial<ProductType>) => void;
   deleteProductType: (id: string) => void;
 
   // Tags CRUD
-  addTag: (tag: Omit<CatalogTag, 'id' | 'createdAt'>) => void;
+  addTag: (tag: NewCatalogTag) => void;
   updateTag: (id: string, tag: Partial<CatalogTag>) => void;
   deleteTag: (id: string) => void;
 
   // Attributes CRUD
-  addAttributeGroup: (group: Omit<AttributeGroup, 'id'>) => void;
-  addAttribute: (attr: Omit<Attribute, 'id' | 'createdAt'>) => void;
+  addAttributeGroup: (group: NewAttributeGroup) => void;
+  addAttribute: (attr: NewAttribute) => void;
   updateAttribute: (id: string, attr: Partial<Attribute>) => void;
   deleteAttribute: (id: string) => void;
 
@@ -151,173 +163,15 @@ const saveToStorage = <T>(key: string, data: T[]) => {
   localStorage.setItem(key, JSON.stringify(data));
 };
 
-const DEFAULT_BRANDS: CatalogBrand[] = [
-  {
-    id: 'b-1',
-    name: 'AeroSpace Inc',
-    logo: 'https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?w=80&h=80&fit=crop',
-    banner: 'https://images.unsplash.com/photo-1518364538800-6bcb3f25da49?w=800&h=300&fit=crop',
-    description: 'High-performance turbine and aerospace components provider.',
-    featured: true,
-    seoTitle: 'AeroSpace Inc - Premium Heavy Industrial Parts',
-    seoDescription: 'The finest aerospace structural and fluid elements engineered for high tolerances.',
-    status: 'ACTIVE',
-    createdAt: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString(),
-  },
-  {
-    id: 'b-2',
-    name: 'GigaCore Technologies',
-    logo: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=80&h=80&fit=crop',
-    banner: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=300&fit=crop',
-    description: 'Next-generation semiconductor and smart battery core components.',
-    featured: true,
-    seoTitle: 'GigaCore Electronics - Industrial Silicon & Battery Pack',
-    seoDescription: 'Powering advanced electrical grids with durable battery packs.',
-    status: 'ACTIVE',
-    createdAt: new Date(Date.now() - 15 * 24 * 3600 * 1000).toISOString(),
-  },
-  {
-    id: 'b-3',
-    name: 'Precision Tooling Co.',
-    logo: 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=80&h=80&fit=crop',
-    description: 'Calibrated measurement equipment and precision tooling units.',
-    featured: false,
-    status: 'ACTIVE',
-    createdAt: new Date(Date.now() - 5 * 24 * 3600 * 1000).toISOString(),
-  },
-];
-
-const DEFAULT_COLLECTIONS: CatalogCollection[] = [
-  {
-    id: 'col-1',
-    name: 'Q3 High-Output Turbines',
-    description: 'A curated set of extreme-reliability fuel turbines.',
-    status: 'ACTIVE',
-    createdAt: new Date(Date.now() - 12 * 24 * 3600 * 1000).toISOString(),
-  },
-  {
-    id: 'col-2',
-    name: 'EcoEnergy Materials',
-    description: 'Solar panels, carbon framing, and green fuel component supplies.',
-    status: 'ACTIVE',
-    createdAt: new Date(Date.now() - 8 * 24 * 3600 * 1000).toISOString(),
-  },
-];
-
-const DEFAULT_PRODUCT_TYPES: ProductType[] = [
-  { id: 'pt-1', name: 'Heavy Industrial Assembly', description: 'Requires physical freight shipping and certification.', createdAt: new Date().toISOString() },
-  { id: 'pt-2', name: 'Precision Calibrator Item', description: 'Calibrated instruments subject to regular thermal testing.', createdAt: new Date().toISOString() },
-  { id: 'pt-3', name: 'Bulk Fluid Chemistry', description: 'Packaged chemical fluids with hazard warnings.', createdAt: new Date().toISOString() },
-];
-
-const DEFAULT_TAGS: CatalogTag[] = [
-  { id: 't-1', name: 'aerospace', status: 'ACTIVE', createdAt: new Date().toISOString() },
-  { id: 't-2', name: 'turbine', status: 'ACTIVE', createdAt: new Date().toISOString() },
-  { id: 't-3', name: 'semiconductor', status: 'ACTIVE', createdAt: new Date().toISOString() },
-  { id: 't-4', name: 'chemical', status: 'ACTIVE', createdAt: new Date().toISOString() },
-  { id: 't-5', name: 'calibrated', status: 'ACTIVE', createdAt: new Date().toISOString() },
-];
-
-const DEFAULT_ATTRIBUTE_GROUPS: AttributeGroup[] = [
-  { id: 'g-1', name: 'Physical Specs', description: 'Standard dimensions and build characteristics' },
-  { id: 'g-2', name: 'Electrical Output', description: 'Voltage, resistance, and capacitance levels' },
-];
-
-const DEFAULT_ATTRIBUTES: Attribute[] = [
-  {
-    id: 'attr-1',
-    groupId: 'g-1',
-    name: 'Build Size',
-    type: 'text',
-    values: [
-      { id: 'v-1', value: 'compact', label: 'Compact Frame (12cm)' },
-      { id: 'v-2', value: 'standard', label: 'Standard Base (45cm)' },
-      { id: 'v-3', value: 'industrial', label: 'Extended Industrial (120cm)' },
-    ],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'attr-2',
-    groupId: 'g-1',
-    name: 'Thermal Coating',
-    type: 'color',
-    values: [
-      { id: 'v-4', value: '#e6355b', label: 'Aero-Red Barrier', extra: '#e6355b' },
-      { id: 'v-5', value: '#475569', label: 'Slate Thermal Guard', extra: '#475569' },
-      { id: 'v-6', value: '#1e3a8a', label: 'Cryo-Blue Shield', extra: '#1e3a8a' },
-    ],
-    createdAt: new Date().toISOString(),
-  },
-];
-
-const DEFAULT_REVIEWS: ProductReview[] = [
-  {
-    id: 'rev-1',
-    productName: 'AeroFlow Turbine X1',
-    productSku: 'SKU-AERO-10000',
-    reviewer: 'Dr. Arthur Pendelton (SpaceX)',
-    rating: 5,
-    comment: 'Exceptional blade balance. Handled 950C thermal loops without any micro-fracturing or drag increases.',
-    status: 'APPROVED',
-    reply: 'Thank you Dr. Arthur! Our metallurgy division takes immense pride in these specs.',
-    createdAt: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString(),
-  },
-  {
-    id: 'rev-2',
-    productName: 'Quantum Spark Plug',
-    productSku: 'SKU-AERO-10001',
-    reviewer: 'Jack Vance (Tesla Tech)',
-    rating: 3,
-    comment: 'Ignition efficiency is superb, but the thread size had a 0.04mm discrepancy. Please calibrate machine heads.',
-    status: 'PENDING',
-    createdAt: new Date(Date.now() - 1 * 24 * 3600 * 1000).toISOString(),
-  },
-];
-
-const DEFAULT_QUESTIONS: ProductQuestion[] = [
-  {
-    id: 'q-1',
-    productName: 'AeroFlow Turbine X1',
-    productSku: 'SKU-AERO-10000',
-    customerName: 'Marcus Aurelius (Apex Aero)',
-    question: 'Is this shipment eligible for the hazardous materials class 9 packaging?',
-    answer: 'Yes, all turbine assembly components are shipped with shock-absorption casing matching HazMat Class 9 standard.',
-    status: 'APPROVED',
-    createdAt: new Date(Date.now() - 5 * 24 * 3600 * 1000).toISOString(),
-  },
-  {
-    id: 'q-2',
-    productName: 'Industrial Hydraulic Fluid',
-    productSku: 'SKU-AERO-10002',
-    customerName: 'Ellen Ripley (Nostromo Mining)',
-    question: 'What is the viscosity index at sub-zero temperatures (specifically around -40C)?',
-    status: 'PENDING',
-    createdAt: new Date(Date.now() - 1 * 24 * 3600 * 1000).toISOString(),
-  },
-];
-
-const DEFAULT_AUDIT_LOGS: AuditHistoryLog[] = [
-  {
-    id: 'log-1',
-    productName: 'AeroFlow Turbine X1',
-    sku: 'SKU-AERO-10000',
-    action: 'Price Updated',
-    changedFrom: '$1200.00',
-    changedTo: '$1499.99',
-    updatedBy: 'Yash Gupta',
-    timestamp: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-  },
-  {
-    id: 'log-2',
-    productName: 'AeroFlow Turbine X1',
-    sku: 'SKU-AERO-10000',
-    action: 'Inventory Audit',
-    changedFrom: '40 units',
-    changedTo: '120 units',
-    updatedBy: 'Sarah Connor',
-    timestamp: new Date(Date.now() - 6 * 3600 * 1000).toISOString(),
-  },
-];
+const DEFAULT_BRANDS: CatalogBrand[] = [];
+const DEFAULT_COLLECTIONS: CatalogCollection[] = [];
+const DEFAULT_PRODUCT_TYPES: ProductType[] = [];
+const DEFAULT_TAGS: CatalogTag[] = [];
+const DEFAULT_ATTRIBUTE_GROUPS: AttributeGroup[] = [];
+const DEFAULT_ATTRIBUTES: Attribute[] = [];
+const DEFAULT_REVIEWS: ProductReview[] = [];
+const DEFAULT_QUESTIONS: ProductQuestion[] = [];
+const DEFAULT_AUDIT_LOGS: AuditHistoryLog[] = [];
 
 export const useCatalogStore = create<CatalogStoreState>((set) => ({
   brands: getInitialData('ent_cat_brands', DEFAULT_BRANDS),
@@ -334,8 +188,8 @@ export const useCatalogStore = create<CatalogStoreState>((set) => ({
   addBrand: (brand) => set((state) => {
     const newBrand: CatalogBrand = {
       ...brand,
-      id: `b-${Date.now()}`,
-      createdAt: new Date().toISOString(),
+      id: brand.id ?? `b-${Date.now()}`,
+      createdAt: brand.createdAt ?? new Date().toISOString(),
     };
     const updated = [...state.brands, newBrand];
     saveToStorage('ent_cat_brands', updated);
@@ -358,8 +212,8 @@ export const useCatalogStore = create<CatalogStoreState>((set) => ({
   addCollection: (col) => set((state) => {
     const newCol: CatalogCollection = {
       ...col,
-      id: `col-${Date.now()}`,
-      createdAt: new Date().toISOString(),
+      id: col.id ?? `col-${Date.now()}`,
+      createdAt: col.createdAt ?? new Date().toISOString(),
     };
     const updated = [...state.collections, newCol];
     saveToStorage('ent_cat_collections', updated);
@@ -382,8 +236,8 @@ export const useCatalogStore = create<CatalogStoreState>((set) => ({
   addProductType: (type) => set((state) => {
     const newType: ProductType = {
       ...type,
-      id: `pt-${Date.now()}`,
-      createdAt: new Date().toISOString(),
+      id: type.id ?? `pt-${Date.now()}`,
+      createdAt: type.createdAt ?? new Date().toISOString(),
     };
     const updated = [...state.productTypes, newType];
     saveToStorage('ent_cat_types', updated);
@@ -406,8 +260,8 @@ export const useCatalogStore = create<CatalogStoreState>((set) => ({
   addTag: (tag) => set((state) => {
     const newTag: CatalogTag = {
       ...tag,
-      id: `t-${Date.now()}`,
-      createdAt: new Date().toISOString(),
+      id: tag.id ?? `t-${Date.now()}`,
+      createdAt: tag.createdAt ?? new Date().toISOString(),
     };
     const updated = [...state.tags, newTag];
     saveToStorage('ent_cat_tags', updated);
@@ -430,7 +284,7 @@ export const useCatalogStore = create<CatalogStoreState>((set) => ({
   addAttributeGroup: (group) => set((state) => {
     const newGroup: AttributeGroup = {
       ...group,
-      id: `g-${Date.now()}`,
+      id: group.id ?? `g-${Date.now()}`,
     };
     const updated = [...state.attributeGroups, newGroup];
     saveToStorage('ent_cat_attr_groups', updated);
@@ -440,8 +294,8 @@ export const useCatalogStore = create<CatalogStoreState>((set) => ({
   addAttribute: (attr) => set((state) => {
     const newAttr: Attribute = {
       ...attr,
-      id: `attr-${Date.now()}`,
-      createdAt: new Date().toISOString(),
+      id: attr.id ?? `attr-${Date.now()}`,
+      createdAt: attr.createdAt ?? new Date().toISOString(),
     };
     const updated = [...state.attributes, newAttr];
     saveToStorage('ent_cat_attributes', updated);

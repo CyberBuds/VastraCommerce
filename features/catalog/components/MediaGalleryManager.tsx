@@ -5,6 +5,7 @@ import { Upload, Trash2, ArrowLeft, ArrowRight, Crop, Layers, AlertCircle, Edit2
 import { cn } from '@/lib/utils';
 import { Button, Input } from '@/components/enterprise/BaseInputs';
 import { toast } from 'sonner';
+import { api } from '@/services/api';
 
 interface MediaItem {
   id: string;
@@ -38,50 +39,39 @@ export function MediaGalleryManager({ mediaList, onChange }: MediaGalleryManager
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      Array.from(e.dataTransfer.files).forEach(file => {
-        addMockFile(file);
-      });
+      await Promise.all(Array.from(e.dataTransfer.files).map(uploadFile));
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      Array.from(e.target.files).forEach(file => {
-        addMockFile(file);
-      });
+      await Promise.all(Array.from(e.target.files).map(uploadFile));
     }
   };
 
-  const addMockFile = (file: File) => {
+  const uploadFile = async (file: File) => {
     const isImage = file.type.startsWith('image/');
     const isVideo = file.type.startsWith('video/');
     const type: 'image' | 'video' | 'document' = isImage ? 'image' : isVideo ? 'video' : 'document';
-
-    // Generate unsplash image for visual fidelity if it is an image
-    const mockUnsplashUrls = [
-      'https://images.unsplash.com/photo-1518364538800-6bcb3f25da49?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=400&h=400&fit=crop',
-    ];
-    const randomUrl = mockUnsplashUrls[Math.floor(Math.random() * mockUnsplashUrls.length)];
-
-    const newItem: MediaItem = {
-      id: `media-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      name: file.name,
-      sizeKb: Math.floor(file.size / 1024),
-      url: isImage ? randomUrl : 'https://www.w3schools.com/html/mov_bbb.mp4',
-      altText: file.name.split('.')[0],
-      type,
-    };
-
-    onChange([...mediaList, newItem]);
-    toast.success('Media catalog file added successfully!');
+    try {
+      const body = new FormData();
+      body.append('file', file);
+      body.append('folder', 'products');
+      const response = await api.post('/media/upload', body, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const media = response.data.data;
+      onChange([...mediaList, {
+        id: String(media.id), name: media.originalName || file.name, sizeKb: Math.round(file.size / 1024),
+        url: media.publicUrl, altText: file.name.split('.')[0], type,
+      }]);
+      toast.success('File uploaded successfully.');
+    } catch {
+      toast.error(`Could not upload ${file.name}.`);
+    }
   };
 
   // Reorder list
@@ -99,11 +89,16 @@ export function MediaGalleryManager({ mediaList, onChange }: MediaGalleryManager
   };
 
   // Delete Item
-  const deleteItem = (id: string) => {
-    const filtered = mediaList.filter(item => item.id !== id);
-    onChange(filtered);
-    if (selectedItem?.id === id) setSelectedItem(null);
-    toast.info('Media asset deleted from registry.');
+  const deleteItem = async (id: string) => {
+    try {
+      await api.delete(`/media/${id}`);
+      const filtered = mediaList.filter(item => item.id !== id);
+      onChange(filtered);
+      if (selectedItem?.id === id) setSelectedItem(null);
+      toast.info('Media asset deleted from registry.');
+    } catch {
+      toast.error('Media asset could not be deleted.');
+    }
   };
 
   // Optimize (Compression Simulator)

@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Plus, Search, Tag, Trash2, Edit } from 'lucide-react';
 import { useCatalogStore, ProductType } from '@/store/catalogStore';
+import { productTypeService } from '@/services/catalogMasterService';
 import { toast } from 'sonner';
 
 export function ProductTypesView() {
@@ -10,6 +12,7 @@ export function ProductTypesView() {
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [form, setForm] = useState({
     name: '',
@@ -34,18 +37,29 @@ export function ProductTypesView() {
     setIsOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return;
 
-    if (editingId) {
-      updateProductType(editingId, form);
-      toast.success('Product type updated');
-    } else {
-      addProductType(form);
-      toast.success('New product type registered');
+    setIsSaving(true);
+    try {
+      const slug = form.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const payload = { ...form, name: form.name.trim(), code: `TYPE-${slug.toUpperCase()}`, slug, status: 'ACTIVE' as const, isActive: true };
+      if (editingId) {
+        await productTypeService.update(editingId, payload);
+        updateProductType(editingId, form);
+        toast.success('Product type updated');
+      } else {
+        const response = await productTypeService.create(payload);
+        addProductType({ ...form, id: String(response.data.id), createdAt: response.data.createdAt });
+        toast.success('New product type registered');
+      }
+      setIsOpen(false);
+    } catch (error) {
+      toast.error(axios.isAxiosError(error) ? error.response?.data?.message || 'Unable to save the product type.' : 'Unable to save the product type.');
+    } finally {
+      setIsSaving(false);
     }
-    setIsOpen(false);
   };
 
   return (
@@ -103,10 +117,15 @@ export function ProductTypesView() {
                 <Edit className="h-3.5 w-3.5" /> Edit
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (confirm(`Delete product type ${pt.name}?`)) {
-                    deleteProductType(pt.id);
-                    toast.success('Product type removed');
+                    try {
+                      await productTypeService.delete(pt.id);
+                      deleteProductType(pt.id);
+                      toast.success('Product type removed');
+                    } catch (error) {
+                      toast.error(axios.isAxiosError(error) ? error.response?.data?.message || 'Unable to delete the product type.' : 'Unable to delete the product type.');
+                    }
                   }
                 }}
                 className="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-100"
@@ -159,9 +178,10 @@ export function ProductTypesView() {
                 </button>
                 <button
                   type="submit"
+                  disabled={isSaving}
                   className="rounded-xl bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
                 >
-                  Save Type
+                  {isSaving ? 'Saving...' : 'Save Type'}
                 </button>
               </div>
             </form>

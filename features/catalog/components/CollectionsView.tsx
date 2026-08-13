@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Plus, Search, Layers, Trash2, Edit } from 'lucide-react';
 import { useCatalogStore, CatalogCollection } from '@/store/catalogStore';
+import { collectionService } from '@/services/catalogMasterService';
 import { toast } from 'sonner';
 
 export function CollectionsView() {
@@ -10,6 +12,7 @@ export function CollectionsView() {
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [form, setForm] = useState<{
     name: string;
@@ -43,18 +46,29 @@ export function CollectionsView() {
     setIsOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return;
 
-    if (editingId) {
-      updateCollection(editingId, form);
-      toast.success('Collection updated');
-    } else {
-      addCollection(form);
-      toast.success('New collection group registered');
+    setIsSaving(true);
+    try {
+      const slug = form.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const payload = { ...form, name: form.name.trim(), code: `COLLECTION-${slug.toUpperCase()}`, slug, isActive: form.status === 'ACTIVE' };
+      if (editingId) {
+        await collectionService.update(editingId, payload);
+        updateCollection(editingId, form);
+        toast.success('Collection updated');
+      } else {
+        const response = await collectionService.create(payload);
+        addCollection({ ...form, id: String(response.data.id), createdAt: response.data.createdAt });
+        toast.success('New collection group registered');
+      }
+      setIsOpen(false);
+    } catch (error) {
+      toast.error(axios.isAxiosError(error) ? error.response?.data?.message || 'Unable to save the collection.' : 'Unable to save the collection.');
+    } finally {
+      setIsSaving(false);
     }
-    setIsOpen(false);
   };
 
   return (
@@ -124,10 +138,15 @@ export function CollectionsView() {
                 <Edit className="h-3.5 w-3.5" /> Edit
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (confirm(`Delete collection ${c.name}?`)) {
-                    deleteCollection(c.id);
-                    toast.success('Collection removed');
+                    try {
+                      await collectionService.delete(c.id);
+                      deleteCollection(c.id);
+                      toast.success('Collection removed');
+                    } catch (error) {
+                      toast.error(axios.isAxiosError(error) ? error.response?.data?.message || 'Unable to delete the collection.' : 'Unable to delete the collection.');
+                    }
                   }
                 }}
                 className="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-100"
@@ -192,9 +211,10 @@ export function CollectionsView() {
                 </button>
                 <button
                   type="submit"
+                  disabled={isSaving}
                   className="rounded-xl bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
                 >
-                  Save Collection
+                  {isSaving ? 'Saving...' : 'Save Collection'}
                 </button>
               </div>
             </form>

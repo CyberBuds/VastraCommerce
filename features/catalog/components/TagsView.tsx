@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Plus, Search, Tag as TagIcon, Trash2, Edit } from 'lucide-react';
 import { useCatalogStore, CatalogTag } from '@/store/catalogStore';
+import { tagService } from '@/services/tagService';
 import { toast } from 'sonner';
 
 export function TagsView() {
@@ -10,6 +12,7 @@ export function TagsView() {
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [form, setForm] = useState<{
     name: string;
@@ -33,18 +36,39 @@ export function TagsView() {
     setIsOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return;
 
-    if (editingId) {
-      updateTag(editingId, form);
-      toast.success('Tag updated');
-    } else {
-      addTag(form);
-      toast.success('New catalog search tag created');
+    setIsSaving(true);
+    try {
+      const slug = form.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const payload = {
+        name: form.name.trim(),
+        code: `TAG-${slug.toUpperCase()}`,
+        slug,
+        status: form.status,
+        isActive: form.status === 'ACTIVE',
+      };
+
+      if (editingId) {
+        await tagService.update(editingId, payload);
+        updateTag(editingId, form);
+        toast.success('Tag updated');
+      } else {
+        const response = await tagService.create(payload);
+        addTag({ ...form, id: String(response.data.id), createdAt: response.data.createdAt });
+        toast.success('New catalog search tag created');
+      }
+      setIsOpen(false);
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || 'Unable to save the tag. Please try again.'
+        : 'Unable to save the tag. Please try again.';
+      toast.error(message);
+    } finally {
+      setIsSaving(false);
     }
-    setIsOpen(false);
   };
 
   return (
@@ -100,9 +124,17 @@ export function TagsView() {
                 <Edit className="h-3.5 w-3.5" />
               </button>
               <button
-                onClick={() => {
-                  deleteTag(t.id);
-                  toast.success('Tag deleted');
+                onClick={async () => {
+                  try {
+                    await tagService.delete(t.id);
+                    deleteTag(t.id);
+                    toast.success('Tag deleted');
+                  } catch (error) {
+                    const message = axios.isAxiosError(error)
+                      ? error.response?.data?.message || 'Unable to delete the tag. Please try again.'
+                      : 'Unable to delete the tag. Please try again.';
+                    toast.error(message);
+                  }
                 }}
                 className="p-1 text-slate-400 hover:text-rose-600"
                 title="Delete"
@@ -157,9 +189,10 @@ export function TagsView() {
                 </button>
                 <button
                   type="submit"
+                  disabled={isSaving}
                   className="rounded-lg bg-indigo-600 px-3 py-1.5 font-semibold text-white hover:bg-indigo-700"
                 >
-                  Save Tag
+                  {isSaving ? 'Saving...' : 'Save Tag'}
                 </button>
               </div>
             </form>

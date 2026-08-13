@@ -48,7 +48,7 @@ export default function DashboardPage() {
   const { data: dashData, isLoading } = useQuery({
     queryKey: ['dashboardStats'],
     queryFn: async () => {
-      const res = await api.get('/api/dashboard/stats');
+      const res = await api.get('/reports/dashboard');
       return res.data.data;
     },
   });
@@ -56,7 +56,7 @@ export default function DashboardPage() {
   // Mutation to add new product
   const addProductMutation = useMutation({
     mutationFn: async (newProd: any) => {
-      const res = await api.post('/api/catalog/products', newProd);
+      const res = await api.post('/products', newProd);
       return res.data;
     },
     onSuccess: () => {

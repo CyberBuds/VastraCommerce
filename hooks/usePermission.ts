@@ -1,5 +1,6 @@
+import * as React from 'react';
 import { useAuthStore } from '@/store/authStore';
-import { UserPermission, UserRole } from '@/types/auth';
+import { User, UserPermission, UserRole } from '@/types/auth';
 
 export function usePermission(requiredPermission: UserPermission | string): {
   hasPermission: boolean;
@@ -22,40 +23,46 @@ export function usePermission(): {
 export function usePermission(requiredPermission?: UserPermission | string) {
   const { user, isAuthenticated } = useAuthStore();
 
+  // Memoize the flattened permissions list to avoid re-computation on every render
+  const userPermissions = React.useMemo<UserPermission[]>(() => {
+  if (!user?.permissions) {
+    return [];
+  }
+
+  return user.permissions;
+}, [user?.permissions]);
+
   const checkPermission = (permission?: UserPermission | string): boolean => {
     if (!permission) return true; // No permission required
     if (!isAuthenticated || !user) return false;
-    
-    // SUPER_ADMIN has master access bypass
-    if (user.role === 'SUPER_ADMIN') return true;
 
-    if (user.permissions.includes(permission as UserPermission)) return true;
+    // SUPER_ADMIN has master access
+    if (user.role?.name === 'Super Admin') return true;
 
-    if (typeof permission === 'string' && (permission.startsWith('Payment.') || permission.startsWith('Finance.'))) {
-      return user.permissions.includes('view:payments') || user.permissions.includes('manage:payments') || user.permissions.includes('view:reports') || user.permissions.includes('manage:reports');
-    }
-
-    return false;
+    return userPermissions.includes(permission as UserPermission);
   };
 
   const hasAnyPermission = (permissions: (UserPermission | string)[]): boolean => {
     if (permissions.length === 0) return true;
     if (!isAuthenticated || !user) return false;
-    if (user.role === 'SUPER_ADMIN') return true;
+    if (user.role?.name === 'Super Admin') return true;
 
     return permissions.some((perm) => checkPermission(perm));
   };
 
   const hasRole = (role: UserRole | UserRole[]): boolean => {
     if (!isAuthenticated || !user) return false;
+    const userRoleName = user.role?.name;
+    if (!userRoleName) return false;
+
     if (Array.isArray(role)) {
-      return role.includes(user.role);
+      return role.includes(userRoleName as UserRole);
     }
-    return user.role === role;
+    return userRoleName === role;
   };
 
   const isSuperAdmin = (): boolean => {
-    return hasRole('SUPER_ADMIN');
+    return hasRole('Super Admin');
   };
 
   const hasPermissionVal = requiredPermission !== undefined
@@ -68,7 +75,7 @@ export function usePermission(requiredPermission?: UserPermission | string) {
     hasAnyPermission,
     hasRole,
     isSuperAdmin,
-    userRole: user?.role,
-    userPermissions: user?.permissions || [],
+    userRole: user?.role?.name as UserRole | undefined,
+    userPermissions,
   };
 }

@@ -177,7 +177,7 @@ export function Topbar() {
                 {user ? `${user.firstName} ${user.lastName}` : 'Anonymous'}
               </span>
               <span className="text-[10px] font-semibold text-slate-450 dark:text-zinc-550 leading-none mt-0.5">
-                {user?.role.replace('_', ' ')}
+                {user?.role?.name?.replace('_', ' ')}
               </span>
             </div>
           </button>
@@ -197,7 +197,7 @@ export function Topbar() {
                   </p>
                   <p className="text-[10px] text-slate-450 dark:text-zinc-500 truncate">{user?.email}</p>
                   <Badge variant="brand" className="w-fit mt-1.5 px-2 py-0">
-                    {user?.role}
+                    {user?.role?.name}
                   </Badge>
                 </div>
 

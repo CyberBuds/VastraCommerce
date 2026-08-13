@@ -59,7 +59,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
     slug: '',
     shortDesc: '',
     description: '',
-    categoryId: 'cat-1',
+    categoryId: '',
     brandId: 'b-1',
     productTags: [] as string[],
     costPrice: '',
@@ -89,6 +89,16 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
   });
 
   const [loading, setLoading] = React.useState(false);
+  const [categoryOptions, setCategoryOptions] = React.useState<Array<{ value: string; label: string }>>([]);
+
+  React.useEffect(() => {
+    api.get('/master/categories', { params: { pageSize: 100 } })
+      .then((response) => setCategoryOptions((response.data?.data?.items ?? []).map((category: any) => ({
+        value: String(category.id),
+        label: category.name,
+      }))))
+      .catch(() => setCategoryOptions([]));
+  }, []);
 
   // Fetch product data if in edit mode
   React.useEffect(() => {
@@ -98,16 +108,15 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
 
     const fetchProduct = async () => {
       try {
-        const res = await api.get(`/api/catalog/products/${productId}`);
+        const res = await api.get(`/products/${productId}`);
         if (isSubscribed && res.data?.success && res.data.data) {
           const prod = res.data.data;
           setForm((prev) => ({
             ...prev,
-            name: prod.name || '',
+            name: prod.productName || '',
             sku: prod.sku || '',
-            sellingPrice: String(prod.price || ''),
-            initialStock: String(prod.stock || ''),
-            categoryId: prod.category === 'Turbines' ? 'cat-1' : 'cat-2',
+            sellingPrice: String(prod.sellingPrice || ''),
+            categoryId: String(prod.categoryId || ''),
           }));
         }
       } catch (err) {
@@ -197,17 +206,29 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
     setLoading(true);
     try {
       const payload = {
-        name: form.name,
+        productCode: form.sku,
+        productName: form.name,
         sku: form.sku,
-        price: parseFloat(form.sellingPrice) || 0,
-        stock: parseInt(form.initialStock) || 0,
-        category: form.categoryId === 'cat-1' ? 'Turbines' : 'Instruments',
-        status: parseInt(form.initialStock) > 0 ? 'ACTIVE' : 'OUT_OF_STOCK',
+        slug: form.slug || undefined,
+        shortDescription: form.shortDesc || undefined,
+        description: form.description || undefined,
+        categoryId: /^\d+$/.test(form.categoryId) ? Number(form.categoryId) : undefined,
+        brandId: form.brandId && !form.brandId.startsWith('b-') ? Number(form.brandId) : undefined,
+        costPrice: parseFloat(form.costPrice) || undefined,
+        sellingPrice: parseFloat(form.sellingPrice) || undefined,
+        mrp: parseFloat(form.msrp) || undefined,
+        images: form.media.filter((item) => item.type === 'image').map((item, index) => ({
+          imageUrl: item.url,
+          altText: item.altText,
+          displayOrder: index,
+          isPrimary: index === 0,
+        })),
+        status: parseInt(form.initialStock) > 0 ? 'ACTIVE' : 'DRAFT',
       };
 
       if (productId) {
         // Edit
-        await api.put(`/api/catalog/products/${productId}`, payload);
+        await api.put(`/products/${productId}`, payload);
         addAuditLog({
           productName: payload.name,
           sku: payload.sku,
@@ -219,7 +240,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
         toast.success('Product portfolio synchronized successfully!');
       } else {
         // Create
-        await api.post('/api/catalog/products', payload);
+        await api.post('/products', payload);
         addAuditLog({
           productName: payload.name,
           sku: payload.sku,
@@ -397,11 +418,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                       label="Taxonomic Category Tree"
                       value={form.categoryId}
                       onChange={(e) => handleFieldChange('categoryId', e.target.value)}
-                      options={[
-                        { value: 'cat-1', label: 'Turbines & Gas Propulsion' },
-                        { value: 'cat-2', label: 'Hydraulic & High-Pressure Fluids' },
-                        { value: 'cat-3', label: 'Instruments & Laser Metrology' },
-                      ]}
+                      options={categoryOptions}
                       id="wiz-prod-cat"
                     />
 
