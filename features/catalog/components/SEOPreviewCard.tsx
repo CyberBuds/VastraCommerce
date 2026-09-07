@@ -105,7 +105,7 @@ export function SEOPreviewCard({
             label="Meta Title"
             value={title}
             onChange={(e) => onChange('title', e.target.value)}
-            placeholder="AeroFlow Turbine X1 | Aero Enterprise Parts"
+                  placeholder="Product name | VastraCommerce"
             helperText={`${title.length} characters (Recommended: 30-60)`}
             id="seo-meta-title"
           />

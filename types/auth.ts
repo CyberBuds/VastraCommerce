@@ -1,5 +1,11 @@
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'OPERATOR';
 
+export interface UserRoleObject {
+  id?: string;
+  name: UserRole;
+  description?: string;
+}
+
 export type UserPermission =
   // Dashboard & System
   | 'view:dashboard'
@@ -41,7 +47,7 @@ export interface User {
   firstName: string;
   lastName: string;
   avatarUrl?: string;
-  role: UserRole;
+  role: UserRoleObject;
   permissions: UserPermission[];
   createdAt: string;
   lastLoginAt: string;

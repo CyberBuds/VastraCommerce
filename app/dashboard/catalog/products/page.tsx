@@ -48,15 +48,23 @@ export default function ProductsPage() {
   const { data: productsData, isLoading } = useQuery({
     queryKey: ['catalogProducts'],
     queryFn: async () => {
-      const res = await api.get('/api/catalog/products', { params: { limit: 100 } });
-      return res.data?.data?.data as CatalogProduct[];
+      const res = await api.get('/products', { params: { pageSize: 100 } });
+      return (res.data?.data?.items ?? []).map((product: any) => ({
+        id: String(product.id),
+        name: product.productName,
+        sku: product.sku,
+        category: product.categoryId ? `Category #${product.categoryId}` : 'Uncategorized',
+        price: Number(product.sellingPrice ?? 0),
+        stock: 0,
+        status: product.status,
+      })) as CatalogProduct[];
     },
   });
 
   // Mutation: Delete Product
   const deleteProductMutation = useMutation({
     mutationFn: async (id: string) => {
-      await api.delete(`/api/catalog/products/${id}`);
+      await api.delete(`/products/${id}`);
     },
     onSuccess: () => {
       toast.success('Product deleted from active catalogs.');
@@ -71,7 +79,7 @@ export default function ProductsPage() {
 
   const handleBulkStatusChange = (selectedRows: CatalogProduct[], status: string) => {
     selectedRows.forEach(async (row) => {
-      await api.put(`/api/catalog/products/${row.id}`, { status });
+      await api.put(`/products/${row.id}`, { status });
     });
     queryClient.invalidateQueries({ queryKey: ['catalogProducts'] });
     toast.success(`Bulk status of ${selectedRows.length} rows updated to ${status}`);

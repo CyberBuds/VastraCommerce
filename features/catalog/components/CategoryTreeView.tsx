@@ -1,12 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronRight, ChevronDown, Folder, Plus, Edit2, Trash2, ArrowUp, ArrowDown, Sparkles, Sliders, Globe } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, Plus, Edit2, Trash2, ArrowUp, ArrowDown, Sparkles, Sliders, Globe, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button, Input, Badge } from '@/components/enterprise/BaseInputs';
 import { Select } from '@/components/enterprise/InteractiveComponents';
 import { useDialog } from '@/hooks/useDialog';
 import { toast } from 'sonner';
+import { api } from '@/services/api';
 
 export interface CategoryNode {
   id: string;
@@ -30,8 +31,29 @@ export function CategoryTreeView({ categories, onUpdate }: CategoryTreeViewProps
     'cat-1': true,
     'cat-2': true,
   });
+  const [imageUrl, setImageUrl] = React.useState('');
+  const [uploadingImage, setUploadingImage] = React.useState(false);
 
   const categoryDialog = useDialog<{ parentId?: string; node?: CategoryNode }>();
+
+  const uploadCategoryImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const body = new FormData();
+      body.append('file', file);
+      body.append('folder', 'categories');
+      const response = await api.post('/media/upload', body, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setImageUrl(response.data.data.publicUrl);
+      toast.success('Category image uploaded successfully.');
+    } catch {
+      toast.error('Category image upload failed.');
+    } finally {
+      setUploadingImage(false);
+      event.target.value = '';
+    }
+  };
 
   const toggleExpand = (id: string) => {
     setExpandedNodes(prev => ({ ...prev, [id]: !prev[id] }));
@@ -89,14 +111,23 @@ export function CategoryTreeView({ categories, onUpdate }: CategoryTreeViewProps
     });
   };
 
-  const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+  const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const categoryPayload = (values: { name: string; code: string; status: 'ACTIVE' | 'INACTIVE'; image: string }) => ({
+    name: values.name,
+    code: values.code,
+    status: values.status,
+    image: values.image || undefined,
+    slug: slugify(values.name),
+  });
+
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const formVals = {
       name: fd.get('name') as string,
       code: fd.get('code') as string,
       status: fd.get('status') as 'ACTIVE' | 'INACTIVE',
-      image: fd.get('image') as string,
+      image: imageUrl || categoryDialog.data?.node?.image || '',
       banner: fd.get('banner') as string,
       seoTitle: fd.get('seoTitle') as string,
       seoDescription: fd.get('seoDescription') as string,
@@ -107,51 +138,47 @@ export function CategoryTreeView({ categories, onUpdate }: CategoryTreeViewProps
       return;
     }
 
+    try {
     if (categoryDialog.data?.node) {
-      // Edit mode
-      const updated = traverseAndModify(
-        categories,
-        categoryDialog.data.node.id,
-        'edit',
-        formVals
-      );
-      onUpdate(updated);
+      const saved = await api.put(`/master/categories/${categoryDialog.data.node.id}`, {
+        ...categoryPayload(formVals),
+      });
+      onUpdate(traverseAndModify(categories, categoryDialog.data.node.id, 'edit', saved.data.data));
       toast.success('Category properties synchronized.');
     } else if (categoryDialog.data?.parentId) {
-      // Add child category
-      const newChild: CategoryNode = {
-        id: `cat-${Date.now()}`,
-        ...formVals,
-        children: [],
-      };
-      const updated = traverseAndModify(
-        categories,
-        categoryDialog.data.parentId,
-        'add',
-        newChild
-      );
+      const saved = await api.post('/master/sub-categories', {
+        ...categoryPayload(formVals),
+        categoryId: Number(categoryDialog.data.parentId),
+      });
+      const newChild: CategoryNode = { ...saved.data.data, id: String(saved.data.data.id), children: [] };
+      const updated = traverseAndModify(categories, categoryDialog.data.parentId, 'add', newChild);
       onUpdate(updated);
       setExpandedNodes(prev => ({ ...prev, [categoryDialog.data!.parentId!]: true }));
       toast.success('Sub-category registered successfully!');
     } else {
-      // Add root category
-      const newRoot: CategoryNode = {
-        id: `cat-${Date.now()}`,
-        ...formVals,
-        children: [],
-      };
-      onUpdate([...categories, newRoot]);
+      const saved = await api.post('/master/categories', {
+        ...categoryPayload(formVals),
+      });
+      onUpdate([...categories, { ...saved.data.data, id: String(saved.data.data.id), children: [] }]);
       toast.success('Root category registered successfully!');
     }
 
     categoryDialog.close();
+    } catch {
+    toast.error('Category could not be saved to the database.');
+  }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this category and all its sub-categories?')) {
-      const updated = traverseAndModify(categories, id, 'delete');
-      onUpdate(updated);
-      toast.info('Category branch deleted from catalog.');
+      try {
+        const isSubCategory = categories.some((category) => category.children?.some((child) => child.id === id));
+        await api.delete(isSubCategory ? `/master/sub-categories/${id}` : `/master/categories/${id}`);
+        onUpdate(traverseAndModify(categories, id, 'delete'));
+        toast.info('Category branch deleted from catalog.');
+      } catch {
+        toast.error('Category could not be deleted from the database.');
+      }
     }
   };
 
@@ -335,24 +362,16 @@ export function CategoryTreeView({ categories, onUpdate }: CategoryTreeViewProps
               id="cat-form-status"
             />
 
-            <div className="space-y-1">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Asset Media Links</span>
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="Category Icon Image URL"
-                  name="image"
-                  defaultValue={categoryDialog.data?.node?.image || ''}
-                  placeholder="https://images.unsplash.com/... (Icon)"
-                  id="cat-form-image"
-                />
-                <Input
-                  label="Category Banner Image URL"
-                  name="banner"
-                  defaultValue={categoryDialog.data?.node?.banner || ''}
-                  placeholder="https://images.unsplash.com/... (Banner)"
-                  id="cat-form-banner"
-                />
-              </div>
+            <div className="space-y-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Category Image</span>
+              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 p-4 text-xs font-bold text-slate-500 hover:border-brand hover:text-brand dark:border-zinc-700">
+                <Upload className="h-4 w-4" />
+                {uploadingImage ? 'Uploading image…' : 'Choose an image to upload'}
+                <input type="file" accept="image/*" className="hidden" disabled={uploadingImage} onChange={uploadCategoryImage} />
+              </label>
+              {(imageUrl || categoryDialog.data?.node?.image) && (
+                <img src={imageUrl || categoryDialog.data?.node?.image} alt="Category preview" className="h-28 w-28 rounded-lg border border-slate-200 object-cover" />
+              )}
             </div>
 
             <div className="space-y-2 border-t border-slate-100 dark:border-zinc-850 pt-3">
@@ -364,7 +383,7 @@ export function CategoryTreeView({ categories, onUpdate }: CategoryTreeViewProps
                   label="SEO Overridden Title"
                   name="seoTitle"
                   defaultValue={categoryDialog.data?.node?.seoTitle || ''}
-                  placeholder="Buy Turbine Systems | Aero Enterprise"
+                  placeholder="Shop collections | VastraCommerce"
                   id="cat-form-seo-title"
                 />
                 <Input

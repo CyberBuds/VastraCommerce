@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Plus, Search, Tag, Globe, Sparkles, Trash2, Edit, CheckCircle, ShieldAlert, Image as ImageIcon } from 'lucide-react';
 import { useCatalogStore, CatalogBrand } from '@/store/catalogStore';
+import { brandService } from '@/services/brandService';
 import { toast } from 'sonner';
 
 export function BrandsView() {
@@ -10,6 +12,7 @@ export function BrandsView() {
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [form, setForm] = useState<{
     name: string;
@@ -67,21 +70,48 @@ export function BrandsView() {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) {
       toast.error('Brand name is required');
       return;
     }
 
-    if (editingId) {
-      updateBrand(editingId, form);
-      toast.success('Brand details updated successfully');
-    } else {
-      addBrand(form);
-      toast.success('New brand added to corporate registry');
+    setIsSaving(true);
+    try {
+      const slug = form.name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      const payload = {
+        name: form.name.trim(),
+        code: `BRAND-${slug.toUpperCase()}`,
+        slug,
+        description: form.description || undefined,
+        image: form.logo || undefined,
+        status: form.status,
+        isActive: form.status === 'ACTIVE',
+      };
+
+      if (editingId) {
+        await brandService.update(editingId, payload);
+        updateBrand(editingId, form);
+        toast.success('Brand details updated successfully');
+      } else {
+        const response = await brandService.create(payload);
+        addBrand({ ...form, id: String(response.data.id), createdAt: response.data.createdAt });
+        toast.success('New brand added to corporate registry');
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || 'Unable to save the brand. Please try again.'
+        : 'Unable to save the brand. Please try again.';
+      toast.error(message);
+    } finally {
+      setIsSaving(false);
     }
-    setIsModalOpen(false);
   };
 
   return (
@@ -175,10 +205,18 @@ export function BrandsView() {
                 <Edit className="h-3.5 w-3.5" /> Edit
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (confirm(`Remove brand ${b.name}?`)) {
-                    deleteBrand(b.id);
-                    toast.success('Brand removed');
+                    try {
+                      await brandService.delete(b.id);
+                      deleteBrand(b.id);
+                      toast.success('Brand removed');
+                    } catch (error) {
+                      const message = axios.isAxiosError(error)
+                        ? error.response?.data?.message || 'Unable to remove the brand. Please try again.'
+                        : 'Unable to remove the brand. Please try again.';
+                      toast.error(message);
+                    }
                   }
                 }}
                 className="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-100"
@@ -290,9 +328,10 @@ export function BrandsView() {
                 </button>
                 <button
                   type="submit"
+                  disabled={isSaving}
                   className="rounded-xl bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
                 >
-                  Save Brand
+                  {isSaving ? 'Saving...' : 'Save Brand'}
                 </button>
               </div>
             </form>

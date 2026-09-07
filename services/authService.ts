@@ -1,3 +1,7 @@
+import { api } from './api';
+import { User } from '@/types/auth';
+import { ApiResponse } from '@/types/common';
+
 export interface LoginPayload {
   email: string;
   password?: string;
@@ -8,6 +12,7 @@ export interface LoginApiResponse {
   data?: {
     accessToken: string;
     refreshToken: string;
+    expiresIn: number;
   };
   message?: string;
   errors?: any;
@@ -58,4 +63,20 @@ export async function loginApi(payload: LoginPayload): Promise<LoginApiResponse>
   }
 
   return data;
+}
+
+export async function getProfileApi(accessToken: string): Promise<ApiResponse<User>> {
+  const response = await api.get<ApiResponse<User>>('users/profile', {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+
+export async function refreshTokenApi(refreshToken: string): Promise<ApiResponse<{ accessToken: string; refreshToken: string; expiresIn: number }>> {
+  const response = await api.post<ApiResponse<{ accessToken: string; refreshToken: string; expiresIn: number }>>('/auth/refresh', {
+    refreshToken,
+  });
+  return response.data;
 }

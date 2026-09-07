@@ -50,7 +50,7 @@ const STEPS = [
 
 export function ProductWizard({ productId, onComplete, onCancel }: ProductWizardProps) {
   const [activeStep, setActiveStep] = React.useState(1);
-  const { brands, tags, attributes, addAuditLog } = useCatalogStore();
+  const { attributes, addAuditLog } = useCatalogStore();
 
   // Wizard State
   const [form, setForm] = React.useState({
@@ -59,8 +59,8 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
     slug: '',
     shortDesc: '',
     description: '',
-    categoryId: 'cat-1',
-    brandId: 'b-1',
+    categoryId: '',
+    brandId: '',
     productTags: [] as string[],
     costPrice: '',
     sellingPrice: '',
@@ -84,11 +84,49 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
     seoKeywords: '',
     seoCanonical: '',
     seoOgImage: '',
+    seoTwitterCard: 'summary',
     relatedSkus: [] as string[],
     bundleDiscount: '10',
+    status: 'DRAFT',
   });
 
   const [loading, setLoading] = React.useState(false);
+  const [categoryOptions, setCategoryOptions] = React.useState<Array<{ value: string; label: string }>>([
+    { value: '', label: 'Select a category' },
+  ]);
+  const [brandOptions, setBrandOptions] = React.useState<Array<{ value: string; label: string }>>([
+    { value: '', label: 'Select a brand' },
+  ]);
+  const [tagOptions, setTagOptions] = React.useState<Array<{ value: string; label: string }>>([]);
+
+  React.useEffect(() => {
+    api.get('/master/categories', { params: { pageSize: 100 } })
+      .then((response) => setCategoryOptions([
+        { value: '', label: 'Select a category' },
+        ...(response.data?.data?.items ?? []).map((category: any) => ({
+          value: String(category.id),
+          label: category.name,
+        })),
+      ]))
+      .catch(() => setCategoryOptions([{ value: '', label: 'Unable to load categories' }]));
+  }, []);
+
+  React.useEffect(() => {
+    api.get('/master/product-tags', { params: { pageSize: 100 } })
+      .then((response) => setTagOptions((response.data?.data?.items ?? []).map((tag: any) => ({
+        value: String(tag.id), label: tag.name,
+      }))))
+      .catch(() => setTagOptions([]));
+  }, []);
+
+  React.useEffect(() => {
+    api.get('/master/brands', { params: { pageSize: 100 } })
+      .then((response) => setBrandOptions([
+        { value: '', label: 'Select a brand' },
+        ...(response.data?.data?.items ?? []).map((brand: any) => ({ value: String(brand.id), label: brand.name })),
+      ]))
+      .catch(() => setBrandOptions([{ value: '', label: 'Unable to load brands' }]));
+  }, []);
 
   // Fetch product data if in edit mode
   React.useEffect(() => {
@@ -98,16 +136,37 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
 
     const fetchProduct = async () => {
       try {
-        const res = await api.get(`/api/catalog/products/${productId}`);
+        const res = await api.get(`/products/${productId}`);
         if (isSubscribed && res.data?.success && res.data.data) {
           const prod = res.data.data;
           setForm((prev) => ({
             ...prev,
-            name: prod.name || '',
+            name: prod.productName || '',
             sku: prod.sku || '',
-            sellingPrice: String(prod.price || ''),
-            initialStock: String(prod.stock || ''),
-            categoryId: prod.category === 'Turbines' ? 'cat-1' : 'cat-2',
+            slug: prod.slug || '',
+            shortDesc: prod.shortDescription || '',
+            description: prod.description || '',
+            sellingPrice: String(prod.sellingPrice || ''),
+            costPrice: prod.costPrice == null ? '' : String(prod.costPrice),
+            msrp: prod.mrp == null ? '' : String(prod.mrp),
+            categoryId: prod.categoryId == null ? '' : String(prod.categoryId),
+            brandId: prod.brandId == null ? '' : String(prod.brandId),
+            weight: prod.weight == null ? '' : String(prod.weight),
+            width: prod.width == null ? '' : String(prod.width),
+            height: prod.height == null ? '' : String(prod.height),
+            depth: prod.length == null ? '' : String(prod.length),
+            seoTitle: prod.metaTitle || '',
+            seoDescription: prod.metaDescription || '',
+            seoKeywords: prod.metaKeywords || '',
+            seoCanonical: prod.canonicalUrl || '',
+            seoOgImage: prod.openGraph?.image || '',
+            seoTwitterCard: prod.twitterCard?.card || 'summary',
+            productTags: (prod.tags || []).map((tag: any) => String(tag.tagId)),
+            status: prod.status || 'DRAFT',
+            media: (prod.images || []).map((image: any) => ({
+              id: String(image.id), url: image.imageUrl, name: image.altText || 'Product image', sizeKb: 0,
+              altText: image.altText || '', type: 'image',
+            })),
           }));
         }
       } catch (err) {
@@ -196,18 +255,55 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      const toNumber = (value: string) => {
+        if (value.trim() === '') return undefined;
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : undefined;
+      };
+      const categoryId = toNumber(form.categoryId);
+      const brandId = toNumber(form.brandId);
+      if (categoryId === undefined) {
+        toast.error('Select a category before saving this product.');
+        return;
+      }
       const payload = {
-        name: form.name,
+        productCode: form.sku,
+        productName: form.name,
         sku: form.sku,
-        price: parseFloat(form.sellingPrice) || 0,
-        stock: parseInt(form.initialStock) || 0,
-        category: form.categoryId === 'cat-1' ? 'Turbines' : 'Instruments',
-        status: parseInt(form.initialStock) > 0 ? 'ACTIVE' : 'OUT_OF_STOCK',
+        slug: form.slug || undefined,
+        shortDescription: form.shortDesc || undefined,
+        description: form.description || undefined,
+        categoryId,
+        ...(brandId !== undefined ? { brandId } : {}),
+        costPrice: toNumber(form.costPrice),
+        sellingPrice: toNumber(form.sellingPrice),
+        mrp: toNumber(form.msrp),
+        weight: toNumber(form.weight),
+        width: toNumber(form.width),
+        height: toNumber(form.height),
+        length: toNumber(form.depth),
+        taxAmount: form.sellingPrice && form.taxRate ? Number((Number(form.sellingPrice) * Number(form.taxRate) / 100).toFixed(2)) : undefined,
+        netAmount: form.sellingPrice && form.taxRate ? Number((Number(form.sellingPrice) * (1 + Number(form.taxRate) / 100)).toFixed(2)) : undefined,
+        metaTitle: form.seoTitle || undefined,
+        metaDescription: form.seoDescription || undefined,
+        metaKeywords: form.seoKeywords || undefined,
+        canonicalUrl: form.seoCanonical || undefined,
+        openGraph: form.seoOgImage ? { image: form.seoOgImage } : undefined,
+        twitterCard: { card: form.seoTwitterCard },
+        searchKeywords: form.seoKeywords || undefined,
+        tags: form.productTags.map(Number).filter(Number.isInteger),
+        images: form.media.filter((item) => item.type === 'image').map((item, index) => ({
+          imageUrl: item.url,
+          altText: item.altText,
+          displayOrder: index,
+          isPrimary: index === 0,
+        })),
+        status: productId ? form.status : (Number(form.initialStock) > 0 ? 'ACTIVE' : 'DRAFT'),
       };
 
       if (productId) {
         // Edit
-        await api.put(`/api/catalog/products/${productId}`, payload);
+        await api.put(`/products/${productId}`, payload);
         addAuditLog({
           productName: payload.name,
           sku: payload.sku,
@@ -219,7 +315,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
         toast.success('Product portfolio synchronized successfully!');
       } else {
         // Create
-        await api.post('/api/catalog/products', payload);
+        await api.post('/products', payload);
         addAuditLog({
           productName: payload.name,
           sku: payload.sku,
@@ -397,11 +493,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                       label="Taxonomic Category Tree"
                       value={form.categoryId}
                       onChange={(e) => handleFieldChange('categoryId', e.target.value)}
-                      options={[
-                        { value: 'cat-1', label: 'Turbines & Gas Propulsion' },
-                        { value: 'cat-2', label: 'Hydraulic & High-Pressure Fluids' },
-                        { value: 'cat-3', label: 'Instruments & Laser Metrology' },
-                      ]}
+                      options={categoryOptions}
                       id="wiz-prod-cat"
                     />
 
@@ -409,7 +501,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                       label="Corporate Brand Registry"
                       value={form.brandId}
                       onChange={(e) => handleFieldChange('brandId', e.target.value)}
-                      options={brands.map((b) => ({ value: b.id, label: b.name }))}
+                      options={brandOptions}
                       id="wiz-prod-brand"
                     />
                   </div>
@@ -417,16 +509,16 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                   <div className="space-y-2">
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Search Keywords Tags</span>
                     <div className="flex flex-wrap gap-2">
-                      {tags.map((tg) => {
-                        const isSelected = form.productTags.includes(tg.name);
+                      {tagOptions.map((tag) => {
+                        const isSelected = form.productTags.includes(tag.value);
                         return (
                           <button
-                            key={tg.id}
+                            key={tag.value}
                             type="button"
                             onClick={() => {
                               const updated = isSelected
-                                ? form.productTags.filter((t) => t !== tg.name)
-                                : [...form.productTags, tg.name];
+                                ? form.productTags.filter((id) => id !== tag.value)
+                                : [...form.productTags, tag.value];
                               handleFieldChange('productTags', updated);
                             }}
                             className={cn(
@@ -436,7 +528,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                                 : "bg-slate-50 text-slate-600 border-slate-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700"
                             )}
                           >
-                            {tg.name}
+                            {tag.label}
                           </button>
                         );
                       })}

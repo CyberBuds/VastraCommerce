@@ -249,7 +249,7 @@ export function ThemeSettingsView() {
                 style={{ backgroundColor: primaryColor, borderRadius }}
               >
                 <p className="text-xs font-bold uppercase opacity-80">Primary Header Card</p>
-                <p className="text-lg font-black mt-1">Aero Enterprise UI</p>
+                <p className="text-lg font-black mt-1">VastraCommerce UI</p>
               </div>
 
               <div className="p-3 bg-slate-50 dark:bg-zinc-850 rounded-xl space-y-2">

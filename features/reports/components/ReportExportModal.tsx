@@ -123,7 +123,7 @@ export function ReportExportModal() {
               type="email"
               value={recipientEmail}
               onChange={(e) => setRecipientEmail(e.target.value)}
-              placeholder="e.g. executive@enterprise-aero.com"
+              placeholder="e.g. reports@your-domain.com"
               className="mt-1 text-xs"
             />
           </div>

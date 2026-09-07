@@ -16,8 +16,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Aero Enterprise Admin Portal',
-  description: 'An enterprise-grade administration foundation dashboard built on Next.js 15, React 19, and TailwindCSS.',
+  title: 'VastraCommerce',
+  description: 'VastraCommerce administration portal.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -9,7 +9,7 @@ const CampaignsPage = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Campaigns</h1>
         <Button asChild>
-          <Link href="/campaigns/new">Create Campaign</Link>
+          <Link href="/dashboard/campaigns/new">Create Campaign</Link>
         </Button>
       </div>
       <CampaignsTable />

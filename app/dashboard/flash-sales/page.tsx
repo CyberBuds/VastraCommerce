@@ -9,7 +9,7 @@ const FlashSalesPage = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Flash Sales</h1>
         <Button asChild>
-          <Link href="/flash-sales/new">Create Flash Sale</Link>
+          <Link href="/dashboard/flash-sales/new">Create Flash Sale</Link>
         </Button>
       </div>
       <FlashSalesTable />

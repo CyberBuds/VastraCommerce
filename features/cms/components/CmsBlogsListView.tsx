@@ -147,7 +147,7 @@ export function CmsBlogsListView() {
         breadcrumbs={[{ label: 'Blogs' }]}
         actionButton={{
           label: 'Create Blog Post',
-          href: '/cms/blogs/new',
+          href: '/dashboard/cms/blogs/new',
         }}
       />
 

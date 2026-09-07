@@ -1,5 +1,7 @@
-import { redirect } from 'next/navigation';
+'use client';
 
-export default function DashboardCmsPagesRedirect() {
-  redirect('/cms/pages');
+import { CmsPagesListView } from '@/features/cms/components/CmsPagesListView';
+
+export default function CmsPagesListPage() {
+  return <CmsPagesListView />;
 }

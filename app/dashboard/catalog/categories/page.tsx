@@ -9,40 +9,14 @@ import { useCatalogStore } from '@/store/catalogStore';
 import { FolderHeart, Star, HelpCircle, ShieldCheck } from 'lucide-react';
 import { Card } from '@/components/enterprise/FeedbackComponents';
 import { Badge } from '@/components/enterprise/BaseInputs';
+import { api } from '@/services/api';
 
 export default function CategoriesPage() {
   const { setBreadcrumbs, setActiveMenuId } = useLayoutStore();
   const { reviews, questions } = useCatalogStore();
   const [activeTab, setActiveTab] = React.useState<'taxonomy' | 'reviews' | 'questions'>('taxonomy');
 
-  // Load category taxonomy list from local DB (or default fallback list matching seed data)
-  const [categories, setCategories] = React.useState<CategoryNode[]>([
-    {
-      id: 'cat-1',
-      name: 'Propulsion & Turbines',
-      code: 'TURB',
-      status: 'ACTIVE',
-      children: [
-        { id: 'cat-1-1', name: 'Gas Burner Heads', code: 'GASB', status: 'ACTIVE' },
-        { id: 'cat-1-2', name: 'Compression Blading', code: 'COMP', status: 'ACTIVE' },
-      ],
-    },
-    {
-      id: 'cat-2',
-      name: 'Hydraulic & High-Pressure Fluids',
-      code: 'FLUI',
-      status: 'ACTIVE',
-      children: [
-        { id: 'cat-2-1', name: 'Thermal Oils', code: 'TOIL', status: 'ACTIVE' },
-      ],
-    },
-    {
-      id: 'cat-3',
-      name: 'Instruments & Laser Metrology',
-      code: 'INST',
-      status: 'ACTIVE',
-    },
-  ]);
+  const [categories, setCategories] = React.useState<CategoryNode[]>([]);
 
   React.useEffect(() => {
     setActiveMenuId('catalog');
@@ -51,6 +25,28 @@ export default function CategoriesPage() {
       { label: 'Taxonomy & Moderation' },
     ]);
   }, [setBreadcrumbs, setActiveMenuId]);
+
+  React.useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const [categoryResponse, subCategoryResponse] = await Promise.all([
+          api.get('/master/categories', { params: { pageSize: 100 } }),
+          api.get('/master/sub-categories', { params: { pageSize: 100 } }),
+        ]);
+        const subCategories = subCategoryResponse.data?.data?.items ?? [];
+        setCategories((categoryResponse.data?.data?.items ?? []).map((category: any) => ({
+          ...category,
+          id: String(category.id),
+          children: subCategories
+            .filter((subCategory: any) => subCategory.categoryId === category.id)
+            .map((subCategory: any) => ({ ...subCategory, id: String(subCategory.id), children: [] })),
+        })));
+      } catch {
+        // The tree stays empty and its database error messages explain failed writes.
+      }
+    };
+    loadCategories();
+  }, []);
 
   const pendingReviewsCount = reviews.filter(r => r.status === 'PENDING').length;
   const pendingQuestionsCount = questions.filter(q => q.status === 'PENDING').length;
