@@ -37,7 +37,7 @@ export function usePermission(requiredPermission?: UserPermission | string) {
     if (!isAuthenticated || !user) return false;
 
     // SUPER_ADMIN has master access
-    if (user.role?.name === 'Super Admin') return true;
+    if (user.role?.name === 'SUPER_ADMIN') return true;
 
     return userPermissions.includes(permission as UserPermission);
   };
@@ -45,7 +45,7 @@ export function usePermission(requiredPermission?: UserPermission | string) {
   const hasAnyPermission = (permissions: (UserPermission | string)[]): boolean => {
     if (permissions.length === 0) return true;
     if (!isAuthenticated || !user) return false;
-    if (user.role?.name === 'Super Admin') return true;
+    if (user.role?.name === 'SUPER_ADMIN') return true;
 
     return permissions.some((perm) => checkPermission(perm));
   };
@@ -62,7 +62,7 @@ export function usePermission(requiredPermission?: UserPermission | string) {
   };
 
   const isSuperAdmin = (): boolean => {
-    return hasRole('Super Admin');
+    return hasRole('SUPER_ADMIN');
   };
 
   const hasPermissionVal = requiredPermission !== undefined
