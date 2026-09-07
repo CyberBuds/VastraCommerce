@@ -63,6 +63,7 @@ export function Topbar() {
         </button>
 
         <div className="hidden sm:block">
+          <span className="mr-4 text-sm font-bold text-slate-800 dark:text-zinc-200">VastraCommerce</span>
           <Breadcrumbs />
         </div>
       </div>

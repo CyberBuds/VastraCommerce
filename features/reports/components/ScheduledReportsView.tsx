@@ -15,7 +15,7 @@ export function ScheduledReportsView() {
   const [templateName, setTemplateName] = React.useState('Executive Daily Sales Briefing');
   const [frequency, setFrequency] = React.useState<'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY'>('DAILY');
   const [format, setFormat] = React.useState<'CSV' | 'EXCEL' | 'PDF' | 'JSON'>('EXCEL');
-  const [recipients, setRecipients] = React.useState('cfo@enterprise-aero.com');
+  const [recipients, setRecipients] = React.useState('');
   const [isAdding, setIsAdding] = React.useState(false);
 
   const handleRunNow = (schedName: string) => {
@@ -108,7 +108,7 @@ export function ScheduledReportsView() {
 
             <div className="sm:col-span-2">
               <Label className="text-xs font-bold">Recipient Emails (Comma separated)</Label>
-              <Input type="text" value={recipients} onChange={(e) => setRecipients(e.target.value)} placeholder="cfo@enterprise-aero.com, audit@enterprise-aero.com" className="mt-1 text-xs" />
+              <Input type="text" value={recipients} onChange={(e) => setRecipients(e.target.value)} placeholder="reports@your-domain.com" className="mt-1 text-xs" />
             </div>
           </div>
 

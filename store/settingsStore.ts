@@ -17,7 +17,7 @@ interface SettingsState {
 }
 
 const DEFAULT_SETTINGS: EnterpriseSettings = {
-  appName: 'Aero Enterprise',
+  appName: 'VastraCommerce',
   currency: 'USD',
   dateFormat: 'MMM dd, yyyy HH:mm',
   simulatedLatencyMs: 400,

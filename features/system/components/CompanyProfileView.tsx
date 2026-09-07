@@ -93,7 +93,7 @@ export function CompanyProfileView() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label="Brand Display Name"
-              placeholder="Aero Enterprise Global Inc."
+                placeholder="VastraCommerce"
               error={errors.companyName?.message}
               {...register('companyName')}
             />

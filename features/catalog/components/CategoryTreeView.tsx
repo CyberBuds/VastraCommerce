@@ -383,7 +383,7 @@ export function CategoryTreeView({ categories, onUpdate }: CategoryTreeViewProps
                   label="SEO Overridden Title"
                   name="seoTitle"
                   defaultValue={categoryDialog.data?.node?.seoTitle || ''}
-                  placeholder="Buy Turbine Systems | Aero Enterprise"
+                  placeholder="Shop collections | VastraCommerce"
                   id="cat-form-seo-title"
                 />
                 <Input

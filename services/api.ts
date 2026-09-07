@@ -22,67 +22,6 @@ api.interceptors.request.use((request) => {
   return request;
 });
 
-// Mock database structures persisted in LocalStorage to behave like a 100% real server
-const LOCAL_DB_KEYS = {
-  products: 'ent_mock_db_products',
-  categories: 'ent_mock_db_categories',
-  users: 'ent_mock_db_users',
-};
-
-// Seed mock products
-const DEFAULT_PRODUCTS = Array.from({ length: 45 }).map((_, i) => ({
-  id: `prod-${i + 1}`,
-  name: [
-    'AeroFlow Turbine X1',
-    'Quantum Spark Plug',
-    'Industrial Hydraulic Fluid',
-    'Carbon Fiber Strut',
-    'GigaCharge battery pack',
-    'Precision Laser Meter',
-    'Heavy Duty Steel Rebar',
-    'Solar Cell Monocrystalline',
-  ][i % 8] + ` (Batch #${1000 + i})`,
-  sku: `SKU-AERO-${10000 + i}`,
-  category: ['Turbines', 'Auto Components', 'Fluids', 'Structural', 'Electrical', 'Instruments'][i % 6],
-  price: parseFloat((150 + i * 49.99).toFixed(2)),
-  stock: Math.floor(Math.random() * 250) + 10,
-  status: Math.random() > 0.15 ? 'ACTIVE' : 'OUT_OF_STOCK',
-  createdAt: new Date(Date.now() - i * 8 * 3600 * 1000).toISOString(),
-}));
-
-// Seed categories
-const DEFAULT_CATEGORIES = [
-  { id: 'cat-1', name: 'Turbines', code: 'TURB', count: 12, status: 'ACTIVE' },
-  { id: 'cat-2', name: 'Auto Components', code: 'AUTO', count: 8, status: 'ACTIVE' },
-  { id: 'cat-3', name: 'Fluids', code: 'FLUI', count: 15, status: 'ACTIVE' },
-  { id: 'cat-4', name: 'Structural', code: 'STRU', count: 20, status: 'ACTIVE' },
-  { id: 'cat-5', name: 'Electrical', code: 'ELEC', count: 32, status: 'ACTIVE' },
-  { id: 'cat-6', name: 'Instruments', code: 'INST', count: 6, status: 'ACTIVE' },
-];
-
-// Seed users for user administration
-const DEFAULT_USERS = [
-  { id: 'u-1', email: 'ykgupta042@gmail.com', firstName: 'Yash', lastName: 'Gupta', role: 'SUPER_ADMIN', status: 'ACTIVE' },
-  { id: 'u-2', email: 'admin@enterprise.com', firstName: 'Sarah', lastName: 'Connor', role: 'ADMIN', status: 'ACTIVE' },
-  { id: 'u-3', email: 'manager@enterprise.com', firstName: 'Michael', lastName: 'Scott', role: 'MANAGER', status: 'ACTIVE' },
-  { id: 'u-4', email: 'operator@enterprise.com', firstName: 'Dwight', lastName: 'Schrute', role: 'OPERATOR', status: 'INACTIVE' },
-];
-
-function getLocalDb<T>(key: string, defaultData: T[]): T[] {
-  if (typeof window === 'undefined') return defaultData;
-  const item = localStorage.getItem(key);
-  if (!item) {
-    localStorage.setItem(key, JSON.stringify(defaultData));
-    return defaultData;
-  }
-  return JSON.parse(item);
-}
-
-function setLocalDb<T>(key: string, data: T[]) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(key, JSON.stringify(data));
-}
-
 // Interceptor 3: Auth Error and Token Refresh
 let isRefreshing = false;
 let failedQueue: any[] = [];

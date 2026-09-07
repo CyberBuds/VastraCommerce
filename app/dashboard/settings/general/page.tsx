@@ -104,7 +104,7 @@ export default function GeneralSettingsPage() {
               <div className="space-y-4">
                 <Input
                   label="Application Name"
-                  placeholder="Aero Enterprise"
+                  placeholder="VastraCommerce"
                   error={errors.appName?.message}
                   {...register('appName')}
                 />
