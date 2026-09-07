@@ -305,7 +305,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
         // Edit
         await api.put(`/products/${productId}`, payload);
         addAuditLog({
-          productName: payload.name,
+          productName: payload.productName,
           sku: payload.sku,
           action: 'Product Edited',
           changedFrom: 'Previous state',
@@ -317,7 +317,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
         // Create
         await api.post('/products', payload);
         addAuditLog({
-          productName: payload.name,
+          productName: payload.productName,
           sku: payload.sku,
           action: 'Product Created',
           changedFrom: 'None',
