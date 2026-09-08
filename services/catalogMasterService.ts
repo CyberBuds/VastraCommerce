@@ -20,6 +20,7 @@ export interface MasterRecord extends MasterPayload {
 }
 
 const createMasterService = (path: string) => ({
+  list: async () => (await api.get<ApiResponse<{ items: MasterRecord[] }>>(path)).data,
   create: async (payload: MasterPayload) => (await api.post<ApiResponse<MasterRecord>>(path, payload)).data,
   update: async (id: string, payload: Partial<MasterPayload>) => (await api.put<ApiResponse<MasterRecord>>(`${path}/${id}`, payload)).data,
   delete: async (id: string) => (await api.delete<ApiResponse<null>>(`${path}/${id}`)).data,

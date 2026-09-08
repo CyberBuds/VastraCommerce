@@ -18,6 +18,10 @@ export interface BrandRecord extends CreateBrandPayload {
 }
 
 export const brandService = {
+  list: async (): Promise<ApiResponse<{ items: BrandRecord[] }>> => {
+    const response = await api.get<ApiResponse<{ items: BrandRecord[] }>>('/master/brands');
+    return response.data;
+  },
   create: async (payload: CreateBrandPayload): Promise<ApiResponse<BrandRecord>> => {
     const response = await api.post<ApiResponse<BrandRecord>>('/master/brands', payload);
     return response.data;

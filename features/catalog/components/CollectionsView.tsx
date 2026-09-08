@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Plus, Search, Layers, Trash2, Edit } from 'lucide-react';
 import { useCatalogStore, CatalogCollection } from '@/store/catalogStore';
@@ -8,7 +8,7 @@ import { collectionService } from '@/services/catalogMasterService';
 import { toast } from 'sonner';
 
 export function CollectionsView() {
-  const { collections, addCollection, updateCollection, deleteCollection } = useCatalogStore();
+  const { collections, addCollection, updateCollection, deleteCollection, replaceCollections } = useCatalogStore();
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -23,6 +23,12 @@ export function CollectionsView() {
     description: '',
     status: 'ACTIVE',
   });
+
+  useEffect(() => {
+    collectionService.list().then((response) => replaceCollections(response.data.items.map((item) => ({
+      id: String(item.id), name: item.name, description: item.description || '', status: item.status, createdAt: item.createdAt,
+    }))));
+  }, [replaceCollections]);
 
   const filtered = collections.filter(
     (c) =>

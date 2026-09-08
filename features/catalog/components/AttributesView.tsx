@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Plus, Search, GitBranch, Palette, Image as ImageIcon, Type, Trash2, Edit } from 'lucide-react';
 import { useCatalogStore, Attribute, AttributeGroup } from '@/store/catalogStore';
@@ -8,7 +8,7 @@ import { attributeGroupService, attributeService, attributeValueService } from '
 import { toast } from 'sonner';
 
 export function AttributesView() {
-  const { attributeGroups, attributes, addAttributeGroup, addAttribute, updateAttribute, deleteAttribute } =
+  const { attributeGroups, attributes, addAttributeGroup, addAttribute, updateAttribute, deleteAttribute, replaceAttributeGroups, replaceAttributes } =
     useCatalogStore();
 
   const [activeTab, setActiveTab] = useState<'attributes' | 'groups'>('attributes');
@@ -24,16 +24,28 @@ export function AttributesView() {
     type: 'text' | 'color' | 'image';
     values: { id: string; value: string; label: string; extra?: string }[];
   }>({
-    groupId: attributeGroups[0]?.id || 'g-1',
+    groupId: attributeGroups[0]?.id || '',
     name: '',
     type: 'text',
-    values: [{ id: 'v-1', value: 'std', label: 'Standard' }],
+    values: [],
   });
 
   // New Group Form
   const [groupName, setGroupName] = useState('');
   const [groupDesc, setGroupDesc] = useState('');
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+
+  useEffect(() => {
+    Promise.all([attributeGroupService.list(), attributeService.list()]).then(([groupsResponse, attributesResponse]) => {
+      replaceAttributeGroups(groupsResponse.data.items.map((item) => ({
+        id: String(item.id), name: item.name, description: item.description || '',
+      })));
+      replaceAttributes(attributesResponse.data.items.map((item) => ({
+        id: String(item.id), groupId: item.groupId ? String(item.groupId) : '', name: item.name,
+        type: 'text', values: [], createdAt: item.createdAt,
+      })));
+    });
+  }, [replaceAttributeGroups, replaceAttributes]);
 
   const handleAddValueRow = () => {
     setAttrForm((prev) => ({
@@ -142,10 +154,10 @@ export function AttributesView() {
             onClick={() => {
               setEditingAttrId(null);
               setAttrForm({
-                groupId: attributeGroups[0]?.id || 'g-1',
+                groupId: attributeGroups[0]?.id || '',
                 name: '',
                 type: 'text',
-                values: [{ id: 'v-1', value: '', label: '' }],
+                values: [],
               });
               setIsOpen(true);
             }}
