@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Plus, Search, Tag, Globe, Sparkles, Trash2, Edit, CheckCircle, ShieldAlert, Image as ImageIcon } from 'lucide-react';
 import { useCatalogStore, CatalogBrand } from '@/store/catalogStore';
@@ -8,7 +8,7 @@ import { brandService } from '@/services/brandService';
 import { toast } from 'sonner';
 
 export function BrandsView() {
-  const { brands, addBrand, updateBrand, deleteBrand } = useCatalogStore();
+  const { brands, addBrand, updateBrand, deleteBrand, replaceBrands } = useCatalogStore();
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -25,14 +25,25 @@ export function BrandsView() {
     status: 'ACTIVE' | 'INACTIVE';
   }>({
     name: '',
-    logo: 'https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?w=80&h=80&fit=crop',
-    banner: 'https://images.unsplash.com/photo-1518364538800-6bcb3f25da49?w=800&h=300&fit=crop',
+    logo: '',
+    banner: '',
     description: '',
     featured: false,
     seoTitle: '',
     seoDescription: '',
     status: 'ACTIVE',
   });
+
+  useEffect(() => {
+    brandService.list()
+      .then((response) => replaceBrands(response.data.items.map((brand) => ({
+        ...brand,
+        id: String(brand.id),
+        logo: brand.image || '',
+        banner: '',
+        featured: false,
+      }))));
+  }, [replaceBrands]);
 
   const filtered = brands.filter(
     (b) =>
@@ -44,8 +55,8 @@ export function BrandsView() {
     setEditingId(null);
     setForm({
       name: '',
-      logo: 'https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?w=80&h=80&fit=crop',
-      banner: 'https://images.unsplash.com/photo-1518364538800-6bcb3f25da49?w=800&h=300&fit=crop',
+      logo: '',
+      banner: '',
       description: '',
       featured: false,
       seoTitle: '',

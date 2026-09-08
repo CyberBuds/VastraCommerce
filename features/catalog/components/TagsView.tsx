@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Plus, Search, Tag as TagIcon, Trash2, Edit } from 'lucide-react';
 import { useCatalogStore, CatalogTag } from '@/store/catalogStore';
@@ -8,7 +8,7 @@ import { tagService } from '@/services/tagService';
 import { toast } from 'sonner';
 
 export function TagsView() {
-  const { tags, addTag, updateTag, deleteTag } = useCatalogStore();
+  const { tags, addTag, updateTag, deleteTag, replaceTags } = useCatalogStore();
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -21,6 +21,12 @@ export function TagsView() {
     name: '',
     status: 'ACTIVE',
   });
+
+  useEffect(() => {
+    tagService.list().then((response) => replaceTags(response.data.items.map((item) => ({
+      id: String(item.id), name: item.name, status: item.status, createdAt: item.createdAt,
+    }))));
+  }, [replaceTags]);
 
   const filtered = tags.filter((t) => t.name.toLowerCase().includes(search.toLowerCase()));
 

@@ -132,6 +132,12 @@ interface CatalogStoreState {
   addAttribute: (attr: NewAttribute) => void;
   updateAttribute: (id: string, attr: Partial<Attribute>) => void;
   deleteAttribute: (id: string) => void;
+  replaceBrands: (brands: CatalogBrand[]) => void;
+  replaceCollections: (collections: CatalogCollection[]) => void;
+  replaceProductTypes: (types: ProductType[]) => void;
+  replaceTags: (tags: CatalogTag[]) => void;
+  replaceAttributeGroups: (groups: AttributeGroup[]) => void;
+  replaceAttributes: (attributes: Attribute[]) => void;
 
   // Reviews Actions
   approveReview: (id: string) => void;
@@ -174,12 +180,12 @@ const DEFAULT_QUESTIONS: ProductQuestion[] = [];
 const DEFAULT_AUDIT_LOGS: AuditHistoryLog[] = [];
 
 export const useCatalogStore = create<CatalogStoreState>((set) => ({
-  brands: getInitialData('ent_cat_brands', DEFAULT_BRANDS),
-  collections: getInitialData('ent_cat_collections', DEFAULT_COLLECTIONS),
-  productTypes: getInitialData('ent_cat_types', DEFAULT_PRODUCT_TYPES),
-  tags: getInitialData('ent_cat_tags', DEFAULT_TAGS),
-  attributeGroups: getInitialData('ent_cat_attr_groups', DEFAULT_ATTRIBUTE_GROUPS),
-  attributes: getInitialData('ent_cat_attributes', DEFAULT_ATTRIBUTES),
+  brands: DEFAULT_BRANDS,
+  collections: DEFAULT_COLLECTIONS,
+  productTypes: DEFAULT_PRODUCT_TYPES,
+  tags: DEFAULT_TAGS,
+  attributeGroups: DEFAULT_ATTRIBUTE_GROUPS,
+  attributes: DEFAULT_ATTRIBUTES,
   reviews: getInitialData('ent_cat_reviews', DEFAULT_REVIEWS),
   questions: getInitialData('ent_cat_questions', DEFAULT_QUESTIONS),
   auditLogs: getInitialData('ent_cat_audit', DEFAULT_AUDIT_LOGS),
@@ -313,6 +319,13 @@ export const useCatalogStore = create<CatalogStoreState>((set) => ({
     saveToStorage('ent_cat_attributes', updated);
     return { attributes: updated };
   }),
+
+  replaceBrands: (brands) => set({ brands }),
+  replaceCollections: (collections) => set({ collections }),
+  replaceProductTypes: (productTypes) => set({ productTypes }),
+  replaceTags: (tags) => set({ tags }),
+  replaceAttributeGroups: (attributeGroups) => set({ attributeGroups }),
+  replaceAttributes: (attributes) => set({ attributes }),
 
   // Reviews
   approveReview: (id) => set((state) => {

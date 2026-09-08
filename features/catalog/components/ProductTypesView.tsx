@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Plus, Search, Tag, Trash2, Edit } from 'lucide-react';
 import { useCatalogStore, ProductType } from '@/store/catalogStore';
@@ -8,7 +8,7 @@ import { productTypeService } from '@/services/catalogMasterService';
 import { toast } from 'sonner';
 
 export function ProductTypesView() {
-  const { productTypes, addProductType, updateProductType, deleteProductType } = useCatalogStore();
+  const { productTypes, addProductType, updateProductType, deleteProductType, replaceProductTypes } = useCatalogStore();
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -18,6 +18,12 @@ export function ProductTypesView() {
     name: '',
     description: '',
   });
+
+  useEffect(() => {
+    productTypeService.list().then((response) => replaceProductTypes(response.data.items.map((item) => ({
+      id: String(item.id), name: item.name, description: item.description || '', createdAt: item.createdAt,
+    }))));
+  }, [replaceProductTypes]);
 
   const filtered = productTypes.filter(
     (pt) =>
