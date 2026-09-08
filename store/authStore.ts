@@ -11,6 +11,33 @@ interface AuthActions {
   checkSession: () => void;
 }
 
+function normalizeUser(rawUser: User & { role?: User['role'] & { permissions?: Array<{ permission?: { resource?: string; action?: string }; resource?: string; action?: string }> } }): User {
+  const roleName = rawUser.role?.name;
+  const normalizedRole = roleName === 'Super Admin'
+    ? 'SUPER_ADMIN'
+    : roleName === 'Admin'
+      ? 'ADMIN'
+      : roleName === 'Manager'
+        ? 'MANAGER'
+        : roleName === 'Operator'
+          ? 'OPERATOR'
+          : roleName;
+
+  const permissions = rawUser.role?.permissions?.flatMap((entry) => {
+    const permission = entry.permission || entry;
+    if (!permission.resource || !permission.action) return [];
+    const resource = permission.resource.toLowerCase();
+    const action = permission.action.toUpperCase();
+    return [action === 'VIEW' ? `view:${resource}` : `manage:${resource}`] as UserPermission[];
+  }) || rawUser.permissions || [];
+
+  return {
+    ...rawUser,
+    role: rawUser.role ? { ...rawUser.role, name: normalizedRole as UserRole } : rawUser.role,
+    permissions: [...new Set(permissions)],
+  };
+}
+
 export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
   user: null,
   tokens: null,
@@ -58,7 +85,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
       };
 
       const userResponse = await getProfileApi(accessToken);
-      const user = userResponse.data;
+      const user = normalizeUser(userResponse.data);
 
       const storage = rememberMe ? localStorage : sessionStorage;
       storage.setItem('ent_auth_user', JSON.stringify(user));
@@ -155,7 +182,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
 
     if (storedUser && storedTokens) {
       try {
-        const user = JSON.parse(storedUser);
+        const user = normalizeUser(JSON.parse(storedUser));
         const tokens = JSON.parse(storedTokens);
         set({
           user,
