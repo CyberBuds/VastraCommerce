@@ -12,7 +12,7 @@ interface AuthActions {
 }
 
 function normalizeUser(rawUser: User & { role?: User['role'] & { permissions?: Array<{ permission?: { resource?: string; action?: string }; resource?: string; action?: string }> } }): User {
-  const roleName = rawUser.role?.name;
+  const roleName = rawUser.role?.name as string | undefined;
   const normalizedRole = roleName === 'Super Admin'
     ? 'SUPER_ADMIN'
     : roleName === 'Admin'
