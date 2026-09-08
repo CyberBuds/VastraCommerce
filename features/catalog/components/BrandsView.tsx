@@ -39,6 +39,7 @@ export function BrandsView() {
       .then((response) => replaceBrands(response.data.items.map((brand) => ({
         ...brand,
         id: String(brand.id),
+        description: brand.description || '',
         logo: brand.image || '',
         banner: '',
         featured: false,
