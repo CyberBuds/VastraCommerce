@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useSystemStore } from '@/store/systemStore';
+import { SystemService } from '@/services/systemService';
 import { Card, Alert } from '@/components/enterprise/FeedbackComponents';
 import { Button, Input, Badge } from '@/components/enterprise/BaseInputs';
 import { Modal } from '@/components/enterprise/InteractiveComponents';
@@ -19,12 +19,31 @@ const MODULE_PERMISSIONS = [
 ];
 
 export function RolesPermissionsView() {
-  const { roles, addRole, updateRole, deleteRole } = useSystemStore();
+  const [roles, setRoles] = React.useState<SystemRole[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  const [selectedRole, setSelectedRole] = React.useState<SystemRole>(roles[0]);
+  const [selectedRole, setSelectedRole] = React.useState<SystemRole | null>(null);
   const [isAddRoleOpen, setIsAddRoleOpen] = React.useState(false);
   const [newRoleName, setNewRoleName] = React.useState('');
   const [newRoleDesc, setNewRoleDesc] = React.useState('');
+
+  const loadRoles = React.useCallback(async () => {
+    const response = await SystemService.listRoles();
+    const mapped = response.data.map((role: any): SystemRole => ({
+      id: String(role.id), roleCode: role.roleCode, name: role.name, description: role.description,
+      isSystem: role.isSystem, userCount: role.userCount, updatedAt: role.updatedAt,
+      permissions: role.permissions.map((permission: any) => `${String(permission.action).toLowerCase()}:${String(permission.resource).toLowerCase()}`),
+    }));
+    setRoles(mapped);
+    setSelectedRole((current) => mapped.find((role) => role.id === current?.id) || mapped[0] || null);
+  }, []);
+
+  React.useEffect(() => {
+    void Promise.resolve()
+      .then(loadRoles)
+      .catch(() => toast.error('Unable to load roles and permissions'))
+      .finally(() => setIsLoading(false));
+  }, [loadRoles]);
 
   const handleTogglePerm = (perm: string) => {
     if (!selectedRole) return;
@@ -33,7 +52,7 @@ export function RolesPermissionsView() {
       ? currentPerms.filter((p) => p !== perm)
       : [...currentPerms, perm];
 
-    updateRole(selectedRole.id, { permissions: updated });
+    void SystemService.updateRole(selectedRole.id, { permissions: updated }).then(loadRoles);
     setSelectedRole({ ...selectedRole, permissions: updated });
     toast.success('Permission matrix updated for role');
   };
@@ -43,16 +62,9 @@ export function RolesPermissionsView() {
       toast.error('Role Name is required');
       return;
     }
-    const code: any = newRoleName.toUpperCase().replace(/\s+/g, '_');
-    addRole({
-      roleCode: code,
-      name: newRoleName,
-      description: newRoleDesc,
-      isSystem: false,
-      permissions: ['view:catalog'],
-    });
-    toast.success('New RBAC Role Created');
-    setIsAddRoleOpen(false);
+    void SystemService.createRole({ name: newRoleName, description: newRoleDesc, permissions: ['view:catalog'] })
+      .then(() => { void loadRoles(); toast.success('New RBAC Role Created'); setIsAddRoleOpen(false); })
+      .catch(() => toast.error('Unable to create role'));
   };
 
   return (
@@ -74,7 +86,7 @@ export function RolesPermissionsView() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Side Role Selector Cards */}
         <div className="lg:col-span-4 space-y-3">
-          {roles.map((r) => (
+          {!isLoading && roles.map((r) => (
             <div
               key={r.id}
               onClick={() => setSelectedRole(r)}
@@ -116,9 +128,7 @@ export function RolesPermissionsView() {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        deleteRole(selectedRole.id);
-                        toast.success('Role deleted');
-                        setSelectedRole(roles[0]);
+                        void SystemService.deleteRole(selectedRole.id).then(() => { void loadRoles(); toast.success('Role deleted'); });
                       }}
                       className="text-red-500 hover:text-red-600"
                     >

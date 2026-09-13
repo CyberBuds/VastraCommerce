@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useSystemStore } from '@/store/systemStore';
+import { SystemService } from '@/services/systemService';
 import { Card } from '@/components/enterprise/FeedbackComponents';
 import { Button, Input, Badge, Switch } from '@/components/enterprise/BaseInputs';
 import { EnterpriseTable } from '@/components/enterprise/EnterpriseTable';
@@ -11,7 +11,9 @@ import { Users, UserPlus, Shield, Lock, RotateCcw, Trash2, Edit3, CheckCircle2, 
 import { toast } from 'sonner';
 
 export function UserManagementView() {
-  const { users, addUser, updateUser, toggleUserStatus, deleteUser } = useSystemStore();
+  const [users, setUsers] = React.useState<SystemUser[]>([]);
+  const [roles, setRoles] = React.useState<Array<{ id: number; name: string; roleCode: SystemRoleType }>>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingUser, setEditingUser] = React.useState<SystemUser | null>(null);
@@ -22,6 +24,32 @@ export function UserManagementView() {
   const [lastName, setLastName] = React.useState('');
   const [roleCode, setRoleCode] = React.useState<SystemRoleType>('ADMIN');
   const [department, setDepartment] = React.useState('IT Operations');
+
+  const loadUsers = React.useCallback(async () => {
+    const response = await SystemService.listUsers();
+    setUsers(response.data.items.map((user: any) => ({
+      id: String(user.id), email: user.email, firstName: user.firstName, lastName: user.lastName,
+      roleCode: (user.role?.name || 'OPERATOR').toUpperCase().replace(/[^A-Z0-9]+/g, '_') as SystemRoleType,
+      department: '', status: user.status, mfaEnabled: false,
+      lastLoginAt: user.lastLogin || '', ipAddress: '', avatarUrl: user.profileImage || '', createdAt: user.createdAt,
+    })));
+  }, []);
+
+  React.useEffect(() => {
+    Promise.all([SystemService.listUsers(), SystemService.listRoles()]).then(([usersResponse, rolesResponse]) => {
+      setRoles(rolesResponse.data.map((role: any) => ({
+        id: role.id,
+        name: role.name,
+        roleCode: role.roleCode as SystemRoleType,
+      })));
+      setUsers(usersResponse.data.items.map((user: any) => ({
+        id: String(user.id), email: user.email, firstName: user.firstName, lastName: user.lastName,
+        roleCode: (user.role?.name || 'OPERATOR').toUpperCase().replace(/[^A-Z0-9]+/g, '_') as SystemRoleType,
+        department: '', status: user.status, mfaEnabled: false,
+        lastLoginAt: user.lastLogin || '', ipAddress: '', avatarUrl: user.profileImage || '', createdAt: user.createdAt,
+      })));
+    }).catch(() => toast.error('Unable to load users and roles')).finally(() => setIsLoading(false));
+  }, []);
 
   const openAddModal = () => {
     setEditingUser(null);
@@ -43,32 +71,21 @@ export function UserManagementView() {
     setIsModalOpen(true);
   };
 
-  const handleSaveUser = () => {
+  const handleSaveUser = async () => {
     if (!email || !firstName || !lastName) {
       toast.error('Email, First Name and Last Name are required');
       return;
     }
 
     if (editingUser) {
-      updateUser(editingUser.id, {
-        email,
-        firstName,
-        lastName,
-        roleCode,
-        department,
-      });
+      const role = roles.find((item) => item.roleCode === roleCode);
+      await SystemService.updateUser(editingUser.id, { email, firstName, lastName, roleId: role?.id });
+      await loadUsers();
       toast.success('User updated successfully');
     } else {
-      addUser({
-        email,
-        firstName,
-        lastName,
-        roleCode,
-        department,
-        status: 'ACTIVE',
-        mfaEnabled: true,
-        avatarUrl: `https://picsum.photos/seed/${firstName.toLowerCase()}/80`,
-      });
+      const role = roles.find((item) => item.roleCode === roleCode);
+      await SystemService.createUser({ email, firstName, lastName, password: 'Admin@123', roleId: role?.id });
+      await loadUsers();
       toast.success('New user provisioned');
     }
     setIsModalOpen(false);
@@ -76,77 +93,86 @@ export function UserManagementView() {
 
   const columns = [
     {
-      key: 'name',
+      id: 'name',
       header: 'User Identity',
-      render: (row: SystemUser) => (
+      cell: ({ row }: any) => (
         <div className="flex items-center gap-3">
-          <img src={row.avatarUrl} alt={row.firstName} className="w-8 h-8 rounded-full border border-slate-200 dark:border-zinc-800" />
+          {row.original.avatarUrl ? <img src={row.original.avatarUrl} alt={row.original.firstName} className="w-8 h-8 rounded-full border border-slate-200 dark:border-zinc-800" /> : <div className="w-8 h-8 rounded-full border border-slate-200 dark:border-zinc-800 bg-slate-100 dark:bg-zinc-800" />}
           <div>
             <span className="font-bold text-sm text-slate-900 dark:text-zinc-100 block">
-              {row.firstName} {row.lastName}
+              {row.original.firstName} {row.original.lastName}
             </span>
-            <span className="text-xs text-slate-500 font-mono">{row.email}</span>
+            <span className="text-xs text-slate-500 font-mono">{row.original.email}</span>
           </div>
         </div>
       ),
     },
     {
-      key: 'roleCode',
+      accessorKey: 'roleCode',
       header: 'Role & Department',
-      render: (row: SystemUser) => (
+      cell: ({ row }: any) => (
         <div>
           <Badge variant="secondary" className="font-bold text-[10px]">
-            {row.roleCode}
+            {row.original.roleCode}
           </Badge>
-          <span className="text-xs text-slate-500 block mt-0.5">{row.department}</span>
+          <span className="text-xs text-slate-500 block mt-0.5">{row.original.department}</span>
         </div>
       ),
     },
     {
-      key: 'status',
+      accessorKey: 'status',
       header: 'Status',
-      render: (row: SystemUser) => (
-        <Badge variant={row.status === 'ACTIVE' ? 'success' : 'danger'}>
-          {row.status}
+      cell: ({ row }: any) => (
+        <Badge variant={row.original.status === 'ACTIVE' ? 'success' : 'danger'}>
+          {row.original.status}
         </Badge>
       ),
     },
     {
-      key: 'mfaEnabled',
+      accessorKey: 'mfaEnabled',
       header: 'MFA Status',
-      render: (row: SystemUser) => (
+      cell: () => (
         <span className="text-xs font-semibold flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
           <CheckCircle2 className="w-3.5 h-3.5" /> Enforced
         </span>
       ),
     },
     {
-      key: 'actions',
+      id: 'actions',
       header: 'Actions',
-      render: (row: SystemUser) => (
+      cell: ({ row }: any) => (
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={() => openEditModal(row)}>
-            <Edit3 className="w-4 h-4 text-slate-600 dark:text-zinc-400" />
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Edit user"
+            className="text-slate-700 hover:bg-slate-100 hover:text-indigo-600 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-indigo-400"
+            onClick={() => openEditModal(row.original)}
+          >
+            <Edit3 className="w-4 h-4 !text-current" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
+            title={row.original.status === 'ACTIVE' ? 'Suspend user' : 'Activate user'}
+            className="text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-950/30"
             onClick={() => {
-              toggleUserStatus(row.id, row.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE');
-              toast.success(`User status changed to ${row.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE'}`);
+              void SystemService.setUserStatus(row.original.id, row.original.status !== 'ACTIVE').then(loadUsers);
+              toast.success(`User status changed to ${row.original.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE'}`);
             }}
           >
-            <Lock className="w-4 h-4 text-amber-500" />
+            <Lock className="w-4 h-4 !text-current" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
+            title="Delete user"
+            className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/30"
             onClick={() => {
-              deleteUser(row.id);
-              toast.success('User account removed');
+              void SystemService.deleteUser(row.original.id).then(() => { setUsers((current) => current.filter((user) => user.id !== row.original.id)); toast.success('User account removed'); });
             }}
           >
-            <Trash2 className="w-4 h-4 text-red-500" />
+            <Trash2 className="w-4 h-4 !text-current" />
           </Button>
         </div>
       ),
@@ -176,6 +202,7 @@ export function UserManagementView() {
           searchPlaceholder="Search users by name, email, department..."
           globalFilter={globalFilter} // Pass globalFilter
           setGlobalFilter={setGlobalFilter} // Pass setGlobalFilter
+          isLoading={isLoading}
         />
       </Card>
 
@@ -211,11 +238,7 @@ export function UserManagementView() {
                 value={roleCode}
                 onChange={(e) => setRoleCode(e.target.value as any)}
               >
-                <option value="SUPER_ADMIN">SUPER_ADMIN</option>
-                <option value="ADMIN">ADMIN</option>
-                <option value="MANAGER">MANAGER</option>
-                <option value="ACCOUNTANT">ACCOUNTANT</option>
-                <option value="OPERATOR">OPERATOR</option>
+                {roles.map((role) => <option key={role.id} value={role.roleCode}>{role.roleCode}</option>)}
               </select>
             </div>
 

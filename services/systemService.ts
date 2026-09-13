@@ -21,6 +21,51 @@ import {
 import { ApiResponse } from '@/types/common';
 
 export class SystemService {
+  static async listUsers(params?: Record<string, unknown>): Promise<ApiResponse<{ items: any[]; total: number; page: number; pageSize: number }>> {
+    const res = await api.get<ApiResponse<{ items: any[]; total: number; page: number; pageSize: number }>>('/users', { params });
+    return res.data;
+  }
+
+  static async createUser(data: Record<string, unknown>): Promise<ApiResponse<any>> {
+    const res = await api.post<ApiResponse<any>>('/users', data);
+    return res.data;
+  }
+
+  static async updateUser(id: string, data: Record<string, unknown>): Promise<ApiResponse<any>> {
+    const res = await api.put<ApiResponse<any>>(`/users/${id}`, data);
+    return res.data;
+  }
+
+  static async setUserStatus(id: string, isActive: boolean): Promise<ApiResponse<any>> {
+    const res = await api.patch<ApiResponse<any>>(`/users/${id}/status`, { isActive });
+    return res.data;
+  }
+
+  static async deleteUser(id: string): Promise<ApiResponse<null>> {
+    const res = await api.delete<ApiResponse<null>>(`/users/${id}`);
+    return res.data;
+  }
+
+  static async listRoles(): Promise<ApiResponse<any[]>> {
+    const res = await api.get<ApiResponse<any[]>>('/roles');
+    return res.data;
+  }
+
+  static async createRole(data: Record<string, unknown>): Promise<ApiResponse<any>> {
+    const res = await api.post<ApiResponse<any>>('/roles', data);
+    return res.data;
+  }
+
+  static async updateRole(id: string, data: Record<string, unknown>): Promise<ApiResponse<any>> {
+    const res = await api.put<ApiResponse<any>>(`/roles/${id}`, data);
+    return res.data;
+  }
+
+  static async deleteRole(id: string): Promise<ApiResponse<null>> {
+    const res = await api.delete<ApiResponse<null>>(`/roles/${id}`);
+    return res.data;
+  }
+
   static async getCompanyProfile(): Promise<ApiResponse<CompanyProfile>> {
     const res = await api.get<ApiResponse<CompanyProfile>>('/api/system/company');
     return res.data;
