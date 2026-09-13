@@ -300,7 +300,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       header: 'Ledger Total',
       cell: ({ row }) => (
         <span className="font-mono text-xs font-extrabold text-slate-900 dark:text-zinc-100">
-          ₹{Number(row.getValue('totalAmount') ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          ₹{Number(row.original.totalAmount ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
         </span>
       ),
     },
