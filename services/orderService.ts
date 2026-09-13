@@ -4,7 +4,53 @@ import { ApiResponse } from '@/types/common';
 
 class OrderService extends BaseFeatureApi<Order> {
   constructor() {
-    super('/api/orders');
+    super('/orders');
+  }
+
+  async getAll(params?: { search?: string; status?: string }) {
+    const response = await api.get<ApiResponse<{ items: any[] }>>('/orders', {
+      params: { ...params, orderStatus: params?.status || undefined }
+    });
+    const payload = response.data;
+    return {
+      ...payload,
+      data: (payload.data?.items || []).map((order) => ({
+        id: String(order.id),
+        orderNumber: order.orderNumber,
+        customerId: String(order.customerId || ''),
+        customerName: [order.customer?.firstName, order.customer?.lastName].filter(Boolean).join(' ') || 'Customer',
+        customerEmail: order.customer?.email || '',
+        customerPhone: order.customer?.mobile || '',
+        items: [],
+        subtotal: Number(order.subtotal || 0),
+        tax: Number(order.taxAmount || 0),
+        shippingCost: Number(order.shippingCharge || 0),
+        discount: Number(order.discountAmount || 0) + Number(order.couponDiscount || 0),
+        totalAmount: Number(order.grandTotal || 0),
+        status: order.orderStatus,
+        paymentStatus: order.paymentStatus === 'CAPTURED' ? 'PAID' : order.paymentStatus === 'REFUNDED' ? 'REFUNDED' : 'UNPAID',
+        paymentMethod: order.paymentMethod === 'COD' ? 'CASH_ON_DELIVERY' : order.paymentMethod,
+        shippingMethod: order.shippingMethod?.name || 'STANDARD',
+        shippingAddress: order.shippingAddress ? {
+          id: String(order.shippingAddress.id), type: order.shippingAddress.addressType,
+          isDefault: Boolean(order.shippingAddress.isDefaultShipping), name: '', phone: order.customer?.mobile || '',
+          addressLine1: order.shippingAddress.addressLine1, addressLine2: order.shippingAddress.addressLine2 || undefined,
+          city: order.shippingAddress.city, state: order.shippingAddress.state,
+          postalCode: order.shippingAddress.pincode, country: order.shippingAddress.country
+        } : null,
+        billingAddress: order.billingAddress ? {
+          id: String(order.billingAddress.id), type: order.billingAddress.addressType,
+          isDefault: Boolean(order.billingAddress.isDefaultBilling), name: '', phone: order.customer?.mobile || '',
+          addressLine1: order.billingAddress.addressLine1, addressLine2: order.billingAddress.addressLine2 || undefined,
+          city: order.billingAddress.city, state: order.billingAddress.state,
+          postalCode: order.billingAddress.pincode, country: order.billingAddress.country
+        } : null,
+        notes: order.remarks || undefined,
+        createdAt: order.orderDate || order.createdAt,
+        updatedAt: order.updatedAt,
+        timeline: []
+      })) as Order[]
+    };
   }
 
   async hold(orderId: string, reason: string): Promise<ApiResponse<Order>> {

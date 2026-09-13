@@ -4,7 +4,46 @@ import { ApiResponse } from '@/types/common';
 
 class CustomerService extends BaseFeatureApi<Customer> {
   constructor() {
-    super('/api/crm/customers');
+    super('/customers');
+  }
+
+  async getAll(params?: { search?: string; groupId?: string; status?: string }) {
+    const response = await api.get<ApiResponse<{ items: any[] }>>('/customers', {
+      params: { ...params, customerGroupId: params?.groupId || undefined }
+    });
+    const payload = response.data;
+    return {
+      ...payload,
+      data: (payload.data?.items || []).map((customer) => ({
+        id: String(customer.id),
+        customerCode: customer.customerCode,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.mobile || '',
+        gender: customer.gender,
+        status: customer.status === 'SUSPENDED' ? 'BLOCKED' : customer.status,
+        emailVerified: Boolean(customer.isEmailVerified),
+        phoneVerified: Boolean(customer.isMobileVerified),
+        source: 'WEB',
+        referralCode: customer.referralCode,
+        groupId: customer.customerGroupId ? String(customer.customerGroupId) : '',
+        groupName: customer.customerGroup?.name || 'Unassigned',
+        tags: [],
+        createdAt: customer.createdAt,
+        lastLoginAt: customer.lastLogin || undefined,
+        addresses: [],
+        walletBalance: Number(customer.walletBalance || 0),
+        walletTransactions: [],
+        rewardPoints: Number(customer.loyaltyPoints || 0),
+        rewardPointsHistory: [],
+        wishlist: [],
+        reviews: [],
+        tickets: [],
+        notes: [],
+        activityLogs: []
+      })) as Customer[]
+    };
   }
 
   // Support for nested adjustments directly through axios
