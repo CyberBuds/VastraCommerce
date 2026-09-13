@@ -225,7 +225,7 @@ export function CustomerProfile360({ customer }: CustomerProfile360Props) {
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">wallet asset</span>
             <span className="text-sm font-extrabold text-slate-900 dark:text-zinc-50 font-mono mt-0.5 block">
-              ₹{customer.walletBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              ₹{Number(customer.walletBalance ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </span>
           </div>
           <div className="p-2 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 rounded-lg"><Wallet className="w-4 h-4" /></div>
@@ -235,7 +235,7 @@ export function CustomerProfile360({ customer }: CustomerProfile360Props) {
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">loyalty credit</span>
             <span className="text-sm font-extrabold text-slate-900 dark:text-zinc-50 font-mono mt-0.5 block">
-              {customer.rewardPoints.toLocaleString()} pts
+              {Number(customer.rewardPoints ?? 0).toLocaleString()} pts
             </span>
           </div>
           <div className="p-2 bg-amber-50 dark:bg-amber-950/30 text-amber-600 rounded-lg"><Coins className="w-4 h-4" /></div>

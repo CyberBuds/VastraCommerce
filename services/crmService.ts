@@ -46,6 +46,33 @@ class CustomerService extends BaseFeatureApi<Customer> {
     };
   }
 
+  async getById(id: string | number) {
+    const response = await api.get<ApiResponse<any>>(`/customers/${id}`);
+    const customer = response.data.data;
+    return {
+      ...response.data,
+      data: {
+        id: String(customer.id), customerCode: customer.customerCode,
+        firstName: customer.firstName, lastName: customer.lastName, email: customer.email,
+        phone: customer.mobile || '', gender: customer.gender,
+        status: customer.status === 'SUSPENDED' ? 'BLOCKED' : customer.status,
+        emailVerified: Boolean(customer.isEmailVerified), phoneVerified: Boolean(customer.isMobileVerified),
+        source: 'WEB', referralCode: customer.referralCode, groupId: customer.customerGroupId ? String(customer.customerGroupId) : '',
+        groupName: customer.customerGroup?.name || 'Unassigned', tags: [], createdAt: customer.createdAt,
+        lastLoginAt: customer.lastLogin || undefined,
+        addresses: (customer.addresses || []).map((address: any) => ({
+          id: String(address.id), type: address.addressType, isDefault: Boolean(address.isDefaultShipping || address.isDefaultBilling),
+          name: `${customer.firstName} ${customer.lastName}`.trim(), phone: customer.mobile || '',
+          addressLine1: address.addressLine1, addressLine2: address.addressLine2 || undefined,
+          city: address.city, state: address.state, postalCode: address.pincode, country: address.country
+        })),
+        walletBalance: Number(customer.walletBalance || 0), walletTransactions: [],
+        rewardPoints: Number(customer.loyaltyPoints || 0), rewardPointsHistory: [],
+        wishlist: [], reviews: [], tickets: [], notes: [], activityLogs: []
+      } as Customer
+    };
+  }
+
   // Support for nested adjustments directly through axios
   async adjustWallet(customerId: string, data: { type: 'CREDIT' | 'DEBIT'; amount: number; purpose: WalletTransaction['purpose']; notes?: string; approvedBy?: string }) {
     const response = await api.put<ApiResponse<any>>(`/api/crm/customers/${customerId}/wallet`, data);
