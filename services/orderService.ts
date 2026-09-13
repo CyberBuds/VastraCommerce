@@ -21,13 +21,26 @@ class OrderService extends BaseFeatureApi<Order> {
         customerName: [order.customer?.firstName, order.customer?.lastName].filter(Boolean).join(' ') || 'Customer',
         customerEmail: order.customer?.email || '',
         customerPhone: order.customer?.mobile || '',
-        items: [],
+        items: (order.items || []).map((item: any) => ({
+          id: String(item.id),
+          productId: String(item.productId),
+          productName: item.productName || item.product?.productName || 'Product',
+          sku: item.sku || item.variant?.sku || item.product?.sku || '',
+          price: Number(item.unitPrice || 0),
+          quantity: Number(item.quantity || 0),
+          total: Number(item.netAmount || 0),
+          pickingStatus: 'PENDING',
+          packingStatus: 'PENDING'
+        })),
         subtotal: Number(order.subtotal || 0),
         tax: Number(order.taxAmount || 0),
         shippingCost: Number(order.shippingCharge || 0),
         discount: Number(order.discountAmount || 0) + Number(order.couponDiscount || 0),
         totalAmount: Number(order.grandTotal || 0),
-        status: order.orderStatus,
+        status: order.orderStatus === 'CONFIRMED' ? 'APPROVED'
+          : order.orderStatus === 'PACKED' ? 'PACKING'
+          : order.orderStatus === 'READY_TO_SHIP' ? 'READY_FOR_SHIPPING'
+          : order.orderStatus,
         paymentStatus: order.paymentStatus === 'CAPTURED' ? 'PAID' : order.paymentStatus === 'REFUNDED' ? 'REFUNDED' : 'UNPAID',
         paymentMethod: order.paymentMethod === 'COD' ? 'CASH_ON_DELIVERY' : order.paymentMethod,
         shippingMethod: order.shippingMethod?.name || 'STANDARD',
@@ -48,7 +61,14 @@ class OrderService extends BaseFeatureApi<Order> {
         notes: order.remarks || undefined,
         createdAt: order.orderDate || order.createdAt,
         updatedAt: order.updatedAt,
-        timeline: []
+        timeline: (order.timeline || []).map((event: any) => ({
+          id: String(event.id),
+          status: event.eventType || order.orderStatus,
+          title: event.eventType?.replaceAll('_', ' ') || 'Order update',
+          description: event.description || '',
+          actor: 'System',
+          timestamp: event.createdAt || order.createdAt
+        }))
       })) as Order[]
     };
   }
