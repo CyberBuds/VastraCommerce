@@ -40,9 +40,44 @@ export interface AttributeValuePayload {
   isActive?: boolean;
 }
 
+interface AttributeValueRecord {
+  id: number;
+  value: string;
+  code?: string;
+  extra?: string;
+}
+
+type AttributeValueListResponse = ApiResponse<AttributeValueRecord[] | { items: AttributeValueRecord[] }>;
+
 export const attributeValueService = {
+  list: async (attributeId: string) =>
+    (await api.get<AttributeValueListResponse>(`/master/attributes/${attributeId}/values`)).data,
+  update: async (attributeId: string, valueId: string, payload: AttributeValuePayload) =>
+    (await api.put<ApiResponse<{ id: number }>>(`/master/attributes/${attributeId}/values/${valueId}`, payload)).data,
   create: async (attributeId: string, payload: AttributeValuePayload) =>
     (await api.post<ApiResponse<{ id: number }>>(`/master/attributes/${attributeId}/values`, payload)).data,
   delete: async (attributeId: string, valueId: string) =>
     (await api.delete<ApiResponse<null>>(`/master/attributes/${attributeId}/values/${valueId}`)).data,
 };
+
+export async function loadAttributesWithValues() {
+  const response = await attributeService.list();
+  const attributes = await Promise.all(response.data.items.map(async (item) => {
+    const valuesResponse = await attributeValueService.list(String(item.id));
+    const rawValues = Array.isArray(valuesResponse.data) ? valuesResponse.data : valuesResponse.data?.items || [];
+    return {
+      id: String(item.id),
+      groupId: item.groupId ? String(item.groupId) : '',
+      name: item.name,
+      type: (item as MasterRecord & { type?: 'text' | 'color' | 'image' }).type || 'text',
+      values: rawValues.map((value) => ({
+        id: String(value.id),
+        value: value.value,
+        label: value.value,
+        extra: value.extra,
+      })),
+      createdAt: item.createdAt,
+    };
+  }));
+  return attributes;
+}

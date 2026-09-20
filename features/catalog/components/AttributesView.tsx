@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Plus, Search, GitBranch, Palette, Image as ImageIcon, Type, Trash2, Edit } from 'lucide-react';
 import { useCatalogStore, Attribute, AttributeGroup } from '@/store/catalogStore';
-import { attributeGroupService, attributeService, attributeValueService } from '@/services/catalogMasterService';
+import { attributeGroupService, attributeService, attributeValueService, loadAttributesWithValues } from '@/services/catalogMasterService';
 import { toast } from 'sonner';
 
 export function AttributesView() {
@@ -36,15 +36,12 @@ export function AttributesView() {
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
 
   useEffect(() => {
-    Promise.all([attributeGroupService.list(), attributeService.list()]).then(([groupsResponse, attributesResponse]) => {
+    Promise.all([attributeGroupService.list(), loadAttributesWithValues()]).then(([groupsResponse, loadedAttributes]) => {
       replaceAttributeGroups(groupsResponse.data.items.map((item) => ({
         id: String(item.id), name: item.name, description: item.description || '',
       })));
-      replaceAttributes(attributesResponse.data.items.map((item) => ({
-        id: String(item.id), groupId: item.groupId ? String(item.groupId) : '', name: item.name,
-        type: 'text', values: [], createdAt: item.createdAt,
-      })));
-    });
+      replaceAttributes(loadedAttributes);
+    }).catch(() => toast.error('Unable to load attributes and values.'));
   }, [replaceAttributeGroups, replaceAttributes]);
 
   const handleAddValueRow = () => {
@@ -83,6 +80,22 @@ export function AttributesView() {
       };
       if (editingAttrId) {
         await attributeService.update(editingAttrId, payload);
+        await Promise.all(attrForm.values.map(async (value) => {
+          const valuePayload = {
+            value: value.label.trim() || value.value.trim(),
+            code: value.value.trim() || undefined,
+            slug: (value.label || value.value).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || undefined,
+            extra: value.extra || undefined,
+            status: 'ACTIVE' as const,
+            isActive: true,
+          };
+          if (Number.isInteger(Number(value.id))) {
+            await attributeValueService.update(editingAttrId, value.id, valuePayload);
+          } else if (valuePayload.value) {
+            const saved = await attributeValueService.create(editingAttrId, valuePayload);
+            value.id = String(saved.data.id);
+          }
+        }));
         updateAttribute(editingAttrId, attrForm);
         toast.success('Attribute set updated');
       } else {
@@ -232,6 +245,21 @@ export function AttributesView() {
                 </div>
 
                 <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-zinc-800">
+                  <button
+                    onClick={() => {
+                      setEditingAttrId(a.id);
+                      setAttrForm({
+                        groupId: a.groupId,
+                        name: a.name,
+                        type: a.type,
+                        values: a.values.map((value) => ({ ...value })),
+                      });
+                      setIsOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-100"
+                  >
+                    <Edit className="h-3.5 w-3.5" /> Edit
+                  </button>
                   <button
                     onClick={async () => {
                       if (confirm(`Delete attribute ${a.name}?`)) {
