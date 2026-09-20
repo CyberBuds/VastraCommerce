@@ -27,6 +27,7 @@ import { MediaGalleryManager } from '../components/MediaGalleryManager';
 import { SEOPreviewCard } from '../components/SEOPreviewCard';
 import { useCatalogStore } from '@/store/catalogStore';
 import { api } from '@/services/api';
+import { loadAttributesWithValues } from '@/services/catalogMasterService';
 import { toast } from 'sonner';
 
 interface ProductWizardProps {
@@ -50,7 +51,10 @@ const STEPS = [
 
 export function ProductWizard({ productId, onComplete, onCancel }: ProductWizardProps) {
   const [activeStep, setActiveStep] = React.useState(1);
-  const { attributes, addAuditLog } = useCatalogStore();
+  const { attributes, addAuditLog, replaceAttributes } = useCatalogStore();
+  const [attributesLoading, setAttributesLoading] = React.useState(true);
+  const [attributesError, setAttributesError] = React.useState(false);
+  const [productAttributeAssignments, setProductAttributeAssignments] = React.useState<Array<{ attributeKey?: string; attributeValue?: string; attributeValueId?: number }>>([]);
 
   // Wizard State
   const [form, setForm] = React.useState({
@@ -103,6 +107,25 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
   const [warehouseOptions, setWarehouseOptions] = React.useState<Array<{ value: string; label: string }>>([
     { value: '', label: 'Select a warehouse' },
   ]);
+
+  React.useEffect(() => {
+    let mounted = true;
+    setAttributesLoading(true);
+    setAttributesError(false);
+    loadAttributesWithValues()
+      .then((loadedAttributes) => {
+        if (mounted) replaceAttributes(loadedAttributes);
+      })
+      .catch(() => {
+        if (mounted) setAttributesError(true);
+      })
+      .finally(() => {
+        if (mounted) setAttributesLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [replaceAttributes]);
 
   React.useEffect(() => {
     api.get('/master/categories', { params: { pageSize: 100 } })
@@ -195,6 +218,11 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
               altText: image.altText || '', type: 'image',
             })),
           }));
+          setProductAttributeAssignments((prod.attributes || []).map((entry: any) => ({
+            attributeKey: entry.attributeKey || entry.attributeValue?.attribute?.name || entry.attributeValue?.attribute?.slug,
+            attributeValue: typeof entry.attributeValue === 'string' ? entry.attributeValue : entry.attributeValue?.value,
+            attributeValueId: entry.attributeValueId || entry.attributeValue?.id,
+          })));
 
           try {
             const inventoryRes = await api.get('/inventory', { params: { productId: Number(productId), pageSize: 20 } });
@@ -219,6 +247,31 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
       isSubscribed = false;
     };
   }, [productId]);
+
+  React.useEffect(() => {
+    if (!productAttributeAssignments.length || !attributes.length) return;
+
+    const selectedAttrIds: string[] = [];
+    const selectedAttributeValues: Record<string, string> = {};
+    productAttributeAssignments.forEach((assignment) => {
+      const key = String(assignment.attributeKey || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const attribute = attributes.find((item) => item.name.toLowerCase().replace(/[^a-z0-9]/g, '') === key);
+      if (!attribute) return;
+
+      const value = String(assignment.attributeValue || '').trim();
+      const matchedValue = attribute.values.find((item) =>
+        item.id === String(assignment.attributeValueId) || item.value.toLowerCase() === value.toLowerCase()
+      );
+      selectedAttrIds.push(attribute.id);
+      if (matchedValue) selectedAttributeValues[attribute.id] = matchedValue.label || matchedValue.value;
+    });
+
+    setForm((prev) => ({
+      ...prev,
+      selectedAttrIds: [...new Set(selectedAttrIds)],
+      selectedAttributeValues,
+    }));
+  }, [attributes, productAttributeAssignments]);
 
   const handleFieldChange = (field: string, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -392,7 +445,8 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
       }
       onComplete();
     } catch (e) {
-      toast.error('Critical database sync rejection.');
+      const message = (e as any)?.response?.data?.message || (e as any)?.response?.data?.errors?.[0]?.msg;
+      toast.error(message || 'Critical database sync rejection.');
     } finally {
       setLoading(false);
     }
@@ -769,7 +823,22 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                     <p className="text-xs text-slate-400 mt-0.5">Choose the features that make this saree unique, like colour or weave.</p>
                   </div>
 
-                  <div className="space-y-3">
+                  {attributesLoading ? (
+                    <div className="space-y-3" aria-label="Loading attributes">
+                      {[1, 2, 3].map((item) => (
+                        <div key={item} className="h-16 animate-pulse rounded-xl border border-slate-200 bg-slate-100 dark:border-zinc-850 dark:bg-zinc-950" />
+                      ))}
+                    </div>
+                  ) : attributesError ? (
+                    <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-700 dark:border-rose-900 dark:bg-rose-950/20 dark:text-rose-300">
+                      Unable to load attributes and values. Please refresh the wizard and try again.
+                    </div>
+                  ) : attributes.length === 0 ? (
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-500 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-400">
+                      No attributes are available yet. Create an attribute group, attribute, and values first.
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
                     {attributes.map((attr) => {
                       const isChecked = form.selectedAttrIds.includes(attr.id);
                       return (
@@ -844,7 +913,8 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                         </div>
                       );
                     })}
-                  </div>
+                    </div>
+                  )}
                 </div>
               )}
 
