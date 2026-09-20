@@ -458,7 +458,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 dark:border-zinc-850 pb-4 mb-4">
         {/* Horizontal Status Filter Tabs */}
         <div className="flex gap-1 bg-slate-100 dark:bg-zinc-850 p-1.5 rounded-xl border border-slate-200/50 dark:border-zinc-800 overflow-x-auto max-w-full">
-          {['ALL', 'PENDING', 'APPROVED', 'PROCESSING', 'PACKING', 'READY_FOR_SHIPPING', 'SHIPPED', 'DELIVERED', 'HOLD', 'CANCELLED'].map((tab) => (
+          {['ALL', ...ORDER_STATUS_OPTIONS.map(({ value }) => value)].filter((tab, index, tabs) => tabs.indexOf(tab) === index).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
