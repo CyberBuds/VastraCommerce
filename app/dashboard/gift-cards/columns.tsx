@@ -35,12 +35,12 @@ export const columns: ColumnDef<GiftCard>[] = [
   {
     accessorKey: 'initialAmount',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Initial Amount" />,
-    cell: ({ row }) => `$${row.original.initialAmount.toFixed(2)}`,
+    cell: ({ row }) => `₹${Number(row.original.initialAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
   },
     {
         accessorKey: 'balance',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Balance" />,
-        cell: ({ row }) => `$${row.original.balance.toFixed(2)}`,
+        cell: ({ row }) => `₹${Number(row.original.balance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
     },
     {
         accessorKey: 'recipientEmail',

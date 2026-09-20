@@ -37,7 +37,7 @@ export function InventoryDashboardView() {
   const statCards = [
     {
       title: 'Total Inventory Valuation',
-      value: `$${stats.inventoryValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      value: `₹${stats.inventoryValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       change: '+4.2% vs last month',
       isPositive: true,
       icon: TrendingUp,

@@ -229,7 +229,7 @@ export function StockAdjustmentsView() {
                       ))}
                     </td>
                     <td className={`py-3.5 px-4 text-right font-mono font-bold ${adj.totalAdjustmentValue >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                      ${adj.totalAdjustmentValue.toFixed(2)}
+                      ₹{Number(adj.totalAdjustmentValue).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="py-3.5 px-4">{adj.requestedBy}</td>
                     <td className="py-3.5 px-4">

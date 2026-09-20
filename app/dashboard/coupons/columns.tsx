@@ -45,7 +45,7 @@ export const columns: ColumnDef<Coupon>[] = [
     cell: ({ row }) => {
         const { type, value } = row.original;
         if (type === 'PERCENTAGE') return `${value}%`;
-        if (type === 'FLAT') return `$${value.toFixed(2)}`;
+        if (type === 'FLAT') return `₹${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         return 'N/A';
     }
   },

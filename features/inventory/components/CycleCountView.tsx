@@ -146,7 +146,7 @@ export function CycleCountView() {
                     <td className="py-3.5 px-4">{cc.assignedEmployee}</td>
                     <td className="py-3.5 px-4 font-bold text-slate-800">{cc.varianceItemsCount} SKUs</td>
                     <td className={`py-3.5 px-4 text-right font-mono font-bold ${cc.varianceValue < 0 ? 'text-rose-600' : 'text-slate-800'}`}>
-                      ${cc.varianceValue.toFixed(2)}
+                      ₹{cc.varianceValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="py-3.5 px-4 text-center">
                       <span

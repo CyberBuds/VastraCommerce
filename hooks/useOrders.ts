@@ -173,6 +173,21 @@ export function useUpdateOrder() {
   });
 }
 
+export function useUpdateOrderStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status, remark }: { id: string; status: string; remark?: string }) => orderService.updateStatus(id, status, remark),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order', variables.id] });
+      toast.success('Order status updated successfully.');
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Failed to update order status.');
+    }
+  });
+}
+
 export function useHoldOrder() {
   const queryClient = useQueryClient();
   return useMutation({

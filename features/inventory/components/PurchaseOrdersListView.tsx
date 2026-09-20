@@ -60,7 +60,7 @@ export function PurchaseOrdersListView() {
                     <td className="py-3.5 px-4">{po.warehouseName}</td>
                     <td className="py-3.5 px-4 font-medium text-slate-800">{po.expectedDeliveryDate}</td>
                     <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-900">
-                      ${po.grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      ₹{po.grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="py-3.5 px-4">
                       <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">

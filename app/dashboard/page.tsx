@@ -377,31 +377,31 @@ export default function DashboardPage() {
       </div>
 
       {/* 1. Add Product SKU Modal */}
-      <Dialog isOpen={addProductDialog.isOpen} onClose={addProductDialog.close} title="Create Catalog Product SKU">
+      <Dialog isOpen={addProductDialog.isOpen} onClose={addProductDialog.close} title="Add Product">
         <form onSubmit={handleAddProductSubmit} className="space-y-4">
-          <Input label="Product Name" name="name" required placeholder="AeroFlow Turbine X5" />
-          <Input label="Catalog SKU Code" name="sku" required placeholder="SKU-AERO-99100" />
+          <Input label="Product Name" name="name" required placeholder="Banarasi Silk Saree" />
+          <Input label="SKU Code" name="sku" required placeholder="VS-SILK-001" />
           <Select
             label="Product Category"
             name="category"
             options={[
-              { value: 'Turbines', label: 'Turbines' },
-              { value: 'Auto Components', label: 'Auto Components' },
-              { value: 'Fluids', label: 'Fluids' },
-              { value: 'Structural', label: 'Structural' },
-              { value: 'Electrical', label: 'Electrical' },
-              { value: 'Instruments', label: 'Instruments' },
+              { value: 'Silk Sarees', label: 'Silk Sarees' },
+              { value: 'Cotton Sarees', label: 'Cotton Sarees' },
+              { value: 'Banarasi Sarees', label: 'Banarasi Sarees' },
+              { value: 'Designer Sarees', label: 'Designer Sarees' },
+              { value: 'Wedding Sarees', label: 'Wedding Sarees' },
+              { value: 'Festive Sarees', label: 'Festive Sarees' },
             ]}
           />
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Price (USD)" name="price" type="number" step="0.01" required placeholder="1499.99" />
-            <Input label="Stock Levels" name="stock" type="number" required placeholder="120" />
+            <Input label="Price" name="price" type="number" step="0.01" required placeholder="₹1499.00" />
+            <Input label="Stock Available" name="stock" type="number" required placeholder="20" />
           </div>
           <Select
-            label="Fulfillment Status"
+            label="Status"
             name="status"
             options={[
-              { value: 'ACTIVE', label: 'Active / Stocked' },
+              { value: 'ACTIVE', label: 'Active / In Stock' },
               { value: 'OUT_OF_STOCK', label: 'Out of Stock' },
             ]}
           />
@@ -410,7 +410,7 @@ export default function DashboardPage() {
               Cancel
             </Button>
             <Button type="submit" variant="primary">
-              Create Product SKU
+              Add Product
             </Button>
           </div>
         </form>

@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1').replace(/\/$/, '');
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const response = await fetch('https://ecommerce-api-p93q.onrender.com/api/v1/auth/login', {
+    const response = await fetch(`${apiBaseUrl}/auth/login`, {
       method: 'POST',
       headers: {
         'accept': 'application/json',

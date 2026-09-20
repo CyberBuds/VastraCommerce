@@ -72,13 +72,14 @@ export function AttributesView() {
     setIsSavingAttribute(true);
     try {
       const slug = attrForm.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const groupIdValue = Number(attrForm.groupId);
       const payload = {
         name: attrForm.name.trim(),
         code: `ATTRIBUTE-${slug.toUpperCase()}`,
         slug,
         status: 'ACTIVE' as const,
         isActive: true,
-        groupId: /^\d+$/.test(attrForm.groupId) ? Number(attrForm.groupId) : undefined,
+        ...(Number.isFinite(groupIdValue) && groupIdValue > 0 ? { groupId: groupIdValue } : {}),
       };
       if (editingAttrId) {
         await attributeService.update(editingAttrId, payload);

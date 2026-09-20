@@ -49,15 +49,22 @@ export default function ProductsPage() {
     queryKey: ['catalogProducts'],
     queryFn: async () => {
       const res = await api.get('/products', { params: { pageSize: 100 } });
-      return (res.data?.data?.items ?? []).map((product: any) => ({
-        id: String(product.id),
-        name: product.productName,
-        sku: product.sku,
-        category: product.categoryId ? `Category #${product.categoryId}` : 'Uncategorized',
-        price: Number(product.sellingPrice ?? 0),
-        stock: 0,
-        status: product.status,
-      })) as CatalogProduct[];
+      return (res.data?.data?.items ?? []).map((product: any) => {
+        const inventoryTotal = (product.inventories ?? []).reduce((sum: number, inventory: any) => {
+          const qty = Number(inventory.availableStock ?? inventory.currentStock ?? 0);
+          return sum + (Number.isFinite(qty) ? qty : 0);
+        }, 0);
+
+        return {
+          id: String(product.id),
+          name: product.productName,
+          sku: product.sku,
+          category: product.categoryId ? `Category #${product.categoryId}` : 'Uncategorized',
+          price: Number(product.sellingPrice ?? 0),
+          stock: inventoryTotal,
+          status: product.status,
+        };
+      }) as CatalogProduct[];
     },
   });
 
@@ -157,7 +164,7 @@ export default function ProductsPage() {
         header: 'Selling Price',
         cell: ({ row }) => (
           <span className="font-mono font-bold text-slate-800 dark:text-zinc-100">
-            ${row.original.price.toFixed(2)}
+            ₹{Number(row.original.price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         ),
       },

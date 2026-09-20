@@ -40,7 +40,7 @@ export function InventoryValuationView() {
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <span className="text-xs font-semibold text-slate-500 uppercase">Total Stock Asset Value</span>
           <div className="mt-2 text-2xl font-extrabold text-indigo-950 font-mono">
-            ${valuation.totalStockValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            ₹{valuation.totalStockValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <span className="mt-1 block text-xs text-slate-400">Calculated via {valuation.valuationMethod} method</span>
         </div>
@@ -54,7 +54,7 @@ export function InventoryValuationView() {
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <span className="text-xs font-semibold text-slate-500 uppercase">Estimated Carrying Cost</span>
           <div className="mt-2 text-2xl font-extrabold text-slate-700 font-mono">
-            ${valuation.inventoryCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            ₹{valuation.inventoryCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <span className="mt-1 block text-xs text-slate-400">Storage, insurance, handling amortized</span>
         </div>
@@ -62,7 +62,7 @@ export function InventoryValuationView() {
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <span className="text-xs font-semibold text-slate-500 uppercase">Projected Gross Margin</span>
           <div className="mt-2 text-2xl font-extrabold text-emerald-600 font-mono">
-            ${valuation.estimatedProfit.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            ₹{valuation.estimatedProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <span className="mt-1 block text-xs text-slate-400">Based on MSRP sale price projections</span>
         </div>
@@ -90,7 +90,7 @@ export function InventoryValuationView() {
                     <td className="py-3.5 px-4 font-bold text-slate-900">{cat.category}</td>
                     <td className="py-3.5 px-4 text-right font-medium text-slate-800">{cat.count} units</td>
                     <td className="py-3.5 px-4 text-right font-mono font-extrabold text-indigo-900">
-                      ${cat.value.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      ₹{cat.value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="py-3.5 px-4 text-right font-bold text-slate-700">{percent}%</td>
                   </tr>

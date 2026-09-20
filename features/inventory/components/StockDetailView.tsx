@@ -70,8 +70,8 @@ export function StockDetailView({ id }: StockDetailProps) {
 
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="text-xs font-semibold text-slate-500 uppercase">Unit Cost</div>
-          <div className="mt-2 text-2xl font-black text-indigo-900">${item.unitCost.toFixed(2)}</div>
-          <div className="mt-1 text-xs text-slate-400">Total Valuation: ${item.totalValuation.toLocaleString()}</div>
+          <div className="mt-2 text-2xl font-black text-indigo-900">₹{item.unitCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          <div className="mt-1 text-xs text-slate-400">Total Valuation: ₹{item.totalValuation.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

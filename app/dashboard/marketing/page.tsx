@@ -18,7 +18,7 @@ const chartdata = [
 ];
 
 const dataFormatter = (number: number) => {
-    return '$' + Intl.NumberFormat('us').format(number).toString();
+    return '₹' + new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(number);
 };
 
 
@@ -35,8 +35,8 @@ const MarketingDashboardPage = () => {
         <StatCard title="Active Campaigns" value={stats?.activeCampaigns} />
         <StatCard title="Running Coupons" value={stats?.runningCoupons} />
         <StatCard title="Active Flash Sales" value={stats?.flashSales} />
-        <StatCard title="Revenue From Promotions" value={`$${stats?.revenueFromPromotions?.toFixed(2)}`} />
-        <StatCard title="Total Discount Amount" value={`$${stats?.discountAmount?.toFixed(2)}`} />
+        <StatCard title="Revenue From Promotions" value={`₹${stats?.revenueFromPromotions?.toFixed(2)}`} />
+        <StatCard title="Total Discount Amount" value={`₹${stats?.discountAmount?.toFixed(2)}`} />
         <StatCard title="Gift Cards Issued" value={stats?.giftCardsIssued} />
         <StatCard title="Referral Registrations" value={stats?.referralRegistrations} />
         <StatCard title="Loyalty Program Members" value={stats?.loyaltyMembers} />

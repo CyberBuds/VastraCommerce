@@ -97,7 +97,7 @@ export function ProductDetailView({ id }: ProductDetailViewProps) {
         <div className="text-right border-t md:border-t-0 md:border-l border-slate-100 dark:border-zinc-800 pt-4 md:pt-0 md:pl-6 shrink-0">
           <span className="text-xs text-slate-400 font-bold uppercase">Commercial Selling Price</span>
           <div className="text-3xl font-mono font-black text-slate-900 dark:text-zinc-100">
-            ${product?.price ? Number(product.price).toFixed(2) : '1,499.99'}
+            ₹{product?.price ? Number(product.price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '1,499.99'}
           </div>
           <span className="text-[10px] text-emerald-600 font-bold">In Stock: {product?.stock || 120} units</span>
         </div>
@@ -149,11 +149,11 @@ export function ProductDetailView({ id }: ProductDetailViewProps) {
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="p-3 bg-slate-50 rounded-xl dark:bg-zinc-950">
                 <span className="text-[10px] text-slate-400 font-bold uppercase">Manufacturing Cost (COGS)</span>
-                <p className="font-mono font-bold text-slate-900 dark:text-zinc-100">${product?.costPrice || 850.0}</p>
+                <p className="font-mono font-bold text-slate-900 dark:text-zinc-100">₹{Number(product?.costPrice || 850).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div className="p-3 bg-slate-50 rounded-xl dark:bg-zinc-950">
                 <span className="text-[10px] text-slate-400 font-bold uppercase">MSRP List Price</span>
-                <p className="font-mono font-bold text-slate-900 dark:text-zinc-100">${product?.msrp || 1800.0}</p>
+                <p className="font-mono font-bold text-slate-900 dark:text-zinc-100">₹{Number(product?.msrp || 1800).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
             </div>
           </div>

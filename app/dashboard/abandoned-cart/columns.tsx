@@ -43,7 +43,7 @@ export const columns: ColumnDef<AbandonedCart>[] = [
   {
     accessorKey: 'cartValue',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Cart Value" />,
-    cell: ({ row }) => `$${row.original.cartValue.toFixed(2)}`,
+    cell: ({ row }) => `₹${row.original.cartValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
   },
   {
     accessorKey: 'recoveryStatus',
