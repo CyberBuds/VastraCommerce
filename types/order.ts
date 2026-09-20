@@ -7,6 +7,8 @@ export type OrderStatus =
   | 'PICKING'
   | 'PACKING'
   | 'READY_FOR_SHIPPING'
+  | 'PACKED'
+  | 'READY_TO_SHIP'
   | 'SHIPPED'
   | 'OUT_FOR_DELIVERY'
   | 'DELIVERED'

@@ -18,7 +18,7 @@ export interface LoginApiResponse {
   errors?: any;
 }
 
-const LOGIN_ENDPOINT = 'https://ecommerce-api-p93q.onrender.com/api/v1/auth/login';
+const LOGIN_ENDPOINT = `${(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1').replace(/\/$/, '')}/auth/login`;
 
 export async function loginApi(payload: LoginPayload): Promise<LoginApiResponse> {
   // Use Next.js server proxy route first to prevent CORS restrictions in preview,

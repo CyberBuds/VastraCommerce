@@ -18,7 +18,7 @@ interface SettingsState {
 
 const DEFAULT_SETTINGS: EnterpriseSettings = {
   appName: 'VastraCommerce',
-  currency: 'USD',
+  currency: 'INR',
   dateFormat: 'MMM dd, yyyy HH:mm',
   simulatedLatencyMs: 400,
   autoLogoutMinutes: 30,

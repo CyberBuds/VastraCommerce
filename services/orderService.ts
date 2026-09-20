@@ -2,6 +2,15 @@ import { BaseFeatureApi, api } from '@/services/api';
 import { Order, Invoice, Shipment, ReturnRequest, TrackingDetail } from '@/types/order';
 import { ApiResponse } from '@/types/common';
 
+const resolvePaymentMethod = (order: any): string => {
+  const rawMethod = order?.paymentMethod ?? order?.payments?.[0]?.paymentMethod ?? order?.payments?.slice()?.sort((a: any, b: any) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())[0]?.paymentMethod;
+  if (!rawMethod) return 'CASH_ON_DELIVERY';
+
+  const normalized = String(rawMethod).trim().toUpperCase();
+  if (normalized === 'COD' || normalized === 'CASH_ON_DELIVERY') return 'CASH_ON_DELIVERY';
+  return String(rawMethod);
+};
+
 class OrderService extends BaseFeatureApi<Order> {
   constructor() {
     super('/orders');
@@ -42,7 +51,7 @@ class OrderService extends BaseFeatureApi<Order> {
           : order.orderStatus === 'READY_TO_SHIP' ? 'READY_FOR_SHIPPING'
           : order.orderStatus,
         paymentStatus: order.paymentStatus === 'CAPTURED' ? 'PAID' : order.paymentStatus === 'REFUNDED' ? 'REFUNDED' : 'UNPAID',
-        paymentMethod: order.paymentMethod === 'COD' ? 'CASH_ON_DELIVERY' : order.paymentMethod,
+        paymentMethod: resolvePaymentMethod(order),
         shippingMethod: order.shippingMethod?.name || 'STANDARD',
         shippingAddress: order.shippingAddress ? {
           id: String(order.shippingAddress.id), type: order.shippingAddress.addressType,
@@ -71,6 +80,11 @@ class OrderService extends BaseFeatureApi<Order> {
         }))
       })) as Order[]
     };
+  }
+
+  async updateStatus(orderId: string, status: string, remark?: string): Promise<ApiResponse<Order>> {
+    const response = await api.patch<ApiResponse<Order>>(`/orders/${orderId}/status`, { status, remark });
+    return response.data;
   }
 
   async hold(orderId: string, reason: string): Promise<ApiResponse<Order>> {

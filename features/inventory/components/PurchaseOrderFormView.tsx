@@ -202,7 +202,7 @@ export function PurchaseOrderFormView() {
               </div>
 
               <div className="col-span-2">
-                <label className="block text-[11px] font-semibold text-slate-500 mb-1">Unit Price ($)</label>
+                <label className="block text-[11px] font-semibold text-slate-500 mb-1">Unit Price (₹)</label>
                 <input
                   type="number"
                   required
@@ -217,7 +217,7 @@ export function PurchaseOrderFormView() {
               </div>
 
               <div className="col-span-2 font-mono font-bold text-xs text-slate-900 self-center">
-                Subtotal: ${(item.orderedQty * item.unitPrice).toFixed(2)}
+                Subtotal: ₹{(item.orderedQty * item.unitPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
 
               <div className="col-span-1 text-right">
@@ -238,15 +238,15 @@ export function PurchaseOrderFormView() {
           <div className="w-64 space-y-2 text-xs text-slate-600">
             <div className="flex justify-between">
               <span>Subtotal:</span>
-              <span className="font-mono font-bold">${totalAmount.toFixed(2)}</span>
+              <span className="font-mono font-bold">₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
             <div className="flex justify-between">
               <span>Est Tax (18% GST):</span>
-              <span className="font-mono font-bold">${taxAmount.toFixed(2)}</span>
+              <span className="font-mono font-bold">₹{taxAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
             <div className="flex justify-between border-t border-slate-200 pt-2 text-sm text-slate-900 font-extrabold">
               <span>Grand Total:</span>
-              <span className="font-mono text-indigo-900">${grandTotal.toFixed(2)}</span>
+              <span className="font-mono text-indigo-900">₹{grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
           </div>
         </div>

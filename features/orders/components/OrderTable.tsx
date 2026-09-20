@@ -18,6 +18,7 @@ import {
   useOrders, 
   useCreateOrder, 
   useUpdateOrder, 
+  useUpdateOrderStatus,
   useHoldOrder, 
   useReleaseOrder, 
   useCancelOrder, 
@@ -46,6 +47,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { mapUiOrderStatusToBackend } from '@/lib/orderStatusMap';
 
 // Selectable catalog products
 const CATALOG_PRODUCTS = [
@@ -54,6 +56,25 @@ const CATALOG_PRODUCTS = [
   { id: 'prod-3', name: 'Industrial Hydraulic Fluid (Batch #1002)', sku: 'SKU-AERO-10002', price: 249.99 },
   { id: 'prod-4', name: 'Carbon Fiber Strut (Batch #1003)', sku: 'SKU-AERO-10003', price: 299.99 },
   { id: 'prod-5', name: 'GigaCharge battery pack (Batch #1004)', sku: 'SKU-AERO-10004', price: 1199.99 }
+];
+
+const ORDER_STATUS_OPTIONS: Array<{ value: OrderStatus; label: string }> = [
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'APPROVED', label: 'Approved' },
+  { value: 'PROCESSING', label: 'Processing' },
+  { value: 'PICKING', label: 'Picking' },
+  { value: 'PACKING', label: 'Packing' },
+  { value: 'PACKED', label: 'Packed' },
+  { value: 'READY_FOR_SHIPPING', label: 'Ready for Shipping' },
+  { value: 'READY_TO_SHIP', label: 'Ready to Ship' },
+  { value: 'SHIPPED', label: 'Shipped' },
+  { value: 'OUT_FOR_DELIVERY', label: 'Out for Delivery' },
+  { value: 'DELIVERED', label: 'Delivered' },
+  { value: 'HOLD', label: 'On Hold' },
+  { value: 'CANCELLED', label: 'Cancelled' },
+  { value: 'RETURN_REQUESTED', label: 'Return Requested' },
+  { value: 'RETURNED', label: 'Returned' },
+  { value: 'REFUNDED', label: 'Refunded' },
 ];
 
 interface OrderTableProps {
@@ -68,6 +89,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
   // React Query Mutations
   const createOrderMutation = useCreateOrder();
   const updateOrderMutation = useUpdateOrder();
+  const updateOrderStatusMutation = useUpdateOrderStatus();
   const holdOrderMutation = useHoldOrder();
   const releaseOrderMutation = useReleaseOrder();
   const cancelOrderMutation = useCancelOrder();
@@ -98,9 +120,15 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
   // Timeline insertion state
   const [newTimeline, setNewTimeline] = React.useState({
     title: '',
-    description: '',
-    status: 'PROCESSING' as any
+    description: ''
   });
+  const [statusDraft, setStatusDraft] = React.useState<OrderStatus>('PENDING');
+
+  const openOrderDetails = (orderId: string) => {
+    const order = orders.find((item) => item.id === orderId);
+    setViewedOrderId(orderId);
+    if (order) setStatusDraft(order.status);
+  };
 
   // Create Order Wizard form state
   const [newOrderForm, setNewOrderForm] = React.useState({
@@ -235,7 +263,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
           ...viewedOrder.timeline,
           {
             id: `ev-add-${Date.now()}`,
-            status: newTimeline.status,
+            status: viewedOrder.status,
             title: newTimeline.title,
             description: newTimeline.description || 'Administrative commentary logged.',
             actor: 'System Operations Controller',
@@ -245,7 +273,31 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       }
     }, {
       onSuccess: () => {
-        setNewTimeline({ title: '', description: '', status: 'PROCESSING' });
+        setNewTimeline({ title: '', description: '' });
+      }
+    });
+  };
+
+  const handleStatusUpdate = () => {
+    if (!viewedOrder || !statusDraft || statusDraft === viewedOrder.status) return;
+
+    const backendStatus = mapUiOrderStatusToBackend(statusDraft);
+    const nextEvent = {
+      id: `ev-status-${Date.now()}`,
+      status: statusDraft,
+      title: `Order status updated to ${statusDraft.replace(/_/g, ' ')}`,
+      description: 'Admin updated the order status from the order details panel.',
+      actor: 'System Operations Controller',
+      timestamp: new Date().toISOString(),
+    };
+
+    updateOrderStatusMutation.mutate({
+      id: viewedOrder.id,
+      status: backendStatus,
+      remark: `Updated from ${viewedOrder.status} to ${statusDraft}`
+    }, {
+      onSuccess: () => {
+        setStatusDraft(statusDraft);
       }
     });
   };
@@ -257,7 +309,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       header: 'Order Reference',
       cell: ({ row }) => (
         <button
-          onClick={() => setViewedOrderId(row.original.id)}
+          onClick={() => openOrderDetails(row.original.id)}
           className="font-mono text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline text-left"
         >
           {row.getValue('OrderNumber')}
@@ -359,7 +411,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0"
-            onClick={() => setViewedOrderId(row.original.id)}
+            onClick={() => openOrderDetails(row.original.id)}
             title="Open 360° Console"
           >
             <Eye className="w-4 h-4 text-slate-600 dark:text-zinc-400" />
@@ -406,7 +458,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 dark:border-zinc-850 pb-4 mb-4">
         {/* Horizontal Status Filter Tabs */}
         <div className="flex gap-1 bg-slate-100 dark:bg-zinc-850 p-1.5 rounded-xl border border-slate-200/50 dark:border-zinc-800 overflow-x-auto max-w-full">
-          {['ALL', 'PENDING', 'APPROVED', 'PROCESSING', 'HOLD', 'SHIPPED', 'DELIVERED', 'CANCELLED'].map((tab) => (
+          {['ALL', 'PENDING', 'APPROVED', 'PROCESSING', 'PACKING', 'READY_FOR_SHIPPING', 'SHIPPED', 'DELIVERED', 'HOLD', 'CANCELLED'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -428,7 +480,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
           onClick={() => setIsCreateOpen(true)}
           className="self-end sm:self-auto"
         >
-          <Plus className="w-4 h-4 mr-1.5" /> Register Order
+          <Plus className="w-4 h-4 mr-1.5" /> Create Order
         </Button>
       </div>
 
@@ -452,7 +504,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
             {/* Drawer Header */}
             <div className="sticky top-0 bg-slate-50 dark:bg-zinc-850 border-b border-slate-200 dark:border-zinc-800 py-4 px-6 flex justify-between items-center z-10">
               <div>
-                <span className="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-wider">Operational Audit Console</span>
+                <span className="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-wider">Order Details</span>
                 <h3 className="text-base font-extrabold text-slate-850 dark:text-zinc-50 flex items-center gap-2 mt-0.5">
                   <Boxes className="w-4.5 h-4.5 text-indigo-500" />
                   {viewedOrder.orderNumber}
@@ -496,7 +548,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                 <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 p-4 rounded-xl flex gap-3 text-amber-850 dark:text-amber-400">
                   <ShieldAlert className="w-5 h-5 shrink-0" />
                   <div>
-                    <h5 className="font-bold">Administrative Lock Engaged</h5>
+                    <h5 className="font-bold">Order on Hold</h5>
                     <p className="mt-0.5 text-[11px] font-medium text-amber-800 dark:text-amber-500">{viewedOrder.holdReason}</p>
                     <Button 
                       variant="primary" 
@@ -516,7 +568,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                 <div className="border border-slate-200/70 dark:border-zinc-800 p-4 rounded-xl space-y-2.5">
                   <h4 className="font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-1.5 uppercase tracking-wider font-mono text-[10px]">
                     <User className="w-3.5 h-3.5 text-indigo-500" />
-                    Customer Dossier
+                    Customer Details
                   </h4>
                   <div className="space-y-1">
                     <p className="font-bold text-slate-900 dark:text-zinc-100">{viewedOrder.customerName}</p>
@@ -627,7 +679,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
               <div className="border border-slate-200/70 dark:border-zinc-800 rounded-xl p-5 space-y-4">
                 <h4 className="font-bold text-slate-850 dark:text-zinc-200 flex items-center gap-1.5 uppercase tracking-wider font-mono text-[10px] border-b border-slate-100 dark:border-zinc-800 pb-2">
                   <Clock className="w-3.5 h-3.5 text-indigo-500" />
-                  Chronological Audit Stream
+                  Order Timeline
                 </h4>
                 
                 {/* Real interactive timeline points list */}
@@ -657,23 +709,14 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
 
                 {/* Add Timeline comment box form */}
                 <form onSubmit={handleTimelineSubmit} className="bg-slate-50 dark:bg-zinc-850 p-4 border border-slate-200/50 dark:border-zinc-800 rounded-lg space-y-3">
-                  <span className="font-bold text-slate-700 dark:text-zinc-300 font-mono text-[9px] uppercase tracking-wide block">Inject Audit Timeline Event</span>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <span className="font-bold text-slate-700 dark:text-zinc-300 font-mono text-[9px] uppercase tracking-wide block">Add Order Note</span>
+                  <div className="grid grid-cols-1 gap-3">
                     <Input
                       placeholder="Comment title (e.g. Call logs, address edited)"
                       required
                       value={newTimeline.title}
                       onChange={(e) => setNewTimeline(p => ({ ...p, title: e.target.value }))}
                     />
-                    <select
-                      value={newTimeline.status}
-                      onChange={(e: any) => setNewTimeline(p => ({ ...p, status: e.target.value }))}
-                      className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 outline-hidden"
-                    >
-                      <option value="PROCESSING">Status: Processing</option>
-                      <option value="HOLD">Status: Hold</option>
-                      <option value="APPROVED">Status: Approved</option>
-                    </select>
                   </div>
                   <Textarea
                     placeholder="Enter event commentary or internal staff directions..."
@@ -689,11 +732,40 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                 </form>
               </div>
 
+              <div className="border border-slate-200/70 dark:border-zinc-800 rounded-xl p-5 space-y-4">
+                <h4 className="font-bold text-slate-850 dark:text-zinc-200 flex items-center gap-1.5 uppercase tracking-wider font-mono text-[10px] border-b border-slate-100 dark:border-zinc-800 pb-2">
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  Update Status
+                </h4>
+
+                <div className="flex flex-col sm:flex-row gap-3 items-center">
+                  <select
+                    value={statusDraft}
+                    onChange={(e) => setStatusDraft(e.target.value as OrderStatus)}
+                    className="w-full sm:flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 dark:text-zinc-200 outline-hidden"
+                  >
+                    {ORDER_STATUS_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={handleStatusUpdate}
+                    disabled={statusDraft === viewedOrder.status}
+                  >
+                    Save
+                  </Button>
+                </div>
+              </div>
+
               {/* Core Administrative Action Ribbons */}
               <div className="border border-slate-200/70 dark:border-zinc-800 rounded-xl p-5 space-y-4">
                 <h4 className="font-bold text-slate-850 dark:text-zinc-200 flex items-center gap-1.5 uppercase tracking-wider font-mono text-[10px] border-b border-slate-100 dark:border-zinc-800 pb-2">
                   <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
-                  Staff Operations Controls
+                  Actions
                 </h4>
                 
                 <div className="flex flex-wrap gap-2.5">
@@ -721,7 +793,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                       size="sm"
                       onClick={() => setIsShipOpen(true)}
                     >
-                      <Truck className="w-4 h-4 mr-1.5" /> Dispatch Shipment (Carrier)
+                      <Truck className="w-4 h-4 mr-1.5" /> Ship Order
                     </Button>
                   )}
 
@@ -732,7 +804,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                       onClick={() => setIsHoldOpen(true)}
                       className="border-amber-300 hover:bg-amber-50 hover:text-amber-800 text-amber-600 font-bold dark:border-amber-800 dark:hover:bg-amber-950/20"
                     >
-                      Place Hold
+                      Hold Order
                     </Button>
                   )}
 
@@ -743,7 +815,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                       onClick={() => setIsCancelOpen(true)}
                       className="hover:bg-rose-50 text-rose-600 hover:text-rose-800 font-bold dark:hover:bg-rose-950/20"
                     >
-                      Cancel Order
+                      Cancel
                     </Button>
                   )}
                 </div>

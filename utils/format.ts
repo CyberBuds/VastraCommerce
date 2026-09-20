@@ -39,10 +39,10 @@ export function formatDate(date: Date | string | number | undefined, formatStr: 
 /**
  * Format currency with dynamic ISO currency and locale.
  */
-export function formatCurrency(amount: number | string | undefined, currency: string = 'USD', locale: string = 'en-US'): string {
+export function formatCurrency(amount: number | string | undefined, currency: string = 'INR', locale: string = 'en-IN'): string {
   const value = typeof amount === 'string' ? parseFloat(amount) : amount;
   if (value === undefined || isNaN(value)) return '-';
-  
+
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,

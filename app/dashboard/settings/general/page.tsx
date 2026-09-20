@@ -53,7 +53,7 @@ export default function GeneralSettingsPage() {
       supportEmail: 'secops@enterprise.aero',
       maxUsers: 500,
       fiscalYearStart: new Date('2026-04-01').toISOString(),
-      defaultCurrency: 'USD',
+      defaultCurrency: 'INR',
       allowedDomains: ['enterprise.aero', 'aero.com'],
       systemMessage: '<b>Notice:</b> Standard security maintenance window schedules apply on Sunday morning.',
       twoFactorMandatory: true,

@@ -68,6 +68,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
     taxRate: '18',
     initialStock: '100',
     minStock: '10',
+    warehouseId: '',
     warehouseBin: 'A-12-B',
     backorderLimit: '0',
     weight: '1.2',
@@ -77,6 +78,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
     fragile: false,
     shippingClass: 'STANDARD',
     selectedAttrIds: [] as string[],
+    selectedAttributeValues: {} as Record<string, string>,
     media: [] as any[],
     seoTitle: '',
     seoDescription: '',
@@ -98,6 +100,9 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
     { value: '', label: 'Select a brand' },
   ]);
   const [tagOptions, setTagOptions] = React.useState<Array<{ value: string; label: string }>>([]);
+  const [warehouseOptions, setWarehouseOptions] = React.useState<Array<{ value: string; label: string }>>([
+    { value: '', label: 'Select a warehouse' },
+  ]);
 
   React.useEffect(() => {
     api.get('/master/categories', { params: { pageSize: 100 } })
@@ -126,6 +131,28 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
         ...(response.data?.data?.items ?? []).map((brand: any) => ({ value: String(brand.id), label: brand.name })),
       ]))
       .catch(() => setBrandOptions([{ value: '', label: 'Unable to load brands' }]));
+  }, []);
+
+  React.useEffect(() => {
+    api.get('/inventory/warehouses', { params: { pageSize: 100 } })
+      .then((response) => {
+        const items = response.data?.data?.items ?? response.data?.data ?? [];
+        const options = [
+          { value: '', label: 'Select a warehouse' },
+          ...items
+            .filter((warehouse: any) => warehouse?.status !== 'INACTIVE')
+            .map((warehouse: any) => ({
+              value: String(warehouse.id),
+              label: `${warehouse.warehouseName || warehouse.name} (${warehouse.warehouseCode || warehouse.code || 'WH'})`,
+            })),
+        ];
+        setWarehouseOptions(options);
+
+        if (!form.warehouseId && options.length > 1) {
+          setForm((prev) => ({ ...prev, warehouseId: options[1].value }));
+        }
+      })
+      .catch(() => setWarehouseOptions([{ value: '', label: 'Unable to load warehouses' }]));
   }, []);
 
   // Fetch product data if in edit mode
@@ -168,6 +195,16 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
               altText: image.altText || '', type: 'image',
             })),
           }));
+
+          try {
+            const inventoryRes = await api.get('/inventory', { params: { productId: Number(productId), pageSize: 20 } });
+            const firstInventory = inventoryRes.data?.data?.items?.[0] ?? inventoryRes.data?.data?.[0];
+            if (firstInventory?.warehouseId && !form.warehouseId) {
+              setForm((prev) => ({ ...prev, warehouseId: String(firstInventory.warehouseId) }));
+            }
+          } catch {
+            // Inventory is optional when editing; keep the default warehouse selection.
+          }
         }
       } catch (err) {
         if (isSubscribed) {
@@ -185,6 +222,17 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
 
   const handleFieldChange = (field: string, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const toAttributeKey = (name: string) => {
+    const words = name
+      .trim()
+      .split(/[^a-zA-Z0-9]+/)
+      .filter(Boolean)
+      .map((part) => part.toLowerCase());
+
+    if (words.length === 0) return '';
+    return words.map((word, index) => index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)).join('');
   };
 
   const handleNext = () => {
@@ -266,6 +314,18 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
         toast.error('Select a category before saving this product.');
         return;
       }
+      const productAttributes = attributes
+        .filter((attr) => form.selectedAttrIds.includes(attr.id))
+        .map((attr) => {
+          const selectedValue = (form.selectedAttributeValues?.[attr.id] ?? '').trim();
+          const value = selectedValue || attr.values[0]?.label || attr.values[0]?.value || '';
+          return {
+            attributeKey: toAttributeKey(attr.name),
+            attributeValue: value,
+          };
+        })
+        .filter((item) => item.attributeKey && item.attributeValue);
+
       const payload = {
         productCode: form.sku,
         productName: form.name,
@@ -284,6 +344,9 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
         length: toNumber(form.depth),
         taxAmount: form.sellingPrice && form.taxRate ? Number((Number(form.sellingPrice) * Number(form.taxRate) / 100).toFixed(2)) : undefined,
         netAmount: form.sellingPrice && form.taxRate ? Number((Number(form.sellingPrice) * (1 + Number(form.taxRate) / 100)).toFixed(2)) : undefined,
+        initialStock: toNumber(form.initialStock),
+        minStock: toNumber(form.minStock),
+        warehouseId: toNumber(form.warehouseId),
         metaTitle: form.seoTitle || undefined,
         metaDescription: form.seoDescription || undefined,
         metaKeywords: form.seoKeywords || undefined,
@@ -298,6 +361,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
           displayOrder: index,
           isPrimary: index === 0,
         })),
+        attributes: productAttributes,
         status: productId ? form.status : (Number(form.initialStock) > 0 ? 'ACTIVE' : 'DRAFT'),
       };
 
@@ -342,10 +406,10 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
           <Layers className="w-5 h-5 text-brand" />
           <div>
             <h1 className="text-sm font-black text-slate-800 dark:text-zinc-100 uppercase tracking-wider">
-              {productId ? `Modify SKU Code: ${form.sku}` : 'Register Enterprise Product SKU'}
+              {productId ? `Edit Saree SKU: ${form.sku}` : 'Add New Saree Product'}
             </h1>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-              10-Step Interactive Wizard Taxonomy Registry
+              Simple product setup for sari catalogue
             </p>
           </div>
         </div>
@@ -428,49 +492,49 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
-                      label="Product Commercial Label"
+                      label="Product Name"
                       value={form.name}
                       onChange={(e) => {
                         handleFieldChange('name', e.target.value);
                         // Auto SEO title & slug
-                        handleFieldChange('seoTitle', e.target.value + ' | Aero Parts');
+                        handleFieldChange('seoTitle', e.target.value + ' | Vastra');
                       }}
                       required
-                      placeholder="e.g. AeroFlow Turbine X1"
+                      placeholder="e.g. Banarasi Silk Saree"
                       id="wiz-prod-name"
                     />
                     <Input
-                      label="Corporate SKU Code"
+                      label="SKU Code"
                       value={form.sku}
                       onChange={(e) => handleFieldChange('sku', e.target.value)}
                       required
-                      placeholder="e.g. SKU-AERO-10000"
+                      placeholder="e.g. VS-SILK-001"
                       id="wiz-prod-sku"
                     />
                   </div>
 
                   <Input
-                    label="Commercial Product Slug"
+                    label="Product URL Name"
                     value={form.slug}
                     onChange={(e) => handleFieldChange('slug', e.target.value)}
-                    placeholder="e.g. aeroflow-turbine-x1"
+                    placeholder="e.g. banarasi-silk-saree"
                     id="wiz-prod-slug"
                   />
 
                   <Input
-                    label="Catalog Highlight Tagline"
+                    label="Short Description"
                     value={form.shortDesc}
                     onChange={(e) => handleFieldChange('shortDesc', e.target.value)}
-                    placeholder="Premium custom-balanced heavy industrial turbine assembly built for extreme gas loops."
+                    placeholder="Handwoven silk saree with rich zari work and elegant drape."
                     id="wiz-prod-short-desc"
                   />
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300">Technical Datasheet Specifications</label>
+                    <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300">Fabric & Design Details</label>
                     <textarea
                       value={form.description}
                       onChange={(e) => handleFieldChange('description', e.target.value)}
-                      placeholder="Input complete metallurgical, fluid dynamic, and certification standards..."
+                      placeholder="Add fabric type, weave, border work, colour, and drape details for this saree..."
                       rows={5}
                       className="w-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl p-2.5 text-sm text-slate-900 dark:text-zinc-100 outline-none"
                     />
@@ -483,14 +547,14 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                 <div className="space-y-4">
                   <div>
                     <h2 className="text-base font-black text-slate-850 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-                      <Tags className="w-5 h-5 text-brand" /> Taxonomic Categorization
+                      <Tags className="w-5 h-5 text-brand" /> Category & Brand
                     </h2>
-                    <p className="text-xs text-slate-400 mt-0.5">Map SKU nodes to taxonomic categories, brands, and search tags.</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Choose the saree category and brand for this style.</p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Select
-                      label="Taxonomic Category Tree"
+                      label="Product Category"
                       value={form.categoryId}
                       onChange={(e) => handleFieldChange('categoryId', e.target.value)}
                       options={categoryOptions}
@@ -498,7 +562,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                     />
 
                     <Select
-                      label="Corporate Brand Registry"
+                      label="Brand Name"
                       value={form.brandId}
                       onChange={(e) => handleFieldChange('brandId', e.target.value)}
                       options={brandOptions}
@@ -507,7 +571,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                   </div>
 
                   <div className="space-y-2">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Search Keywords Tags</span>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Collection Tags</span>
                     <div className="flex flex-wrap gap-2">
                       {tagOptions.map((tag) => {
                         const isSelected = form.productTags.includes(tag.value);
@@ -542,18 +606,18 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                 <div className="space-y-4">
                   <div>
                     <h2 className="text-base font-black text-slate-850 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-                      <DollarSign className="w-5 h-5 text-brand" /> Pricing Matrix
+                      <DollarSign className="w-5 h-5 text-brand" /> Price & GST
                     </h2>
-                    <p className="text-xs text-slate-400 mt-0.5">Establish manufacturing costs, commercial sale values, and tax matrices.</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Add your cost, selling price, and tax rate for the product.</p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <Input
-                      label="Cost Price (COGS)"
+                      label="Cost Price"
                       value={form.costPrice}
                       onChange={(e) => handleFieldChange('costPrice', e.target.value)}
                       required
-                      placeholder="850.00"
+                      placeholder="₹850.00"
                       id="wiz-prod-cost"
                     />
                     <Input
@@ -561,27 +625,27 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                       value={form.sellingPrice}
                       onChange={(e) => handleFieldChange('sellingPrice', e.target.value)}
                       required
-                      placeholder="1499.00"
+                      placeholder="₹1499.00"
                       id="wiz-prod-price"
                     />
                     <Input
-                      label="MSRP (Comparison price)"
+                      label="MRP"
                       value={form.msrp}
                       onChange={(e) => handleFieldChange('msrp', e.target.value)}
-                      placeholder="1800.00"
+                      placeholder="₹1800.00"
                       id="wiz-prod-msrp"
                     />
                   </div>
 
                   <Select
-                    label="VAT & Sales Tax Bracket"
+                    label="GST Rate"
                     value={form.taxRate}
                     onChange={(e) => handleFieldChange('taxRate', e.target.value)}
                     options={[
-                      { value: '0', label: '0% Exempt (Medical/Diplomatic)' },
-                      { value: '5', label: '5% Standard Food/Chemical Services' },
-                      { value: '18', label: '18% Standard Heavy Machinery Bracket' },
-                      { value: '25', label: '25% Luxury & Carbon Overcharge' },
+                      { value: '0', label: '0% No tax' },
+                      { value: '5', label: '5% GST' },
+                      { value: '18', label: '18% GST' },
+                      { value: '25', label: '25% GST' },
                     ]}
                     id="wiz-prod-tax"
                   />
@@ -593,37 +657,44 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                 <div className="space-y-4">
                   <div>
                     <h2 className="text-base font-black text-slate-850 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-                      <Settings2 className="w-5 h-5 text-brand" /> Inventory Controls
+                      <Settings2 className="w-5 h-5 text-brand" /> Stock & Inventory
                     </h2>
-                    <p className="text-xs text-slate-400 mt-0.5">Control safety stock margins, barcode bins, and backorder capacities.</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Set the stock quantity and choose the warehouse where this saree is stored.</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <Input
-                      label="Initial Stock Quantity"
+                      label="Stock Available"
                       value={form.initialStock}
                       onChange={(e) => handleFieldChange('initialStock', e.target.value)}
                       required
                       id="wiz-prod-stock"
                     />
-                    <Input
-                      label="Safety Buffer Stock Level"
-                      value={form.minStock}
-                      onChange={(e) => handleFieldChange('minStock', e.target.value)}
-                      id="wiz-prod-min-stock"
+                    <Select
+                      label="Warehouse"
+                      value={form.warehouseId}
+                      onChange={(e) => handleFieldChange('warehouseId', e.target.value)}
+                      options={warehouseOptions}
+                      id="wiz-prod-warehouse"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <Input
-                      label="Warehouse Bin Identifier (Coded)"
+                      label="Low Stock Alert"
+                      value={form.minStock}
+                      onChange={(e) => handleFieldChange('minStock', e.target.value)}
+                      id="wiz-prod-min-stock"
+                    />
+                    <Input
+                      label="Storage Rack"
                       value={form.warehouseBin}
                       onChange={(e) => handleFieldChange('warehouseBin', e.target.value)}
-                      placeholder="C-4-F"
+                      placeholder="A1-02"
                       id="wiz-prod-bin"
                     />
                     <Input
-                      label="Maximum Backorder Allowances"
+                      label="Backorder Limit"
                       value={form.backorderLimit}
                       onChange={(e) => handleFieldChange('backorderLimit', e.target.value)}
                       id="wiz-prod-backorder"
@@ -637,9 +708,9 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                 <div className="space-y-4">
                   <div>
                     <h2 className="text-base font-black text-slate-850 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-                      <Truck className="w-5 h-5 text-brand" /> Logistics Parameters
+                      <Truck className="w-5 h-5 text-brand" /> Size & Packaging
                     </h2>
-                    <p className="text-xs text-slate-400 mt-0.5">Record weight matrices, physical dimensional footprints, and freight hazard flags.</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Add the saree size, packing details, and shipping care info in simple terms.</p>
                   </div>
 
                   <div className="grid grid-cols-4 gap-4">
@@ -647,24 +718,28 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                       label="Weight (kg)"
                       value={form.weight}
                       onChange={(e) => handleFieldChange('weight', e.target.value)}
+                      placeholder="0.6"
                       id="wiz-prod-weight"
                     />
                     <Input
                       label="Width (cm)"
                       value={form.width}
                       onChange={(e) => handleFieldChange('width', e.target.value)}
+                      placeholder="145"
                       id="wiz-prod-width"
                     />
                     <Input
                       label="Height (cm)"
                       value={form.height}
                       onChange={(e) => handleFieldChange('height', e.target.value)}
+                      placeholder="20"
                       id="wiz-prod-height"
                     />
                     <Input
-                      label="Depth (cm)"
+                      label="Length (m)"
                       value={form.depth}
                       onChange={(e) => handleFieldChange('depth', e.target.value)}
+                      placeholder="5.5"
                       id="wiz-prod-depth"
                     />
                   </div>
@@ -678,7 +753,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                       id="wiz-prod-fragile"
                     />
                     <label htmlFor="wiz-prod-fragile" className="text-xs font-bold text-slate-700 dark:text-zinc-300 cursor-pointer">
-                      Fragile / High-Tolerance Calibration Asset (Requires custom shipping cases)
+                      Delicate fabric / needs extra packing
                     </label>
                   </div>
                 </div>
@@ -689,9 +764,9 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                 <div className="space-y-4">
                   <div>
                     <h2 className="text-base font-black text-slate-850 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-                      <GitBranch className="w-5 h-5 text-brand" /> Multi-SKU Variants Setup
+                      <GitBranch className="w-5 h-5 text-brand" /> Fabric & Style Options
                     </h2>
-                    <p className="text-xs text-slate-400 mt-0.5">Select attributes to generate multiple child options under this SKU family.</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Choose the features that make this saree unique, like colour or weave.</p>
                   </div>
 
                   <div className="space-y-3">
@@ -721,21 +796,49 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                           </div>
 
                           {isChecked && (
-                            <div className="pl-6 flex flex-wrap gap-2">
-                              {attr.values.map((v) => (
-                                <span
-                                  key={v.id}
-                                  className="inline-flex items-center gap-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-md py-1 px-2.5 text-[11px] font-bold text-slate-700 dark:text-zinc-300"
-                                >
-                                  {attr.type === 'color' && (
-                                    <span
-                                      className="w-3 h-3 rounded-full border border-slate-200 inline-block"
-                                      style={{ backgroundColor: v.extra }}
-                                    />
-                                  )}
-                                  <span>{v.label}</span>
-                                </span>
-                              ))}
+                            <div className="pl-6 space-y-2">
+                              <div className="flex flex-wrap gap-2">
+                                {attr.values.map((v) => {
+                                  const valueLabel = v.label || v.value;
+                                  const isSelected = (form.selectedAttributeValues?.[attr.id] ?? '') === valueLabel;
+                                  return (
+                                    <button
+                                      key={v.id}
+                                      type="button"
+                                      onClick={() => handleFieldChange('selectedAttributeValues', {
+                                        ...form.selectedAttributeValues,
+                                        [attr.id]: valueLabel,
+                                      })}
+                                      className={cn(
+                                        'inline-flex items-center gap-1 rounded-md border py-1 px-2.5 text-[11px] font-bold transition-colors',
+                                        isSelected
+                                          ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-indigo-400 dark:bg-indigo-950/40 dark:text-indigo-300'
+                                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300'
+                                      )}
+                                    >
+                                      {attr.type === 'color' && (
+                                        <span
+                                          className="w-3 h-3 rounded-full border border-slate-200 inline-block"
+                                          style={{ backgroundColor: v.extra || '#000' }}
+                                        />
+                                      )}
+                                      <span>{valueLabel}</span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+
+                              {attr.values.length === 0 && (
+                                <Input
+                                  label={`Custom ${attr.name} value`}
+                                  value={form.selectedAttributeValues?.[attr.id] || ''}
+                                  onChange={(event) => handleFieldChange('selectedAttributeValues', {
+                                    ...form.selectedAttributeValues,
+                                    [attr.id]: event.target.value,
+                                  })}
+                                  placeholder={`Enter ${attr.name}`}
+                                />
+                              )}
                             </div>
                           )}
                         </div>
@@ -791,23 +894,23 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                     <h2 className="text-base font-black text-slate-850 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
                       <Sparkles className="w-5 h-5 text-brand" /> Related Products linkages
                     </h2>
-                    <p className="text-xs text-slate-400 mt-0.5">Setup related products to display on storefronts, and discount bundling policies.</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Add matching products or offers to increase cross-sell on the store.</p>
                   </div>
 
                   <div className="space-y-4 max-w-xl">
                     <Input
-                      label="Related SKUs (comma-separated codes)"
+                      label="Related Products"
                       value={form.relatedSkus.join(', ')}
                       onChange={(e) => {
                         const vals = e.target.value.split(',').map((s) => s.trim());
                         handleFieldChange('relatedSkus', vals);
                       }}
-                      placeholder="SKU-AERO-10001, SKU-AERO-10005"
+                      placeholder="VS-SILK-002, VS-SILK-005"
                       id="wiz-prod-related"
                     />
 
                     <Input
-                      label="Discount Bundled Package Rebate (%)"
+                      label="Bundle Discount (%)"
                       value={form.bundleDiscount}
                       onChange={(e) => handleFieldChange('bundleDiscount', e.target.value)}
                       placeholder="15"

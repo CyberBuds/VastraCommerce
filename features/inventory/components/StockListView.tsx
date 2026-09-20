@@ -38,8 +38,8 @@ export function StockListView() {
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Stock Control & Inventory Register</h1>
-          <p className="text-sm text-slate-500">Real-time SKU quantities, reserved stock, valuations, and reorder levels</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Stock Overview</h1>
+          <p className="text-sm text-slate-500">Live product quantities, warehouse availability, and reorder alerts</p>
         </div>
         <div className="flex items-center gap-3">
           <Link
@@ -106,13 +106,13 @@ export function StockListView() {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider border-b border-slate-200">
               <tr>
-                <th className="py-3 px-4 font-semibold">SKU & Item Name</th>
-                <th className="py-3 px-4 font-semibold">Warehouse Location</th>
-                <th className="py-3 px-4 font-semibold">Category / Brand</th>
+                <th className="py-3 px-4 font-semibold">Product / SKU</th>
+                <th className="py-3 px-4 font-semibold">Warehouse</th>
+                <th className="py-3 px-4 font-semibold">Category</th>
                 <th className="py-3 px-4 font-semibold text-right">Available Qty</th>
                 <th className="py-3 px-4 font-semibold text-right">Reserved</th>
                 <th className="py-3 px-4 font-semibold text-right">Unit Cost</th>
-                <th className="py-3 px-4 font-semibold text-right">Total Valuation</th>
+                <th className="py-3 px-4 font-semibold text-right">Total Value</th>
                 <th className="py-3 px-4 font-semibold text-center">Status</th>
                 <th className="py-3 px-4 font-semibold text-center">Action</th>
               </tr>
@@ -146,9 +146,9 @@ export function StockListView() {
                       {item.availableQty}
                     </td>
                     <td className="py-3.5 px-4 text-right font-medium text-slate-500">{item.reservedQty}</td>
-                    <td className="py-3.5 px-4 text-right font-mono">${item.unitCost.toFixed(2)}</td>
+                    <td className="py-3.5 px-4 text-right font-mono">₹{item.unitCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td className="py-3.5 px-4 text-right font-mono font-bold text-indigo-900">
-                      ${item.totalValuation.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      ₹{item.totalValuation.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="py-3.5 px-4 text-center">
                       <span

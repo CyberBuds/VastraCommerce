@@ -41,7 +41,7 @@ export function ReferralHistory() {
                                 <TableCell>{r.referrerId}</TableCell>
                                 <TableCell>{r.referredUserId}</TableCell>
                                 <TableCell><Badge variant={r.status === 'COMPLETED' ? 'default' : 'secondary'}>{r.status}</Badge></TableCell>
-                                <TableCell>${r.rewardAmount?.toFixed(2)}</TableCell>
+                                <TableCell>₹{Number(r.rewardAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                 <TableCell>{new Date(r.createdAt).toLocaleDateString()}</TableCell>
                             </TableRow>
                         ))}
