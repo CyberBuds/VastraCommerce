@@ -12,7 +12,7 @@ import {
   Search,
   Bell,
   Package,
-  DollarSign,
+  IndianRupee,
   ChevronRight,
   Store,
 } from 'lucide-react';
@@ -69,7 +69,7 @@ export function DashboardPreview() {
               </span>
             </div>
             <div className="mt-1.5 text-lg xl:text-xl font-extrabold text-white tracking-tight">
-              $128,450.00
+              ₹128,450.00
             </div>
             <p className="text-[10px] text-slate-400 mt-0.5">3,420 orders fulfilled</p>
           </motion.div>
@@ -90,7 +90,7 @@ export function DashboardPreview() {
             <div className="mt-1.5 text-lg xl:text-xl font-extrabold text-white tracking-tight">
               1,284
             </div>
-            <p className="text-[10px] text-slate-400 mt-0.5">$42.50 Avg. Order Value</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">₹42.50 Avg. Order Value</p>
           </motion.div>
 
           {/* Pending Shipments */}
@@ -120,7 +120,7 @@ export function DashboardPreview() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <DollarSign className="w-3.5 h-3.5 text-blue-400" />
+                  <IndianRupee className="w-3.5 h-3.5 text-blue-400" />
                   Sales Performance
                 </h3>
                 <p className="text-[10px] text-slate-400">Hourly revenue trajectory today</p>
@@ -167,7 +167,7 @@ export function DashboardPreview() {
                 </div>
                 <div className="overflow-hidden">
                   <p className="text-xs font-bold text-white truncate">Handloom Silk Sari</p>
-                  <p className="text-[10px] text-slate-400">412 sold • $180.00 unit</p>
+                  <p className="text-[10px] text-slate-400">412 sold • ₹180.00 unit</p>
                 </div>
               </div>
             </div>
@@ -201,7 +201,7 @@ export function DashboardPreview() {
                 <span className="text-slate-400 truncate">Priya Sharma • Royal Linen Kurta</span>
               </div>
               <div className="flex items-center gap-2 text-[11px]">
-                <span className="font-extrabold text-emerald-400">$249.00</span>
+                <span className="font-extrabold text-emerald-400">₹249.00</span>
                 <span className="text-[9px] text-slate-500">2m ago</span>
               </div>
             </div>
@@ -213,7 +213,7 @@ export function DashboardPreview() {
                 <span className="text-slate-400 truncate">Ankit Verma • Chanderi Dupatta</span>
               </div>
               <div className="flex items-center gap-2 text-[11px]">
-                <span className="font-extrabold text-blue-400">$120.00</span>
+                <span className="font-extrabold text-blue-400">₹120.00</span>
                 <span className="text-[9px] text-slate-500">7m ago</span>
               </div>
             </div>

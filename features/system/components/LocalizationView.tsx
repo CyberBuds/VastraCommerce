@@ -5,7 +5,7 @@ import { useSystemStore } from '@/store/systemStore';
 import { Card, Alert } from '@/components/enterprise/FeedbackComponents';
 import { Button, Input, Switch, Badge } from '@/components/enterprise/BaseInputs';
 import { TagInput } from '@/components/enterprise/ComplexInputs';
-import { Languages, DollarSign, Clock, Save, RefreshCw } from 'lucide-react';
+import { Languages, IndianRupee, Clock, Save, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function LocalizationView() {
@@ -13,7 +13,7 @@ export function LocalizationView() {
 
   const [defaultLanguage, setDefaultLanguage] = React.useState(localization.defaultLanguage);
   const [supportedLanguages, setSupportedLanguages] = React.useState(localization.supportedLanguages);
-  const [defaultCurrency, setDefaultCurrency] = React.useState(localization.defaultCurrency);
+  const [defaultCurrency, setDefaultCurrency] = React.useState(localization.defaultCurrency || 'INR');
   const [supportedCurrencies, setSupportedCurrencies] = React.useState(localization.supportedCurrencies);
   const [autoSyncExchangeRates, setAutoSyncExchangeRates] = React.useState(localization.autoSyncExchangeRates);
   const [exchangeRateApiProvider, setExchangeRateApiProvider] = React.useState(localization.exchangeRateApiProvider);
@@ -90,7 +90,7 @@ export function LocalizationView() {
         <Card
           header={
             <div className="flex items-center gap-2">
-              <DollarSign className="w-4.5 h-4.5 text-slate-600 dark:text-zinc-400" />
+              <IndianRupee className="w-4.5 h-4.5 text-slate-600 dark:text-zinc-400" />
               <span className="font-bold text-sm text-slate-800 dark:text-zinc-100">Multi-Currency & Exchange Rate Provider</span>
             </div>
           }
@@ -104,10 +104,11 @@ export function LocalizationView() {
                   value={defaultCurrency}
                   onChange={(e) => setDefaultCurrency(e.target.value)}
                 >
-                  <option value="USD">USD ($) - US Dollar</option>
+                  <option value="INR">INR (₹) - Indian Rupee</option>
+                  <option value="USD">USD - US Dollar</option>
                   <option value="EUR">EUR (€) - Euro</option>
                   <option value="GBP">GBP (£) - British Pound</option>
-                  <option value="SGD">SGD ($) - Singapore Dollar</option>
+                  <option value="SGD">SGD - Singapore Dollar</option>
                 </select>
               </div>
 

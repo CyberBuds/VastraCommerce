@@ -13,7 +13,7 @@ import { Select } from '@/components/enterprise/InteractiveComponents';
 import {
   TrendingUp,
   TrendingDown,
-  DollarSign,
+  IndianRupee,
   ShoppingCart,
   Users,
   ShoppingBag,
@@ -152,7 +152,7 @@ export default function DashboardPage() {
         <Card className="hover:translate-y-[-2px] transition-transform">
           <div className="flex justify-between items-start">
             <span className="p-2.5 rounded-lg bg-slate-50 dark:bg-zinc-800 text-slate-800 dark:text-zinc-250 border border-slate-100 dark:border-zinc-750">
-              <DollarSign className="w-5 h-5" />
+              <IndianRupee className="w-5 h-5" />
             </span>
             <div className={`flex items-center text-xs font-bold gap-0.5 ${stats?.revenue.change > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
               {stats?.revenue.change > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}

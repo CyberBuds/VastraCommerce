@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePermission } from "@/hooks/usePermission";
 import { RevenueCard } from "@/features/payments/components/RevenueCard";
 import { TransactionCard } from "@/features/payments/components/TransactionCard";
-import { DollarSign, CreditCard } from "lucide-react";
+import { IndianRupee, CreditCard } from "lucide-react";
 import { RevenueTrendChart } from "@/features/payments/components/charts/RevenueTrendChart";
 import { DailyCollectionsChart } from "@/features/payments/components/charts/DailyCollectionsChart";
 import { MonthlyRevenueChart } from "@/features/payments/components/charts/MonthlyRevenueChart";
@@ -27,7 +27,7 @@ const PaymentDashboardPage = () => {
         <AdminLayout>
             <h1 className="text-2xl font-bold mb-4">Payment Dashboard</h1>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <RevenueCard title="Total Revenue" amount="$45,231.89" icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} />
+                <RevenueCard title="Total Revenue" amount="₹45,231.89" icon={<IndianRupee className="h-4 w-4 text-muted-foreground" />} />
                 <TransactionCard title="Completed Payments" count={2350} icon={<CreditCard className="h-4 w-4 text-muted-foreground" />} />
                 <TransactionCard title="Pending Payments" count={120} icon={<CreditCard className="h-4 w-4 text-muted-foreground" />} />
                 <TransactionCard title="Failed Payments" count={30} icon={<CreditCard className="h-4 w-4 text-muted-foreground" />} />

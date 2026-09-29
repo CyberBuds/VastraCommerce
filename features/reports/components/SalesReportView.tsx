@@ -8,7 +8,7 @@ import { ReportKpiCard } from './ReportKpiCard';
 import { ReportChartCard } from './ReportChartCard';
 import { ReportDataTable } from './ReportDataTable';
 import { ReportExportModal } from './ReportExportModal';
-import { DollarSign, TrendingUp, Tag, Globe, ShoppingBag } from 'lucide-react';
+import { IndianRupee, TrendingUp, Tag, Globe, ShoppingBag } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 export function SalesReportView() {
@@ -54,8 +54,8 @@ export function SalesReportView() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <ReportKpiCard title="Gross Sales Volume" value={`$${totalGross.toLocaleString()}`} change={11.5} icon={DollarSign} />
-        <ReportKpiCard title="Net Revenue Realized" value={`$${totalNet.toLocaleString()}`} change={14.2} icon={TrendingUp} />
+        <ReportKpiCard title="Gross Sales Volume" value={`₹${totalGross.toLocaleString('en-IN')}`} change={11.5} icon={IndianRupee} />
+        <ReportKpiCard title="Net Revenue Realized" value={`₹${totalNet.toLocaleString('en-IN')}`} change={14.2} icon={TrendingUp} />
         <ReportKpiCard title="Total Orders Executed" value={totalOrders.toLocaleString()} change={8.9} icon={ShoppingBag} />
         <ReportKpiCard title="Average Gross Margin" value="38.4%" change={1.2} icon={Tag} />
       </div>
@@ -66,9 +66,9 @@ export function SalesReportView() {
           <BarChart data={salesTrend}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.15} />
             <XAxis dataKey="period" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} tickFormatter={(val) => `$${val / 1000}k`} />
+            <YAxis tick={{ fontSize: 11 }} tickFormatter={(val) => `₹${(val / 1000).toLocaleString('en-IN')}k`} />
             <Tooltip
-              formatter={(val: any) => [`$${Number(val).toLocaleString()}`, '']}
+              formatter={(val: any) => [`₹${Number(val).toLocaleString('en-IN')}`, '']}
               contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }}
             />
             <Bar dataKey="grossSales" name="Gross Sales" fill="#6366f1" radius={[6, 6, 0, 0]} />
@@ -88,7 +88,7 @@ export function SalesReportView() {
           { header: 'Units Sold', accessorKey: 'quantitySold' },
           {
             header: 'Total Revenue',
-            accessorKey: (row) => <span className="font-mono font-bold">${row.totalRevenue.toLocaleString()}</span>,
+            accessorKey: (row) => <span className="font-mono font-bold">₹{row.totalRevenue.toLocaleString('en-IN')}</span>,
           },
           {
             header: 'Revenue Share',

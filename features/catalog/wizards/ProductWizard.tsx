@@ -11,7 +11,7 @@ import {
   AlertCircle,
   ShieldAlert,
   Package,
-  DollarSign,
+  IndianRupee,
   Truck,
   Tags,
   Image as ImageIcon,
@@ -37,9 +37,9 @@ interface ProductWizardProps {
 }
 
 const STEPS = [
-  { id: 1, label: 'Identity', desc: 'SKU & Names', icon: Package },
-  { id: 2, label: 'Taxonomy', desc: 'Brands & Tags', icon: Tags },
-  { id: 3, label: 'Pricing', desc: 'Costs & Taxes', icon: DollarSign },
+  { id: 1, label: 'Taxonomy', desc: 'Brands & Tags', icon: Tags },
+  { id: 2, label: 'Identity', desc: 'SKU & Names', icon: Package },
+  { id: 3, label: 'Pricing', desc: 'Costs & Taxes', icon: IndianRupee },
   { id: 4, label: 'Inventory', desc: 'Warehousing', icon: Settings2 },
   { id: 5, label: 'Logistics', desc: 'Shipping Specs', icon: Truck },
   { id: 6, label: 'Variants', desc: 'SKU Attributes', icon: GitBranch },
@@ -290,7 +290,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
 
   const handleNext = () => {
     // Basic validation before changing steps
-    if (activeStep === 1 && (!form.name || !form.sku)) {
+    if (activeStep === 2 && (!form.name || !form.sku)) {
       toast.error('Required parameters missing', { description: 'Identify product Name and SKU to proceed.' });
       return;
     }
@@ -534,8 +534,8 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
               transition={{ duration: 0.15 }}
               className="space-y-6 h-full"
             >
-              {/* Step 1: Basic Identity */}
-              {activeStep === 1 && (
+              {/* Step 2: Basic Identity */}
+              {activeStep === 2 && (
                 <div className="space-y-4">
                   <div>
                     <h2 className="text-base font-black text-slate-850 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
@@ -596,8 +596,8 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                 </div>
               )}
 
-              {/* Step 2: Category & Brand */}
-              {activeStep === 2 && (
+              {/* Step 1: Category & Brand */}
+              {activeStep === 1 && (
                 <div className="space-y-4">
                   <div>
                     <h2 className="text-base font-black text-slate-850 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
@@ -660,7 +660,7 @@ export function ProductWizard({ productId, onComplete, onCancel }: ProductWizard
                 <div className="space-y-4">
                   <div>
                     <h2 className="text-base font-black text-slate-850 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-                      <DollarSign className="w-5 h-5 text-brand" /> Price & GST
+                      <IndianRupee className="w-5 h-5 text-brand" /> Price & GST
                     </h2>
                     <p className="text-xs text-slate-400 mt-0.5">Add your cost, selling price, and tax rate for the product.</p>
                   </div>

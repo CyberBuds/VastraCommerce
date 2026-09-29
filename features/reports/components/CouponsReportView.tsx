@@ -6,11 +6,11 @@ import { ReportFilterPanel } from './ReportFilterPanel';
 import { ReportKpiCard } from './ReportKpiCard';
 import { ReportDataTable } from './ReportDataTable';
 import { ReportExportModal } from './ReportExportModal';
-import { Ticket, Percent, DollarSign, TrendingUp } from 'lucide-react';
+import { Ticket, Percent, IndianRupee, TrendingUp } from 'lucide-react';
 
 const mockCoupons = [
   { id: 1, code: 'AERO2026', type: 'PERCENTAGE', discount: '15% OFF', redemptions: 480, maxUses: 1000, totalDiscountGiven: 42000, revenueImpact: 280000 },
-  { id: 2, code: 'VIPSPRING', type: 'FIXED_AMOUNT', discount: '$250 OFF', redemptions: 120, maxUses: 200, totalDiscountGiven: 30000, revenueImpact: 195000 },
+  { id: 2, code: 'VIPSPRING', type: 'FIXED_AMOUNT', discount: '₹250 OFF', redemptions: 120, maxUses: 200, totalDiscountGiven: 30000, revenueImpact: 195000 },
   { id: 3, code: 'FREESHIP20', type: 'FREE_SHIPPING', discount: '100% Freight', redemptions: 850, maxUses: 5000, totalDiscountGiven: 12500, revenueImpact: 340000 },
 ];
 
@@ -33,8 +33,8 @@ export function CouponsReportView() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <ReportKpiCard title="Active Promo Codes" value="18" icon={Ticket} />
         <ReportKpiCard title="Total Redemptions" value="1,450" change={14.2} icon={Percent} />
-        <ReportKpiCard title="Total Discounts Granted" value="$84,500" subtext="Promotional margin impact" icon={DollarSign} />
-        <ReportKpiCard title="Coupon Attributed Sales" value="$815,000" change={19.1} icon={TrendingUp} />
+        <ReportKpiCard title="Total Discounts Granted" value="₹84,500" subtext="Promotional margin impact" icon={IndianRupee} />
+        <ReportKpiCard title="Coupon Attributed Sales" value="₹815,000" change={19.1} icon={TrendingUp} />
       </div>
 
       <ReportDataTable
@@ -45,8 +45,8 @@ export function CouponsReportView() {
           { header: 'Discount Type', accessorKey: 'type' },
           { header: 'Benefit', accessorKey: 'discount' },
           { header: 'Redemptions / Capacity', accessorKey: (r) => `${r.redemptions} / ${r.maxUses}` },
-          { header: 'Total Discount Amount', accessorKey: (r) => <span className="font-mono text-rose-600">${r.totalDiscountGiven.toLocaleString()}</span> },
-          { header: 'Revenue Generated', accessorKey: (r) => <span className="font-mono font-bold text-emerald-600">${r.revenueImpact.toLocaleString()}</span> },
+          { header: 'Total Discount Amount', accessorKey: (r) => <span className="font-mono text-rose-600">₹{r.totalDiscountGiven.toLocaleString('en-IN')}</span> },
+          { header: 'Revenue Generated', accessorKey: (r) => <span className="font-mono font-bold text-emerald-600">₹{r.revenueImpact.toLocaleString('en-IN')}</span> },
         ]}
       />
 

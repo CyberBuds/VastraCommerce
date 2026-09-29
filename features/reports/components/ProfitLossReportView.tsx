@@ -6,7 +6,7 @@ import { ReportsHeader } from './ReportsHeader';
 import { ReportFilterPanel } from './ReportFilterPanel';
 import { ReportKpiCard } from './ReportKpiCard';
 import { ReportExportModal } from './ReportExportModal';
-import { DollarSign, TrendingUp, TrendingDown, Percent, FileSpreadsheet } from 'lucide-react';
+import { IndianRupee, TrendingUp, TrendingDown, Percent, FileSpreadsheet } from 'lucide-react';
 
 export function ProfitLossReportView() {
   const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
@@ -33,10 +33,10 @@ export function ProfitLossReportView() {
       {isFiltersOpen && <ReportFilterPanel />}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <ReportKpiCard title="Gross Sales Revenue" value={`$${grossRev.toLocaleString()}`} change={14.8} icon={DollarSign} />
-        <ReportKpiCard title="Cost of Goods Sold (COGS)" value={`$${cogs.toLocaleString()}`} icon={TrendingDown} />
-        <ReportKpiCard title="Gross Margin Profit" value={`$${grossProfit.toLocaleString()}`} change={16.2} icon={TrendingUp} />
-        <ReportKpiCard title="Net Income After Tax" value={`$${netIncome.toLocaleString()}`} change={12.4} badgeText="20.1% Net Rate" icon={Percent} />
+        <ReportKpiCard title="Gross Sales Revenue" value={`₹${grossRev.toLocaleString('en-IN')}`} change={14.8} icon={IndianRupee} />
+        <ReportKpiCard title="Cost of Goods Sold (COGS)" value={`₹${cogs.toLocaleString('en-IN')}`} icon={TrendingDown} />
+        <ReportKpiCard title="Gross Margin Profit" value={`₹${grossProfit.toLocaleString('en-IN')}`} change={16.2} icon={TrendingUp} />
+        <ReportKpiCard title="Net Income After Tax" value={`₹${netIncome.toLocaleString('en-IN')}`} change={12.4} badgeText="20.1% Net Rate" icon={Percent} />
       </div>
 
       {/* P&L Structured Statement Table */}
@@ -53,48 +53,48 @@ export function ProfitLossReportView() {
           {/* Revenue Section */}
           <div className="py-2.5 flex items-center justify-between font-bold text-slate-900 dark:text-zinc-100 bg-slate-50/50 dark:bg-zinc-950/50 px-3 rounded-lg">
             <span>GROSS SALES REVENUE</span>
-            <span className="font-mono text-emerald-600">${grossRev.toLocaleString()}</span>
+            <span className="font-mono text-emerald-600">₹{grossRev.toLocaleString('en-IN')}</span>
           </div>
 
           <div className="py-2.5 flex items-center justify-between pl-6 text-slate-600 dark:text-zinc-300">
             <span>Cost of Goods Sold (COGS)</span>
-            <span className="font-mono text-rose-600">-${cogs.toLocaleString()}</span>
+            <span className="font-mono text-rose-600">-₹{cogs.toLocaleString('en-IN')}</span>
           </div>
 
           <div className="py-2.5 flex items-center justify-between font-bold text-slate-900 dark:text-zinc-100 bg-slate-100/60 dark:bg-zinc-800/60 px-3 rounded-lg">
             <span>GROSS PROFIT MARGIN</span>
-            <span className="font-mono text-emerald-600">${grossProfit.toLocaleString()}</span>
+            <span className="font-mono text-emerald-600">₹{grossProfit.toLocaleString('en-IN')}</span>
           </div>
 
           {/* Operating Expenses */}
           <div className="py-2.5 flex items-center justify-between pl-6 text-slate-600 dark:text-zinc-300">
             <span>General & Administrative Operating Overhead</span>
-            <span className="font-mono text-rose-600">-${(fin?.operatingExpenses ?? 0).toLocaleString()}</span>
+            <span className="font-mono text-rose-600">-₹{(fin?.operatingExpenses ?? 0).toLocaleString('en-IN')}</span>
           </div>
 
           <div className="py-2.5 flex items-center justify-between pl-6 text-slate-600 dark:text-zinc-300">
             <span>Marketing & Customer Acquisition Spend</span>
-            <span className="font-mono text-rose-600">-${(fin?.marketingExpenses ?? 0).toLocaleString()}</span>
+            <span className="font-mono text-rose-600">-₹{(fin?.marketingExpenses ?? 0).toLocaleString('en-IN')}</span>
           </div>
 
           <div className="py-2.5 flex items-center justify-between pl-6 text-slate-600 dark:text-zinc-300">
             <span>Freight Freight & Logistics Overhead</span>
-            <span className="font-mono text-rose-600">-${(fin?.logisticsExpenses ?? 0).toLocaleString()}</span>
+            <span className="font-mono text-rose-600">-₹{(fin?.logisticsExpenses ?? 0).toLocaleString('en-IN')}</span>
           </div>
 
           <div className="py-2.5 flex items-center justify-between font-bold text-slate-900 dark:text-zinc-100 bg-slate-100/60 dark:bg-zinc-800/60 px-3 rounded-lg">
             <span>OPERATING INCOME (EBITDA)</span>
-            <span className="font-mono text-emerald-600">${netBeforeTax.toLocaleString()}</span>
+            <span className="font-mono text-emerald-600">₹{netBeforeTax.toLocaleString('en-IN')}</span>
           </div>
 
           <div className="py-2.5 flex items-center justify-between pl-6 text-slate-600 dark:text-zinc-300">
             <span>Estimated Income Tax Liability</span>
-            <span className="font-mono text-rose-600">-${(fin?.taxLiability ?? 0).toLocaleString()}</span>
+            <span className="font-mono text-rose-600">-₹{(fin?.taxLiability ?? 0).toLocaleString('en-IN')}</span>
           </div>
 
           <div className="py-3 flex items-center justify-between font-extrabold text-sm text-slate-900 dark:text-zinc-100 bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900 px-4 rounded-xl">
             <span>NET INCOME AFTER TAX</span>
-            <span className="font-mono text-indigo-600 dark:text-indigo-400">${netIncome.toLocaleString()}</span>
+            <span className="font-mono text-indigo-600 dark:text-indigo-400">₹{netIncome.toLocaleString('en-IN')}</span>
           </div>
         </div>
       </div>

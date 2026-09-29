@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
+import { useQuery } from '@tanstack/react-query';
 import { 
   Order, 
   OrderItem, 
@@ -23,9 +24,11 @@ import {
   useReleaseOrder, 
   useCancelOrder, 
   useCreateShipment, 
-  usePayInvoice 
+  usePayInvoice,
+  useGenerateOrderInvoice
 } from '@/hooks/useOrders';
 import { useCustomers } from '@/hooks/useCustomers';
+import { api } from '@/services/api';
 import { 
   Eye, 
   Plus, 
@@ -49,14 +52,12 @@ import {
 import { toast } from 'sonner';
 import { mapUiOrderStatusToBackend } from '@/lib/orderStatusMap';
 
-// Selectable catalog products
-const CATALOG_PRODUCTS = [
-  { id: 'prod-1', name: 'AeroFlow Turbine X1 (Batch #1000)', sku: 'SKU-AERO-10000', price: 1499.99 },
-  { id: 'prod-2', name: 'Quantum Spark Plug (Batch #1001)', sku: 'SKU-AERO-10001', price: 199.98 },
-  { id: 'prod-3', name: 'Industrial Hydraulic Fluid (Batch #1002)', sku: 'SKU-AERO-10002', price: 249.99 },
-  { id: 'prod-4', name: 'Carbon Fiber Strut (Batch #1003)', sku: 'SKU-AERO-10003', price: 299.99 },
-  { id: 'prod-5', name: 'GigaCharge battery pack (Batch #1004)', sku: 'SKU-AERO-10004', price: 1199.99 }
-];
+interface CatalogProductOption {
+  id: string;
+  name: string;
+  sku: string;
+  price: number;
+}
 
 const ORDER_STATUS_OPTIONS: Array<{ value: OrderStatus; label: string }> = [
   { value: 'PENDING', label: 'Pending' },
@@ -95,15 +96,40 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
   const cancelOrderMutation = useCancelOrder();
   const createShipmentMutation = useCreateShipment();
   const payInvoiceMutation = usePayInvoice();
+  const generateInvoiceMutation = useGenerateOrderInvoice();
   
   const { data: customers = [] } = useCustomers();
+  const [isCreateOpen, setIsCreateOpen] = React.useState(false);
+  const {
+    data: catalogProducts = [],
+    isLoading: isCatalogProductsLoading,
+    isError: isCatalogProductsError
+  } = useQuery<CatalogProductOption[]>({
+    queryKey: ['orderWizardCatalogProducts'],
+    enabled: isCreateOpen,
+    queryFn: async () => {
+      const response = await api.get('/products', { params: { pageSize: 100 } });
+      const products = response.data?.data?.items ?? [];
+      return products
+        .filter((product: any) => product?.id && product?.productName)
+        .map((product: any) => ({
+          id: String(product.id),
+          name: String(product.productName),
+          sku: String(product.sku || ''),
+          price: Number(product.sellingPrice ?? 0)
+        }));
+    }
+  });
 
   // Active view states
   const [viewedOrderId, setViewedOrderId] = React.useState<string | null>(null);
+  const [generatedInvoiceIds, setGeneratedInvoiceIds] = React.useState<Record<string, string>>({});
   const viewedOrder = React.useMemo(() => {
     return viewedOrderId ? orders.find(o => o.id === viewedOrderId) || null : null;
   }, [viewedOrderId, orders]);
-  const [isCreateOpen, setIsCreateOpen] = React.useState(false);
+  const currentInvoiceId = viewedOrder
+    ? viewedOrder.invoiceId || generatedInvoiceIds[viewedOrder.id]
+    : undefined;
   const [isHoldOpen, setIsHoldOpen] = React.useState(false);
   const [holdReason, setHoldReason] = React.useState('');
   const [isCancelOpen, setIsCancelOpen] = React.useState(false);
@@ -149,7 +175,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
   const calculatedTotals = React.useMemo(() => {
     let subtotal = 0;
     newOrderForm.items.forEach(it => {
-      const prod = CATALOG_PRODUCTS.find(p => p.id === it.productId);
+      const prod = catalogProducts.find(p => p.id === it.productId);
       if (prod) subtotal += prod.price * it.quantity;
     });
 
@@ -172,7 +198,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
     const totalAmount = subtotal - discount + tax + shippingCost;
 
     return { subtotal, discount, tax, shippingCost, totalAmount };
-  }, [newOrderForm.items, newOrderForm.customerId, newOrderForm.shippingMethod, customers]);
+  }, [newOrderForm.items, newOrderForm.customerId, newOrderForm.shippingMethod, customers, catalogProducts]);
 
   // Handle Order Registration
   const handleCreateSubmit = (e: React.FormEvent) => {
@@ -182,8 +208,14 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
     const selectedCust = customers.find(c => c.id === newOrderForm.customerId);
     if (!selectedCust) return;
 
+    const missingProduct = newOrderForm.items.some((item) => !catalogProducts.some((product) => product.id === item.productId));
+    if (missingProduct) {
+      toast.error('A selected catalog product is no longer available. Refresh the list and try again.');
+      return;
+    }
+
     const orderItems: OrderItem[] = newOrderForm.items.map((it, idx) => {
-      const p = CATALOG_PRODUCTS.find(prod => prod.id === it.productId)!;
+      const p = catalogProducts.find(prod => prod.id === it.productId)!;
       return {
         id: `item-${Date.now()}-${idx}`,
         productId: p.id,
@@ -775,10 +807,10 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                       variant="primary"
                       size="sm"
                       onClick={() => {
-                        if (viewedOrder.invoiceId) {
-                          payInvoiceMutation.mutate(viewedOrder.invoiceId);
+                        if (currentInvoiceId) {
+                          payInvoiceMutation.mutate(currentInvoiceId);
                         } else {
-                          toast.error('Invoice not generated. Please generate invoice inside Invoices tab first.');
+                          toast.error('Generate an invoice for this order before recording payment.');
                         }
                       }}
                       isLoading={payInvoiceMutation.isPending}
@@ -796,6 +828,26 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                       <Truck className="w-4 h-4 mr-1.5" /> Ship Order
                     </Button>
                   )}
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => generateInvoiceMutation.mutate(viewedOrder.id, {
+                      onSuccess: (response) => {
+                        if (response.data?.id) {
+                          setGeneratedInvoiceIds((current) => ({
+                            ...current,
+                            [viewedOrder.id]: String(response.data.id)
+                          }));
+                        }
+                      }
+                    })}
+                    isLoading={generateInvoiceMutation.isPending}
+                    disabled={Boolean(currentInvoiceId)}
+                  >
+                    <FileText className="w-4 h-4 mr-1.5" />
+                    {currentInvoiceId ? 'Invoice Generated' : 'Generate Invoice'}
+                  </Button>
 
                   {viewedOrder.status !== 'HOLD' && !['DELIVERED', 'CANCELLED', 'RETURNED'].includes(viewedOrder.status) && (
                     <Button
@@ -1087,7 +1139,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
               <div className="flex justify-between items-center border-b border-slate-100 dark:border-zinc-800 pb-2">
                 <span className="font-bold text-slate-800 dark:text-zinc-200 font-mono text-[10px] uppercase tracking-wider flex items-center gap-1.5">
                   <Boxes className="w-4 h-4 text-emerald-500" />
-                  Cargo Item Builder
+                  Add Products
                 </span>
                 <Button
                   type="button"
@@ -1096,25 +1148,34 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                   className="h-7 text-[10px] font-mono"
                   onClick={() => setNewOrderForm(p => ({
                     ...p,
-                    items: [...p.items, { productId: CATALOG_PRODUCTS[0].id, quantity: 1 }]
+                    items: [...p.items, { productId: catalogProducts[0]?.id || '', quantity: 1 }]
                   }))}
+                  disabled={isCatalogProductsLoading || catalogProducts.length === 0}
                 >
-                  + Add Line Item
+                  + Add Product
                 </Button>
               </div>
 
               {newOrderForm.items.length === 0 ? (
                 <div className="py-6 text-center text-slate-400 flex flex-col items-center justify-center gap-1.5">
                   <Boxes className="w-8 h-8 text-slate-300" />
-                  <p className="font-medium">Click &quot;Add Line Item&quot; to compile cargo products.</p>
+                  <p className="font-medium">
+                    {isCatalogProductsLoading
+                      ? 'Loading catalog products…'
+                      : isCatalogProductsError
+                        ? 'Unable to load catalog products. Try again shortly.'
+                        : catalogProducts.length === 0
+                          ? 'No products are available in the catalog.'
+                          : 'Select products from the catalog to add them to this order.'}
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-2 max-h-[160px] overflow-y-auto">
                   {newOrderForm.items.map((item, index) => {
-                    const matchedProd = CATALOG_PRODUCTS.find(cp => cp.id === item.productId);
                     return (
                       <div key={index} className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-slate-150 dark:border-zinc-800 p-2 rounded-lg">
                         <select
+                          required
                           value={item.productId}
                           onChange={(e) => {
                             const updated = [...newOrderForm.items];
@@ -1123,9 +1184,9 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                           }}
                           className="flex-1 bg-transparent p-1 border-0 focus:ring-0 text-xs"
                         >
-                          {CATALOG_PRODUCTS.map(p => (
+                          {catalogProducts.map(p => (
                             <option key={p.id} value={p.id}>
-                              {p.name} (₹{p.price.toLocaleString('en-IN')})
+                              {p.name}{p.sku ? ` · ${p.sku}` : ''} (₹{p.price.toLocaleString('en-IN')})
                             </option>
                           ))}
                         </select>

@@ -214,7 +214,7 @@ export function CustomReportBuilderView() {
                     {selectedFields.map((f) => (
                       <td key={f} className="p-3">
                         {f.includes('Revenue') || f.includes('Price') || f.includes('Valuation')
-                          ? '$284,500'
+                          ? '₹284,500'
                           : f.includes('Name') || f.includes('customer')
                           ? 'Boeing Global'
                           : f.includes('Date')
@@ -227,7 +227,7 @@ export function CustomReportBuilderView() {
                     {selectedFields.map((f) => (
                       <td key={f} className="p-3">
                         {f.includes('Revenue') || f.includes('Price') || f.includes('Valuation')
-                          ? '$192,100'
+                          ? '₹192,100'
                           : f.includes('Name') || f.includes('customer')
                           ? 'Airbus Defense'
                           : f.includes('Date')

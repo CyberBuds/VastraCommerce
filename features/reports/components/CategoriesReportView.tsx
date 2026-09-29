@@ -8,7 +8,7 @@ import { ReportKpiCard } from './ReportKpiCard';
 import { ReportChartCard } from './ReportChartCard';
 import { ReportDataTable } from './ReportDataTable';
 import { ReportExportModal } from './ReportExportModal';
-import { Layers, TrendingUp, PieChart as PieIcon, DollarSign } from 'lucide-react';
+import { Layers, TrendingUp, PieChart as PieIcon, IndianRupee } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 export function CategoriesReportView() {
@@ -32,16 +32,16 @@ export function CategoriesReportView() {
         <ReportKpiCard title="Total Merchandise Categories" value="24" icon={Layers} />
         <ReportKpiCard title="Top Revenue Category" value="Avionics & Radar" subtext="39.4% revenue share" icon={TrendingUp} />
         <ReportKpiCard title="Fastest Growing Category" value="Turbine Propulsion" change={22.4} icon={PieIcon} />
-        <ReportKpiCard title="Avg Units Sold per Category" value="3,820" change={6.8} icon={DollarSign} />
+        <ReportKpiCard title="Avg Units Sold per Category" value="3,820" change={6.8} icon={IndianRupee} />
       </div>
 
-      <ReportChartCard title="Category Revenue Breakdown ($)" subtitle="Net revenue volume by department">
+      <ReportChartCard title="Category Revenue Breakdown (₹)" subtitle="Net revenue volume by department">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={categories}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.15} />
             <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} tickFormatter={(val) => `$${val / 1000}k`} />
-            <Tooltip formatter={(val: any) => [`$${Number(val).toLocaleString()}`, 'Revenue']} />
+            <YAxis tick={{ fontSize: 11 }} tickFormatter={(val) => `₹${(val / 1000).toLocaleString('en-IN')}k`} />
+            <Tooltip formatter={(val: any) => [`₹${Number(val).toLocaleString('en-IN')}`, 'Revenue']} />
             <Bar dataKey="totalRevenue" fill="#6366f1" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
@@ -57,7 +57,7 @@ export function CategoriesReportView() {
           { header: 'Units Sold', accessorKey: 'quantitySold' },
           {
             header: 'Total Revenue',
-            accessorKey: (row) => <span className="font-mono font-bold">${row.totalRevenue.toLocaleString()}</span>,
+            accessorKey: (row) => <span className="font-mono font-bold">₹{row.totalRevenue.toLocaleString('en-IN')}</span>,
           },
           {
             header: 'Revenue Share',

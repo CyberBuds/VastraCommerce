@@ -7,7 +7,7 @@ import { ReportFilterPanel } from './ReportFilterPanel';
 import { ReportKpiCard } from './ReportKpiCard';
 import { ReportDataTable } from './ReportDataTable';
 import { ReportExportModal } from './ReportExportModal';
-import { Package, AlertTriangle, XCircle, Warehouse, DollarSign } from 'lucide-react';
+import { Package, AlertTriangle, XCircle, Warehouse, IndianRupee } from 'lucide-react';
 
 export function InventoryReportView() {
   const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
@@ -32,8 +32,8 @@ export function InventoryReportView() {
       {isFiltersOpen && <ReportFilterPanel />}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <ReportKpiCard title="Total Cost Basis" value={`$${totalCost.toLocaleString()}`} icon={DollarSign} />
-        <ReportKpiCard title="Total Retail Value" value={`$${totalRetail.toLocaleString()}`} change={8.2} icon={Warehouse} />
+        <ReportKpiCard title="Total Cost Basis" value={`₹${totalCost.toLocaleString('en-IN')}`} icon={IndianRupee} />
+        <ReportKpiCard title="Total Retail Value" value={`₹${totalRetail.toLocaleString('en-IN')}`} change={8.2} icon={Warehouse} />
         <ReportKpiCard title="Low Stock Alerts" value={lowStockCount} subtext="Requires replenishment" icon={AlertTriangle} iconColorClass="text-amber-600 bg-amber-500/10" />
         <ReportKpiCard title="Out of Stock SKUs" value={outOfStockCount} subtext="Zero available units" icon={XCircle} iconColorClass="text-rose-600 bg-rose-500/10" />
       </div>
@@ -49,11 +49,11 @@ export function InventoryReportView() {
           { header: 'Reserved', accessorKey: 'reservedStock' },
           {
             header: 'Unit Cost / Retail',
-            accessorKey: (r) => <span className="font-mono text-xs">${r.costPrice} / ${r.retailPrice}</span>,
+            accessorKey: (r) => <span className="font-mono text-xs">₹{r.costPrice} / ₹{r.retailPrice}</span>,
           },
           {
             header: 'Total Cost Valuation',
-            accessorKey: (r) => <span className="font-mono font-bold text-slate-800 dark:text-zinc-200">${r.totalCostValue.toLocaleString()}</span>,
+            accessorKey: (r) => <span className="font-mono font-bold text-slate-800 dark:text-zinc-200">₹{r.totalCostValue.toLocaleString('en-IN')}</span>,
           },
           {
             header: 'Status',

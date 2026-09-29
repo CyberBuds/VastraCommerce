@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { TrendingUp, DollarSign, PieChart, BarChart } from 'lucide-react';
+import { TrendingUp, PieChart, BarChart } from 'lucide-react';
 import { useInventoryValuation } from '../hooks/useInventory';
 
 export function InventoryValuationView() {

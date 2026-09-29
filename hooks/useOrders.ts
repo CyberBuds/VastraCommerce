@@ -61,6 +61,21 @@ export function useInvoice(id?: string) {
   });
 }
 
+export function useGenerateOrderInvoice() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (orderId: string) => orderService.getInvoiceForOrder(orderId),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      toast.success(`Invoice ${response.data.invoiceNumber} is ready.`);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Unable to generate invoice.');
+    }
+  });
+}
+
 // ==========================================
 // 3. SHIPMENTS QUERY HOOKS
 // ==========================================

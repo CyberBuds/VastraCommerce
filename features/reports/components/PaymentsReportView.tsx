@@ -7,7 +7,7 @@ import { ReportFilterPanel } from './ReportFilterPanel';
 import { ReportKpiCard } from './ReportKpiCard';
 import { ReportDataTable } from './ReportDataTable';
 import { ReportExportModal } from './ReportExportModal';
-import { CreditCard, CheckCircle2, AlertCircle, Percent, DollarSign } from 'lucide-react';
+import { CreditCard, CheckCircle2, AlertCircle, Percent, IndianRupee } from 'lucide-react';
 
 export function PaymentsReportView() {
   const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
@@ -31,10 +31,10 @@ export function PaymentsReportView() {
       {isFiltersOpen && <ReportFilterPanel />}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <ReportKpiCard title="Processed Payment Volume" value={`$${totalVolume.toLocaleString()}`} change={11.2} icon={CreditCard} />
-        <ReportKpiCard title="Gateway Processing Overhead" value={`$${totalFees.toLocaleString()}`} subtext="Merchant processing fees" icon={DollarSign} />
+        <ReportKpiCard title="Processed Payment Volume" value={`₹${totalVolume.toLocaleString('en-IN')}`} change={11.2} icon={CreditCard} />
+        <ReportKpiCard title="Gateway Processing Overhead" value={`₹${totalFees.toLocaleString('en-IN')}`} subtext="Merchant processing fees" icon={IndianRupee} />
         <ReportKpiCard title="Overall Gateway Success Rate" value="98.2%" change={0.4} icon={CheckCircle2} />
-        <ReportKpiCard title="Outstanding Settlements" value="$42,500" subtext="Pending bank transfer" icon={AlertCircle} />
+        <ReportKpiCard title="Outstanding Settlements" value="₹42,500" subtext="Pending bank transfer" icon={AlertCircle} />
       </div>
 
       <ReportDataTable
@@ -48,11 +48,11 @@ export function PaymentsReportView() {
           { header: 'Failed', accessorKey: 'failedCount' },
           {
             header: 'Processed Volume',
-            accessorKey: (r) => <span className="font-mono font-bold">${r.totalVolume.toLocaleString()}</span>,
+            accessorKey: (r) => <span className="font-mono font-bold">₹{r.totalVolume.toLocaleString('en-IN')}</span>,
           },
           {
             header: 'Processing Fees',
-            accessorKey: (r) => <span className="font-mono text-rose-600">${r.feeAmount.toLocaleString()}</span>,
+            accessorKey: (r) => <span className="font-mono text-rose-600">₹{r.feeAmount.toLocaleString('en-IN')}</span>,
           },
           {
             header: 'Success Rate',

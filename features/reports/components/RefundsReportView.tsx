@@ -7,7 +7,7 @@ import { ReportFilterPanel } from './ReportFilterPanel';
 import { ReportKpiCard } from './ReportKpiCard';
 import { ReportDataTable } from './ReportDataTable';
 import { ReportExportModal } from './ReportExportModal';
-import { RotateCcw, AlertTriangle, CheckCircle2, DollarSign } from 'lucide-react';
+import { RotateCcw, AlertTriangle, CheckCircle2, IndianRupee } from 'lucide-react';
 
 const mockRefunds = [
   { id: 'ref-101', rmaNumber: 'RMA-2026-089', orderNumber: 'ORD-9821', customerName: 'Boeing Global Logistics', reason: 'Defective Avionics Board', amount: 14500, status: 'APPROVED', date: '2026-07-20' },
@@ -34,10 +34,10 @@ export function RefundsReportView() {
       {isFiltersOpen && <ReportFilterPanel />}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <ReportKpiCard title="Total Refund Volume" value={`$${((metrics?.refundAmount || 0) / 1000).toFixed(1)}k`} change={-8.4} icon={RotateCcw} />
+        <ReportKpiCard title="Total Refund Volume" value={`₹${((metrics?.refundAmount || 0) / 1000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}k`} change={-8.4} icon={RotateCcw} />
         <ReportKpiCard title="Active RMA Requests" value="14" subtext="In auditing queue" icon={AlertTriangle} iconColorClass="text-amber-600 bg-amber-500/10" />
         <ReportKpiCard title="Completed Restocks" value="48" change={4.2} icon={CheckCircle2} />
-        <ReportKpiCard title="Refund % of Gross Revenue" value="2.4%" change={-0.3} icon={DollarSign} />
+        <ReportKpiCard title="Refund % of Gross Revenue" value="2.4%" change={-0.3} icon={IndianRupee} />
       </div>
 
       <ReportDataTable
@@ -48,7 +48,7 @@ export function RefundsReportView() {
           { header: 'Order Ref', accessorKey: 'orderNumber' },
           { header: 'Customer Account', accessorKey: 'customerName' },
           { header: 'Return Cause', accessorKey: 'reason' },
-          { header: 'Amount', accessorKey: (r) => <span className="font-mono font-bold text-rose-600">${r.amount.toLocaleString()}</span> },
+          { header: 'Amount', accessorKey: (r) => <span className="font-mono font-bold text-rose-600">₹{r.amount.toLocaleString('en-IN')}</span> },
           { header: 'Status', accessorKey: 'status' },
           { header: 'Date', accessorKey: 'date' },
         ]}
