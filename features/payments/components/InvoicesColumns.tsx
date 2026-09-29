@@ -42,6 +42,7 @@ export const columns: ColumnDef<Invoice>[] = [
                         "bg-green-500": status === "paid",
                         "bg-yellow-500": status === "unpaid",
                         "bg-red-500": status === "overdue",
+                        "bg-slate-500": status === "void",
                     })}
                 >
                     {status}

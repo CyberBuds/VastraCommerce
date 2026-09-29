@@ -13,13 +13,33 @@ export const getTransactionById = async (id: string): Promise<Transaction> => {
 };
 
 export const getInvoices = async (): Promise<Invoice[]> => {
-    const response = await api.get('/payments/invoices');
-    return response.data;
+    const response = await api.get('/invoices', {
+        params: { pageSize: 100, sortBy: 'invoiceDate', sortOrder: 'desc' }
+    });
+    const invoices = response.data?.data?.items ?? response.data?.data ?? [];
+    return invoices.map((invoice: any): Invoice => ({
+        id: String(invoice.id),
+        orderNumber: invoice.order?.orderNumber || '',
+        customer: [invoice.order?.customer?.firstName, invoice.order?.customer?.lastName].filter(Boolean).join(' ') || 'Customer',
+        amount: Number(invoice.netAmount || 0),
+        status: invoice.invoiceStatus === 'PAID' ? 'paid' : invoice.invoiceStatus === 'CANCELLED' ? 'void' : 'unpaid',
+        invoiceDate: invoice.invoiceDate || invoice.createdAt,
+        dueDate: invoice.dueDate || invoice.invoiceDate || invoice.createdAt
+    }));
 };
 
 export const getInvoiceById = async (id: string): Promise<Invoice> => {
-    const response = await api.get(`/payments/invoices/${id}`);
-    return response.data;
+    const response = await api.get(`/invoices/${id}`);
+    const invoice = response.data?.data;
+    return {
+        id: String(invoice.id),
+        orderNumber: invoice.order?.orderNumber || '',
+        customer: [invoice.order?.customer?.firstName, invoice.order?.customer?.lastName].filter(Boolean).join(' ') || 'Customer',
+        amount: Number(invoice.netAmount || 0),
+        status: invoice.invoiceStatus === 'PAID' ? 'paid' : invoice.invoiceStatus === 'CANCELLED' ? 'void' : 'unpaid',
+        invoiceDate: invoice.invoiceDate || invoice.createdAt,
+        dueDate: invoice.dueDate || invoice.invoiceDate || invoice.createdAt
+    };
 };
 
 export const getCreditNotes = async (): Promise<CreditNote[]> => {
