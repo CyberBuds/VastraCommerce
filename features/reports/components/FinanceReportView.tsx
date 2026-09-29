@@ -7,7 +7,7 @@ import { ReportFilterPanel } from './ReportFilterPanel';
 import { ReportKpiCard } from './ReportKpiCard';
 import { ReportDataTable } from './ReportDataTable';
 import { ReportExportModal } from './ReportExportModal';
-import { Landmark, FileText, CreditCard, DollarSign } from 'lucide-react';
+import { Landmark, FileText, CreditCard, IndianRupee } from 'lucide-react';
 
 const mockInvoices = [
   { id: 'INV-2026-001', accountName: 'Boeing Global Logistics', invoiceDate: '2026-07-01', dueDate: '2026-07-31', amount: 142000, status: 'PAID' },
@@ -33,10 +33,10 @@ export function FinanceReportView() {
       {isFiltersOpen && <ReportFilterPanel />}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <ReportKpiCard title="Accounts Receivable" value="$305,000" change={5.1} icon={Landmark} />
-        <ReportKpiCard title="Overdue Invoices" value="$65,000" subtext="Requires collections follow-up" icon={FileText} iconColorClass="text-rose-600 bg-rose-500/10" />
-        <ReportKpiCard title="Issued Credit Notes" value="$12,400" icon={CreditCard} />
-        <ReportKpiCard title="Avg Days Sales Outstanding (DSO)" value="24 Days" change={-2.0} icon={DollarSign} />
+        <ReportKpiCard title="Accounts Receivable" value="₹305,000" change={5.1} icon={Landmark} />
+        <ReportKpiCard title="Overdue Invoices" value="₹65,000" subtext="Requires collections follow-up" icon={FileText} iconColorClass="text-rose-600 bg-rose-500/10" />
+        <ReportKpiCard title="Issued Credit Notes" value="₹12,400" icon={CreditCard} />
+        <ReportKpiCard title="Avg Days Sales Outstanding (DSO)" value="24 Days" change={-2.0} icon={IndianRupee} />
       </div>
 
       <ReportDataTable
@@ -47,7 +47,7 @@ export function FinanceReportView() {
           { header: 'Account Name', accessorKey: 'accountName' },
           { header: 'Invoice Date', accessorKey: 'invoiceDate' },
           { header: 'Due Date', accessorKey: 'dueDate' },
-          { header: 'Amount Due', accessorKey: (r) => <span className="font-mono font-bold">${r.amount.toLocaleString()}</span> },
+          { header: 'Amount Due', accessorKey: (r) => <span className="font-mono font-bold">₹{r.amount.toLocaleString('en-IN')}</span> },
           {
             header: 'Status',
             accessorKey: (r) => (

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend } from 'recharts';
 import { useCustomers, useCustomerGroups, useCustomerSegments } from '@/hooks/useCustomers';
-import { Users, TrendingUp, DollarSign, Clock, HelpCircle, Heart } from 'lucide-react';
+import { Users, TrendingUp, IndianRupee, Clock, HelpCircle, Heart } from 'lucide-react';
 
 const ACQUISITION_DATA = [
   { month: 'Jan', organic: 120, ads: 80, referrals: 40 },
@@ -63,7 +63,7 @@ export function AnalyticsCharts() {
         </div>
 
         <div className="bg-white dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800/80 rounded-xl p-5 shadow-xs flex items-center gap-4">
-          <div className="p-3 bg-slate-900 text-white rounded-xl"><DollarSign className="w-5 h-5" /></div>
+          <div className="p-3 bg-slate-900 text-white rounded-xl"><IndianRupee className="w-5 h-5" /></div>
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono block">Consolidated Wallet Assets</span>
             <span className="text-xl font-extrabold text-slate-900 dark:text-zinc-50 font-mono mt-0.5 block">₹{totalWallet.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>

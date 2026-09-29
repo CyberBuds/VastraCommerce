@@ -35,9 +35,9 @@ export const columns: ColumnDef<WalletTransaction>[] = [
         header: "Amount",
         cell: ({ row }) => {
             const amount = parseFloat(row.getValue("amount"));
-            const formatted = new Intl.NumberFormat("en-US", {
+            const formatted = new Intl.NumberFormat("en-IN", {
                 style: "currency",
-                currency: "USD",
+                currency: "INR",
             }).format(amount);
             return <div>{formatted}</div>;
         },
@@ -47,9 +47,9 @@ export const columns: ColumnDef<WalletTransaction>[] = [
         header: "Balance",
         cell: ({ row }) => {
             const balance = parseFloat(row.getValue("balance"));
-            const formatted = new Intl.NumberFormat("en-US", {
+            const formatted = new Intl.NumberFormat("en-IN", {
                 style: "currency",
-                currency: "USD",
+                currency: "INR",
             }).format(balance);
             return <div>{formatted}</div>;
         },

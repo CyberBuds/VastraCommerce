@@ -180,7 +180,7 @@ export function SuppliersListView() {
             <div className="mt-5 border-t border-slate-100 pt-3 flex items-center justify-between text-xs">
               <span className="text-slate-500">Terms: <strong className="text-slate-800">{sup.paymentTerms}</strong></span>
               <span className="font-mono font-bold text-indigo-900">
-                Spent: ${sup.totalSpent.toLocaleString()} ({sup.totalOrdersCount} orders)
+                Spent: ₹{sup.totalSpent.toLocaleString('en-IN')} ({sup.totalOrdersCount} orders)
               </span>
             </div>
           </div>

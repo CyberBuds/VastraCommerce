@@ -32,7 +32,7 @@ export function VendorsReportView() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <ReportKpiCard title="Active Approved Suppliers" value="42" icon={Building2} />
-        <ReportKpiCard title="Procurement Spend (YTD)" value="$2.59M" change={10.2} icon={PackageCheck} />
+        <ReportKpiCard title="Procurement Spend (YTD)" value="₹2.59M" change={10.2} icon={PackageCheck} />
         <ReportKpiCard title="Avg Supplier Lead Time" value="5.2 Days" change={-0.6} icon={Clock} />
         <ReportKpiCard title="Parts Quality Pass Rate" value="99.96%" change={0.1} icon={ShieldCheck} />
       </div>
@@ -43,7 +43,7 @@ export function VendorsReportView() {
         columns={[
           { header: 'Supplier Name', accessorKey: 'name' },
           { header: 'Parts Supplied', accessorKey: 'partsSupplied' },
-          { header: 'Procurement Spend', accessorKey: (r) => <span className="font-mono font-bold">${r.spendBasis.toLocaleString()}</span> },
+          { header: 'Procurement Spend', accessorKey: (r) => <span className="font-mono font-bold">₹{r.spendBasis.toLocaleString('en-IN')}</span> },
           { header: 'Avg Lead Time', accessorKey: (r) => `${r.avgLeadTimeDays} Days` },
           { header: 'Defect Rate', accessorKey: (r) => <span className="text-emerald-600 font-bold">{r.defectRate}</span> },
           { header: 'SLA Score', accessorKey: (r) => <span className="font-bold text-indigo-600">{r.slaCompliance}</span> },

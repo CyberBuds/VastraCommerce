@@ -6,7 +6,7 @@ import { api } from '@/services/api';
 import { useCatalogStore } from '@/store/catalogStore';
 import {
   Package,
-  DollarSign,
+  IndianRupee,
   Tag,
   Globe,
   Settings2,
@@ -144,7 +144,7 @@ export function ProductDetailView({ id }: ProductDetailViewProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-3 dark:border-zinc-800 dark:bg-zinc-900">
             <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100 flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-emerald-500" /> Commercial Pricing Structure
+              <IndianRupee className="h-4 w-4 text-emerald-500" /> Commercial Pricing Structure
             </h3>
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="p-3 bg-slate-50 rounded-xl dark:bg-zinc-950">

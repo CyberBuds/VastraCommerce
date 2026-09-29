@@ -20,7 +20,7 @@ const couponData = [
 
 const COLORS = ['#64748b', '#8b5cf6', '#6366f1', '#f43f5e', '#06b6d4', '#f59e0b'];
 
-const valueFormatter = (number: number) => `$ ${new Intl.NumberFormat('us').format(number).toString()}`;
+const valueFormatter = (number: number) => `₹${new Intl.NumberFormat('en-IN').format(number).toString()}`;
 
 const MarketingAnalyticsPage = () => {
     return (

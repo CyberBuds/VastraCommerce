@@ -66,7 +66,7 @@ export function OrdersReportView() {
               { header: 'Order Volume', accessorKey: 'count' },
               {
                 header: 'Total Order Value',
-                accessorKey: (row) => <span className="font-mono font-bold">${row.value.toLocaleString()}</span>,
+                accessorKey: (row) => <span className="font-mono font-bold">₹{row.value.toLocaleString('en-IN')}</span>,
               },
               {
                 header: 'Percentage Share',

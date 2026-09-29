@@ -33,9 +33,9 @@ export function TaxReportView() {
       {isFiltersOpen && <ReportFilterPanel />}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <ReportKpiCard title="Total Tax Collected" value={`$${((metrics?.taxCollected || 0) / 1000).toFixed(1)}k`} change={9.2} icon={Receipt} />
+        <ReportKpiCard title="Total Tax Collected" value={`₹${((metrics?.taxCollected || 0) / 1000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}k`} change={9.2} icon={Receipt} />
         <ReportKpiCard title="Active Tax Jurisdictions" value="12 Regions" icon={Globe} />
-        <ReportKpiCard title="Pending Tax Remittance" value="$121,600" subtext="EU VAT Q2 filing" icon={Building2} iconColorClass="text-amber-600 bg-amber-500/10" />
+        <ReportKpiCard title="Pending Tax Remittance" value="₹121,600" subtext="Tax remittance pending" icon={Building2} iconColorClass="text-amber-600 bg-amber-500/10" />
         <ReportKpiCard title="Tax Audit Readiness Score" value="100%" subtext="Fully reconciled" icon={ShieldCheck} iconColorClass="text-emerald-600 bg-emerald-500/10" />
       </div>
 
@@ -45,9 +45,9 @@ export function TaxReportView() {
         columns={[
           { header: 'Tax Jurisdiction Region', accessorKey: 'region' },
           { header: 'Tax Rule Code', accessorKey: (r) => <span className="font-mono font-bold text-indigo-600">{r.taxCode}</span> },
-          { header: 'Taxable Sales Basis', accessorKey: (r) => <span className="font-mono">${r.taxableSales.toLocaleString()}</span> },
+          { header: 'Taxable Sales Basis', accessorKey: (r) => <span className="font-mono">₹{r.taxableSales.toLocaleString('en-IN')}</span> },
           { header: 'Effective Rate', accessorKey: 'taxRate' },
-          { header: 'Tax Amount Collected', accessorKey: (r) => <span className="font-mono font-bold text-emerald-600">${r.taxCollected.toLocaleString()}</span> },
+          { header: 'Tax Amount Collected', accessorKey: (r) => <span className="font-mono font-bold text-emerald-600">₹{r.taxCollected.toLocaleString('en-IN')}</span> },
           { header: 'Compliance Filing Status', accessorKey: 'status' },
         ]}
       />

@@ -7,7 +7,7 @@ import { Button, Input, Badge, Switch } from '@/components/enterprise/BaseInputs
 import { EnterpriseTable } from '@/components/enterprise/EnterpriseTable';
 import { Modal } from '@/components/enterprise/InteractiveComponents';
 import { StoreSetting } from '@/features/system/types/systemTypes';
-import { Store, Plus, Globe, CheckCircle, XCircle, Trash2, Edit3, DollarSign, Layers } from 'lucide-react';
+import { Store, Plus, Globe, CheckCircle, XCircle, Trash2, Edit3, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function StoreSettingsView() {
@@ -20,7 +20,7 @@ export function StoreSettingsView() {
   const [formCode, setFormCode] = React.useState('');
   const [formName, setFormName] = React.useState('');
   const [formDomain, setFormDomain] = React.useState('');
-  const [formCurrency, setFormCurrency] = React.useState('USD');
+  const [formCurrency, setFormCurrency] = React.useState('INR');
   const [formLanguage, setFormLanguage] = React.useState('en-US');
   const [formStrategy, setFormStrategy] = React.useState<StoreSetting['inventoryStrategy']>('STRICT_ALLOCATION');
   const [formPhoneRequired, setFormPhoneRequired] = React.useState(true);
@@ -31,7 +31,7 @@ export function StoreSettingsView() {
     setFormCode(`STORE-${Math.floor(100 + Math.random() * 900)}`);
     setFormName('');
     setFormDomain('');
-    setFormCurrency('USD');
+    setFormCurrency('INR');
     setFormLanguage('en-US');
     setFormStrategy('STRICT_ALLOCATION');
     setFormPhoneRequired(true);
@@ -222,6 +222,7 @@ export function StoreSettingsView() {
                 value={formCurrency}
                 onChange={(e) => setFormCurrency(e.target.value)}
               >
+                <option value="INR">INR - Indian Rupee</option>
                 <option value="USD">USD - US Dollar</option>
                 <option value="EUR">EUR - Euro</option>
                 <option value="GBP">GBP - British Pound</option>

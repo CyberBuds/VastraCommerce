@@ -7,7 +7,6 @@ import { AppProviders } from '@/providers/AppProviders';
 import { AdminLayout } from '@/features/layout/AdminLayout';
 import { Button, Badge } from '@/components/enterprise/BaseInputs';
 import { 
-  DollarSign, 
   TrendingUp, 
   TrendingDown, 
   Scale, 

@@ -7,7 +7,7 @@ import { Button, Input, Badge, Switch } from '@/components/enterprise/BaseInputs
 import { EnterpriseTable } from '@/components/enterprise/EnterpriseTable';
 import { Modal } from '@/components/enterprise/InteractiveComponents';
 import { TaxRule } from '@/features/system/types/systemTypes';
-import { Receipt, Plus, Edit3, Trash2, ShieldCheck, DollarSign } from 'lucide-react';
+import { Receipt, Plus, Edit3, Trash2, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function TaxSettingsView() {

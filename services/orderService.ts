@@ -82,6 +82,11 @@ class OrderService extends BaseFeatureApi<Order> {
     };
   }
 
+  async getInvoiceForOrder(orderId: string): Promise<ApiResponse<Invoice>> {
+    const response = await api.get<ApiResponse<Invoice>>(`/orders/${orderId}/invoice`);
+    return response.data;
+  }
+
   async updateStatus(orderId: string, status: string, remark?: string): Promise<ApiResponse<Order>> {
     const response = await api.patch<ApiResponse<Order>>(`/orders/${orderId}/status`, { status, remark });
     return response.data;

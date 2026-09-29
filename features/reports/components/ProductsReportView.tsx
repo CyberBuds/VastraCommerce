@@ -7,7 +7,7 @@ import { ReportFilterPanel } from './ReportFilterPanel';
 import { ReportKpiCard } from './ReportKpiCard';
 import { ReportDataTable } from './ReportDataTable';
 import { ReportExportModal } from './ReportExportModal';
-import { Package, Star, TrendingUp, DollarSign } from 'lucide-react';
+import { Package, Star, TrendingUp, IndianRupee } from 'lucide-react';
 
 export function ProductsReportView() {
   const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
@@ -30,7 +30,7 @@ export function ProductsReportView() {
         <ReportKpiCard title="Active Catalog SKUs" value="3,820" change={5.2} icon={Package} />
         <ReportKpiCard title="Top Performing SKU" value="AV-RAD-09" subtext="Weather Radar Pro X9" icon={Star} />
         <ReportKpiCard title="Avg Product Gross Margin" value="42.8%" change={2.1} icon={TrendingUp} />
-        <ReportKpiCard title="Product Sales Velocity" value="142 units/day" change={8.4} icon={DollarSign} />
+        <ReportKpiCard title="Product Sales Velocity" value="142 units/day" change={8.4} icon={IndianRupee} />
       </div>
 
       <ReportDataTable
@@ -41,11 +41,11 @@ export function ProductsReportView() {
           { header: 'Product Name', accessorKey: 'productName' },
           { header: 'Category', accessorKey: 'category' },
           { header: 'Stock Level', accessorKey: 'stockOnHand' },
-          { header: 'Cost Price', accessorKey: (r) => <span className="font-mono">${r.costPrice}</span> },
-          { header: 'Retail Price', accessorKey: (r) => <span className="font-mono">${r.retailPrice}</span> },
+          { header: 'Cost Price', accessorKey: (r) => <span className="font-mono">₹{r.costPrice}</span> },
+          { header: 'Retail Price', accessorKey: (r) => <span className="font-mono">₹{r.retailPrice}</span> },
           {
             header: 'Valuation',
-            accessorKey: (r) => <span className="font-mono font-bold text-emerald-600">${r.totalRetailValue.toLocaleString()}</span>,
+            accessorKey: (r) => <span className="font-mono font-bold text-emerald-600">₹{r.totalRetailValue.toLocaleString('en-IN')}</span>,
           },
         ]}
       />

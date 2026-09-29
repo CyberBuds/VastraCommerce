@@ -45,7 +45,7 @@ export function ShippingReportView() {
         />
         <ReportKpiCard
           title="Total Logistics Expenditure"
-          value={`$${totalCost.toLocaleString()}`}
+          value={`₹${totalCost.toLocaleString('en-IN')}`}
           icon={Clock}
         />
         <ReportKpiCard
@@ -82,7 +82,7 @@ export function ShippingReportView() {
             header: 'Freight Expense',
             accessorKey: (r) => (
               <span className="font-mono font-bold">
-                ${r.totalCost.toLocaleString()}
+                ₹{r.totalCost.toLocaleString('en-IN')}
               </span>
             ),
           },

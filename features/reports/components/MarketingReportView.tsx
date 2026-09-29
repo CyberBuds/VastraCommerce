@@ -7,7 +7,7 @@ import { ReportFilterPanel } from './ReportFilterPanel';
 import { ReportKpiCard } from './ReportKpiCard';
 import { ReportDataTable } from './ReportDataTable';
 import { ReportExportModal } from './ReportExportModal';
-import { Megaphone, TrendingUp, DollarSign, Target, MessageSquare } from 'lucide-react';
+import { Megaphone, TrendingUp, IndianRupee, Target, MessageSquare } from 'lucide-react';
 
 export function MarketingReportView() {
   const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
@@ -30,8 +30,8 @@ export function MarketingReportView() {
       {isFiltersOpen && <ReportFilterPanel />}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <ReportKpiCard title="Campaign Media Spend" value={`$${totalSpend.toLocaleString()}`} icon={DollarSign} />
-        <ReportKpiCard title="Attributed Campaign Revenue" value={`$${totalRevenue.toLocaleString()}`} change={18.5} icon={TrendingUp} />
+        <ReportKpiCard title="Campaign Media Spend" value={`₹${totalSpend.toLocaleString('en-IN')}`} icon={IndianRupee} />
+        <ReportKpiCard title="Attributed Campaign Revenue" value={`₹${totalRevenue.toLocaleString('en-IN')}`} change={18.5} icon={TrendingUp} />
         <ReportKpiCard title="Overall Campaign ROAS" value="15.2x" change={2.4} icon={Target} />
         <ReportKpiCard title="Total Conversions" value="1,200" change={12.0} icon={Megaphone} />
       </div>
@@ -45,8 +45,8 @@ export function MarketingReportView() {
           { header: 'Impressions', accessorKey: (r) => r.impressions.toLocaleString() },
           { header: 'Click-Throughs', accessorKey: (r) => r.clicks.toLocaleString() },
           { header: 'Conversions', accessorKey: 'conversions' },
-          { header: 'Ad Spend', accessorKey: (r) => <span className="font-mono">${r.spend.toLocaleString()}</span> },
-          { header: 'Attributed Revenue', accessorKey: (r) => <span className="font-mono font-bold text-emerald-600">${r.revenueGenerated.toLocaleString()}</span> },
+          { header: 'Ad Spend', accessorKey: (r) => <span className="font-mono">₹{r.spend.toLocaleString('en-IN')}</span> },
+          { header: 'Attributed Revenue', accessorKey: (r) => <span className="font-mono font-bold text-emerald-600">₹{r.revenueGenerated.toLocaleString('en-IN')}</span> },
           { header: 'ROAS / ROI', accessorKey: (r) => <span className="font-bold text-indigo-600">{r.roi}x</span> },
         ]}
       />

@@ -13,7 +13,7 @@ import { ReportKpiCard } from './ReportKpiCard';
 import { ReportChartCard } from './ReportChartCard';
 import { ReportExportModal } from './ReportExportModal';
 import {
-  DollarSign,
+  IndianRupee,
   TrendingUp,
   ShoppingBag,
   Users,
@@ -66,14 +66,14 @@ export function ReportsDashboardView() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <ReportKpiCard
           title="Total Revenue"
-          value={`$${((metrics?.totalRevenue || 0) / 1000).toFixed(1)}k`}
+          value={`₹${((metrics?.totalRevenue || 0) / 1000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}k`}
           change={metrics?.revenueChange}
-          icon={DollarSign}
+          icon={IndianRupee}
           iconColorClass="text-emerald-600 bg-emerald-500/10"
         />
         <ReportKpiCard
           title="Gross Sales"
-          value={`$${((metrics?.grossSales || 0) / 1000).toFixed(1)}k`}
+          value={`₹${((metrics?.grossSales || 0) / 1000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}k`}
           subtext="Before refunds & promos"
           icon={TrendingUp}
           iconColorClass="text-indigo-600 bg-indigo-500/10"
@@ -94,14 +94,14 @@ export function ReportsDashboardView() {
         />
         <ReportKpiCard
           title="Inventory Valuation"
-          value={`$${((metrics?.inventoryValue || 0) / 1000000).toFixed(2)}M`}
+          value={`₹${((metrics?.inventoryValue || 0) / 1000000).toLocaleString('en-IN', { maximumFractionDigits: 2 })}M`}
           subtext="Warehouse cost basis"
           icon={Package}
           iconColorClass="text-amber-600 bg-amber-500/10"
         />
         <ReportKpiCard
           title="Average Order Value"
-          value={`$${metrics?.averageOrderValue || 0}`}
+          value={`₹${Number(metrics?.averageOrderValue || 0).toLocaleString('en-IN')}`}
           change={1.8}
           icon={BarChart3}
           iconColorClass="text-sky-600 bg-sky-500/10"
@@ -115,10 +115,10 @@ export function ReportsDashboardView() {
         />
         <ReportKpiCard
           title="Net Operating Profit"
-          value={`$${((metrics?.netProfit || 0) / 1000).toFixed(1)}k`}
+          value={`₹${((metrics?.netProfit || 0) / 1000).toLocaleString('en-IN', { maximumFractionDigits: 1 })}k`}
           change={12.4}
           badgeText="25.8% Margin"
-          icon={DollarSign}
+          icon={IndianRupee}
           iconColorClass="text-emerald-600 bg-emerald-500/10"
         />
       </div>
@@ -145,9 +145,9 @@ export function ReportsDashboardView() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.15} />
                 <XAxis dataKey="period" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} tickFormatter={(val) => `$${val / 1000}k`} />
+                <YAxis tick={{ fontSize: 11 }} tickFormatter={(val) => `₹${(val / 1000).toLocaleString('en-IN')}k`} />
                 <Tooltip
-                  formatter={(val: any) => [`$${Number(val).toLocaleString()}`, '']}
+                  formatter={(val: any) => [`₹${Number(val).toLocaleString('en-IN')}`, '']}
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }}
                 />
                 <Legend wrapperStyle={{ fontSize: '12px' }} />
@@ -200,10 +200,10 @@ export function ReportsDashboardView() {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={categories} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#334155" opacity={0.15} />
-              <XAxis type="number" tickFormatter={(val) => `$${val / 1000}k`} tick={{ fontSize: 11 }} />
+              <XAxis type="number" tickFormatter={(val) => `₹${(val / 1000).toLocaleString('en-IN')}k`} tick={{ fontSize: 11 }} />
               <YAxis dataKey="name" type="category" width={140} tick={{ fontSize: 11 }} />
               <Tooltip
-                formatter={(val: any) => [`$${Number(val).toLocaleString()}`, 'Revenue']}
+                formatter={(val: any) => [`₹${Number(val).toLocaleString('en-IN')}`, 'Revenue']}
                 contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }}
               />
               <Bar dataKey="totalRevenue" fill="#6366f1" radius={[0, 8, 8, 0]} />
@@ -224,7 +224,7 @@ export function ReportsDashboardView() {
                   <p className="text-[11px] text-slate-400">{cat.ordersCount} orders • {cat.quantitySold} units</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-slate-900 dark:text-zinc-100 font-mono">${cat.totalRevenue.toLocaleString()}</p>
+                  <p className="font-bold text-slate-900 dark:text-zinc-100 font-mono">₹{cat.totalRevenue.toLocaleString('en-IN')}</p>
                   <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-bold">{cat.percentageOfTotal}% share</p>
                 </div>
               </div>
