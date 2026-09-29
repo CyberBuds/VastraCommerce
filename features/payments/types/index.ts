@@ -16,7 +16,7 @@ export interface Invoice {
     orderNumber: string;
     customer: string;
     amount: number;
-    status: 'paid' | 'unpaid' | 'overdue';
+    status: 'paid' | 'unpaid' | 'overdue' | 'void';
     invoiceDate: string;
     dueDate: string;
 }
