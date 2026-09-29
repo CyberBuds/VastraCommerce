@@ -86,6 +86,14 @@ export interface Invoice {
   subtotal: number;
   tax: number;
   totalAmount: number;
+  items: Array<{
+    id: string;
+    productName: string;
+    sku: string;
+    quantity: number;
+    unitPrice: number;
+    total: number;
+  }>;
   status: 'DRAFT' | 'SENT' | 'PAID' | 'VOID' | 'OVERDUE';
   dueDate: string;
   issuedDate: string;

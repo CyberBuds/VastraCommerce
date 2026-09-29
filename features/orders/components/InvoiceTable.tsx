@@ -5,12 +5,13 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Invoice } from '@/types/order';
 import { EnterpriseTable } from '@/components/enterprise/EnterpriseTable';
 import { Badge, Button } from '@/components/enterprise/BaseInputs';
+import { Alert } from '@/components/enterprise/FeedbackComponents';
 import { useInvoices, usePayInvoice, useVoidInvoice } from '@/hooks/useOrders';
 import { FileText, CheckCircle2, Ban, Eye, Printer, Landmark } from 'lucide-react';
 
 export function InvoiceTable() {
   const [globalFilter, setGlobalFilter] = React.useState('');
-  const { data: invoices = [], isLoading } = useInvoices();
+  const { data: invoices = [], isLoading, isError, error, refetch } = useInvoices();
   
   const payInvoiceMutation = usePayInvoice();
   const voidInvoiceMutation = useVoidInvoice();
@@ -86,7 +87,7 @@ export function InvoiceTable() {
       header: 'Taxed Total',
       cell: ({ row }) => (
         <span className="font-mono text-xs font-extrabold text-slate-900 dark:text-zinc-50">
-          ₹{(row.getValue('totalAmount') as number).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          ₹{row.original.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
         </span>
       ),
     },
@@ -162,6 +163,19 @@ export function InvoiceTable() {
 
   return (
     <div className="w-full relative" id="invoices-table-root">
+      {isError && (
+        <Alert
+          type="error"
+          title="Unable to load invoices"
+          description={error instanceof Error ? error.message : 'The invoice service did not return a successful response.'}
+          className="mb-4"
+        />
+      )}
+      {isError && (
+        <Button type="button" variant="outline" size="sm" onClick={() => void refetch()} className="mb-4">
+          Retry loading invoices
+        </Button>
+      )}
       <EnterpriseTable
         data={invoices}
         columns={columns}
@@ -211,17 +225,29 @@ export function InvoiceTable() {
               </div>
             </div>
 
-            {/* Line items mock table */}
+            {/* Invoice line items */}
             <div className="border border-slate-150 dark:border-zinc-800 rounded-lg overflow-hidden font-mono text-[11px]">
               <div className="grid grid-cols-12 bg-slate-50 dark:bg-zinc-850 p-2.5 border-b border-slate-150 dark:border-zinc-800 font-bold text-slate-500 text-[10px]">
-                <div className="col-span-8 uppercase">Item / Component Description</div>
-                <div className="col-span-4 text-right uppercase">Ledger Line Total</div>
+                <div className="col-span-6 uppercase">Product</div>
+                <div className="col-span-2 text-right uppercase">Qty</div>
+                <div className="col-span-2 text-right uppercase">Unit Price</div>
+                <div className="col-span-2 text-right uppercase">Line Total</div>
               </div>
               <div className="divide-y divide-slate-100 dark:divide-zinc-800 p-2.5 space-y-2">
-                <div className="grid grid-cols-12">
-                  <div className="col-span-8 font-bold text-slate-700 dark:text-zinc-300">AeroSpace Contract Assemblies and Metallurgy Components</div>
-                  <div className="col-span-4 text-right font-extrabold text-slate-900 dark:text-zinc-100">₹{viewedInvoice.subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
-                </div>
+                {viewedInvoice.items.map((item) => (
+                  <div key={item.id} className="grid grid-cols-12 items-start gap-2 py-1">
+                    <div className="col-span-6 min-w-0">
+                      <p className="font-bold text-slate-700 dark:text-zinc-300">{item.productName}</p>
+                      {item.sku && <p className="mt-0.5 text-[9px] text-slate-400">SKU: {item.sku}</p>}
+                    </div>
+                    <div className="col-span-2 text-right text-slate-600 dark:text-zinc-400">{item.quantity}</div>
+                    <div className="col-span-2 text-right text-slate-600 dark:text-zinc-400">₹{item.unitPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                    <div className="col-span-2 text-right font-extrabold text-slate-900 dark:text-zinc-100">₹{item.total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                  </div>
+                ))}
+                {viewedInvoice.items.length === 0 && (
+                  <p className="py-3 text-center text-slate-400">No product lines are available for this invoice.</p>
+                )}
               </div>
             </div>
 
