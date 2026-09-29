@@ -22,6 +22,14 @@ const mapInvoice = (invoice: any): Invoice => ({
   subtotal: Number(invoice.order?.subtotal ?? invoice.netAmount ?? 0),
   tax: Number(invoice.gstAmount || 0),
   totalAmount: Number(invoice.netAmount || 0),
+  items: (invoice.order?.items || []).map((item: any) => ({
+    id: String(item.id),
+    productName: item.productName || item.product?.productName || 'Product',
+    sku: item.sku || item.variant?.sku || item.product?.sku || '',
+    quantity: Number(item.quantity || 0),
+    unitPrice: Number(item.unitPrice || 0),
+    total: Number(item.netAmount || 0)
+  })),
   status: invoice.invoiceStatus === 'ISSUED' ? 'SENT'
     : invoice.invoiceStatus === 'CANCELLED' ? 'VOID'
     : invoice.invoiceStatus,
