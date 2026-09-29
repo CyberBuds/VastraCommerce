@@ -5,12 +5,13 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Invoice } from '@/types/order';
 import { EnterpriseTable } from '@/components/enterprise/EnterpriseTable';
 import { Badge, Button } from '@/components/enterprise/BaseInputs';
+import { Alert } from '@/components/enterprise/FeedbackComponents';
 import { useInvoices, usePayInvoice, useVoidInvoice } from '@/hooks/useOrders';
 import { FileText, CheckCircle2, Ban, Eye, Printer, Landmark } from 'lucide-react';
 
 export function InvoiceTable() {
   const [globalFilter, setGlobalFilter] = React.useState('');
-  const { data: invoices = [], isLoading } = useInvoices();
+  const { data: invoices = [], isLoading, isError, error, refetch } = useInvoices();
   
   const payInvoiceMutation = usePayInvoice();
   const voidInvoiceMutation = useVoidInvoice();
@@ -86,7 +87,7 @@ export function InvoiceTable() {
       header: 'Taxed Total',
       cell: ({ row }) => (
         <span className="font-mono text-xs font-extrabold text-slate-900 dark:text-zinc-50">
-          ₹{(row.getValue('totalAmount') as number).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          ₹{row.original.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
         </span>
       ),
     },
@@ -162,6 +163,19 @@ export function InvoiceTable() {
 
   return (
     <div className="w-full relative" id="invoices-table-root">
+      {isError && (
+        <Alert
+          type="error"
+          title="Unable to load invoices"
+          description={error instanceof Error ? error.message : 'The invoice service did not return a successful response.'}
+          className="mb-4"
+        />
+      )}
+      {isError && (
+        <Button type="button" variant="outline" size="sm" onClick={() => void refetch()} className="mb-4">
+          Retry loading invoices
+        </Button>
+      )}
       <EnterpriseTable
         data={invoices}
         columns={columns}
