@@ -11,6 +11,25 @@ const resolvePaymentMethod = (order: any): string => {
   return String(rawMethod);
 };
 
+const mapInvoice = (invoice: any): Invoice => ({
+  id: String(invoice.id),
+  invoiceNumber: invoice.invoiceNumber,
+  orderId: String(invoice.orderId),
+  orderNumber: invoice.order?.orderNumber || '',
+  customerId: String(invoice.order?.customerId || ''),
+  customerName: [invoice.order?.customer?.firstName, invoice.order?.customer?.lastName].filter(Boolean).join(' ') || 'Customer',
+  customerEmail: invoice.order?.customer?.email || '',
+  subtotal: Number(invoice.order?.subtotal ?? invoice.netAmount ?? 0),
+  tax: Number(invoice.gstAmount || 0),
+  totalAmount: Number(invoice.netAmount || 0),
+  status: invoice.invoiceStatus === 'ISSUED' ? 'SENT'
+    : invoice.invoiceStatus === 'CANCELLED' ? 'VOID'
+    : invoice.invoiceStatus,
+  issuedDate: invoice.invoiceDate || invoice.createdAt,
+  dueDate: invoice.dueDate || invoice.invoiceDate || invoice.createdAt,
+  paidAt: invoice.invoiceStatus === 'PAID' ? invoice.updatedAt : undefined
+});
+
 class OrderService extends BaseFeatureApi<Order> {
   constructor() {
     super('/orders');
@@ -46,6 +65,7 @@ class OrderService extends BaseFeatureApi<Order> {
         shippingCost: Number(order.shippingCharge || 0),
         discount: Number(order.discountAmount || 0) + Number(order.couponDiscount || 0),
         totalAmount: Number(order.grandTotal || 0),
+        invoiceId: order.invoice?.id ? String(order.invoice.id) : undefined,
         status: order.orderStatus === 'CONFIRMED' ? 'APPROVED'
           : order.orderStatus === 'PACKED' ? 'PACKING'
           : order.orderStatus === 'READY_TO_SHIP' ? 'READY_FOR_SHIPPING'
@@ -144,14 +164,29 @@ class InvoiceService extends BaseFeatureApi<Invoice> {
     super('/invoices');
   }
 
+  async getAll(): Promise<ApiResponse<Invoice[]>> {
+    const response = await api.get<ApiResponse<{ items: any[] }>>('/invoices', {
+      params: { pageSize: 100, sortBy: 'invoiceDate', sortOrder: 'desc' }
+    });
+    return {
+      ...response.data,
+      data: (response.data.data?.items || []).map(mapInvoice)
+    };
+  }
+
+  async getById(id: string | number): Promise<ApiResponse<Invoice>> {
+    const response = await api.get<ApiResponse<any>>(`/invoices/${id}`);
+    return { ...response.data, data: mapInvoice(response.data.data) };
+  }
+
   async pay(invoiceId: string): Promise<ApiResponse<Invoice>> {
     const response = await api.put<ApiResponse<Invoice>>(`/invoices/${invoiceId}/pay`);
-    return response.data;
+    return { ...response.data, data: mapInvoice(response.data.data) };
   }
 
   async void(invoiceId: string): Promise<ApiResponse<Invoice>> {
     const response = await api.put<ApiResponse<Invoice>>(`/invoices/${invoiceId}/void`);
-    return response.data;
+    return { ...response.data, data: mapInvoice(response.data.data) };
   }
 }
 
