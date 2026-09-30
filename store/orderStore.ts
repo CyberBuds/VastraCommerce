@@ -616,6 +616,14 @@ export const useOrderStore = create<OrderState & OrderActions>((set, get) => ({
       subtotal: order.subtotal,
       tax: order.tax,
       totalAmount: order.totalAmount,
+      items: order.items.map(item => ({
+        id: item.id,
+        productName: item.productName,
+        sku: item.sku,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        total: item.total
+      })),
       status: order.paymentStatus === 'PAID' ? 'PAID' : 'SENT',
       issuedDate: new Date().toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 15 * 24 * 3600 * 1000).toISOString().split('T')[0], // 15 days credit terms
